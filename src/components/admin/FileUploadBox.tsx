@@ -16,7 +16,7 @@ const FileUploadBox = ({
   onFileSelected,
   title,
   description,
-  allowedTypes = ['jpg', 'jpeg', 'png', 'gif'],
+  allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'obj', 'gltf', 'glb', 'las', 'laz', 'xyz', 'pts'],
   icon
 }: FileUploadBoxProps) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -51,11 +51,11 @@ const FileUploadBox = ({
   };
 
   const processFile = async (file: File) => {
-    // Dosya türünü kontrol et
     const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
     if (allowedTypes && !allowedTypes.includes(fileExt)) {
-      setErrorMessage(`Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`);
-      toast.error(`Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`);
+      const errorMsg = `Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`;
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -72,7 +72,6 @@ const FileUploadBox = ({
       toast.error(`Dosya yüklenemedi: ${errorMessage}`);
     } finally {
       setIsUploading(false);
-      // Dosya input'unu temizle ki aynı dosyayı tekrar seçebilsin
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

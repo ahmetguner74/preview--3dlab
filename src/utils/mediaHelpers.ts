@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -14,49 +13,23 @@ export const uploadFileToStorage = async (
     const fileExt = file.name.split('.').pop();
     const filePath = `${folderPath}${uuidv4()}.${fileExt}`;
     
-    // Önce bucket'ların listesini kontrol et
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    
-    if (listError) {
-      console.error('Bucket listeleme hatası:', listError);
-      throw listError;
-    }
-    
-    // Bucket yoksa oluştur
-    const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-    if (!bucketExists) {
-      console.log(`${bucketName} bucket'ı bulunamadı, oluşturuluyor...`);
-      const { error: createError } = await supabase.storage.createBucket(bucketName, {
-        public: true,
-        fileSizeLimit: 50 * 1024 * 1024, // 50MB limit
-      });
-      
-      if (createError) {
-        console.error('Bucket oluşturma hatası:', createError);
-        throw createError;
-      }
-      console.log(`${bucketName} bucket'ı başarıyla oluşturuldu`);
-    }
-    
-    // Dosyayı yükle
-    console.log(`${bucketName} bucket'ına dosya yükleniyor: ${filePath}`);
-    const { error: uploadError } = await supabase.storage
+    // Dosyayı doğrudan yükle, bucket kontrolü kaldırıldı
+    const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false,
       });
     
-    if (uploadError) {
-      console.error('Dosya yükleme hatası:', uploadError);
-      throw uploadError;
+    if (error) {
+      console.error('Dosya yükleme hatası:', error);
+      throw error;
     }
     
-    // Yüklenen dosyanın URL'ini al
-    const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-    console.log('Dosya başarıyla yüklendi:', data.publicUrl);
+    const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+    console.log('Dosya başarıyla yüklendi:', publicUrlData.publicUrl);
     
-    return data.publicUrl;
+    return publicUrlData.publicUrl;
   } catch (error) {
     console.error('Dosya yükleme hatası:', error);
     return null;
