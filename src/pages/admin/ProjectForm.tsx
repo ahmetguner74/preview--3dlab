@@ -1,10 +1,18 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Project, ProjectStatus } from '@/types/project';
 import { toast } from "sonner";
-import { ArrowLeft, Save, Eye, Trash, Image, Cube, Settings, Plus } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Save, 
+  Eye, 
+  Trash, 
+  Image, 
+  Box, 
+  Settings, 
+  Plus 
+} from 'lucide-react';
 import { 
   Tabs, 
   TabsContent, 
@@ -77,7 +85,6 @@ const ProjectForm = () => {
     const { name, value } = e.target;
     
     if (name === 'title' && !isEditing) {
-      // Başlık değiştiğinde otomatik slug oluştur (sadece yeni projeler için)
       const slug = value
         .toLowerCase()
         .replace(/[^a-z0-9ğüşiöç]+/g, '-')
@@ -151,7 +158,6 @@ const ProjectForm = () => {
           });
           
         if (error) {
-          // Slug benzersizlik hatası kontrolü
           if (error.code === '23505' && error.details?.includes('slug')) {
             toast.error('Bu URL zaten kullanılıyor. Lütfen başka bir URL seçin.');
             return;
@@ -288,7 +294,6 @@ const ProjectForm = () => {
               <TabsTrigger value="ayarlar">Ayarlar</TabsTrigger>
             </TabsList>
             
-            {/* GENEL SEKMESİ */}
             <TabsContent value="genel" className="bg-white p-6 rounded-md shadow-sm">
               <div className="mb-6">
                 <h2 className="text-xl font-medium mb-1">Genel Bilgiler</h2>
@@ -431,7 +436,6 @@ const ProjectForm = () => {
               </div>
             </TabsContent>
             
-            {/* İÇERİK SEKMESİ */}
             <TabsContent value="icerik" className="bg-white p-6 rounded-md shadow-sm">
               <div className="mb-6">
                 <h2 className="text-xl font-medium mb-1">İçerik Bilgileri</h2>
@@ -506,7 +510,6 @@ const ProjectForm = () => {
               </div>
             </TabsContent>
             
-            {/* MEDYA SEKMESİ */}
             <TabsContent value="medya" className="bg-white p-6 rounded-md shadow-sm">
               <div className="mb-6">
                 <h2 className="text-xl font-medium mb-1">Medya Galerisi</h2>
@@ -587,7 +590,6 @@ const ProjectForm = () => {
               </div>
             </TabsContent>
             
-            {/* NOKTA BULUTU SEKMESİ */}
             <TabsContent value="nokta-bulutu" className="bg-white p-6 rounded-md shadow-sm">
               <div className="mb-6">
                 <h2 className="text-xl font-medium mb-1">Nokta Bulutu</h2>
@@ -595,7 +597,7 @@ const ProjectForm = () => {
               </div>
               
               <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                <Cube className="mx-auto h-12 w-12 text-gray-400" />
+                <Box className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-4">
                   <Button variant="default">
                     <Plus size={16} className="mr-1" /> Nokta Bulutu Yükle
@@ -607,7 +609,6 @@ const ProjectForm = () => {
               </div>
             </TabsContent>
             
-            {/* 3D MODEL SEKMESİ */}
             <TabsContent value="3d-model" className="bg-white p-6 rounded-md shadow-sm">
               <div className="mb-6">
                 <h2 className="text-xl font-medium mb-1">3D Model</h2>
@@ -615,7 +616,7 @@ const ProjectForm = () => {
               </div>
               
               <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                <Cube className="mx-auto h-12 w-12 text-gray-400" />
+                <Box className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-4">
                   <Button variant="default">
                     <Plus size={16} className="mr-1" /> 3D Model Yükle
@@ -627,7 +628,6 @@ const ProjectForm = () => {
               </div>
             </TabsContent>
             
-            {/* AYARLAR SEKMESİ */}
             <TabsContent value="ayarlar" className="bg-white p-6 rounded-md shadow-sm">
               <div className="mb-6">
                 <h2 className="text-xl font-medium mb-1">Proje Ayarları</h2>
