@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Cloud, X } from 'lucide-react';
+import { Cloud, X, Info } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import { Project3DModel } from '@/types/project';
@@ -93,10 +93,22 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
         <p className="text-sm text-gray-500">Projeye ait nokta bulutu verilerini buradan yükleyebilirsiniz.</p>
       </div>
       
+      {/* Potree bilgi kutusu */}
+      <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded flex">
+        <Info className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+        <div>
+          <p className="text-sm text-blue-700">
+            Nokta bulutu verileri Potree görüntüleyici ile web tarayıcınızda görüntülenecektir.
+            En iyi sonuç için LAZ/LAS formatlarını kullanmanız önerilir. Büyük dosyaların yüklenmesi 
+            biraz zaman alabilir.
+          </p>
+        </div>
+      </div>
+      
       <FileUploadBox 
         onFileSelected={handlePointCloudUpload}
         title="Nokta Bulutu Yükle"
-        description="LAZ, LAS formatları desteklenir. Nokta bulutu Potree ile görüntülenecektir."
+        description="LAZ, LAS, XYZ, PTS formatları desteklenir. Nokta bulutu Potree ile görüntülenecektir."
         icon={<Cloud className="mx-auto h-12 w-12 text-gray-400" />}
         allowedTypes={['laz', 'las', 'xyz', 'pts']}
       />
