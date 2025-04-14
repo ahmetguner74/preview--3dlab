@@ -1,80 +1,100 @@
-import React from 'react';
-import Layout from '../components/layout/Layout';
+
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Settings, Layers, FileImage, Video, Package, Box } from 'lucide-react';
+import { ArrowLeftCircle, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { AdminSidebar } from '../components/admin/AdminSidebar';
+import { AdminDashboard } from '../components/admin/AdminDashboard';
 
 const Admin = () => {
-  return (
-    <Layout>
-      <div className="arch-container py-24">
-        <div className="flex items-center mb-12">
-          <Settings size={40} className="mr-4 text-arch-black" />
-          <h1 className="text-4xl font-display">Admin Paneli</h1>
-        </div>
+  const [projectCount, setProjectCount] = useState(0);
+  const [featuredCount, setFeaturedCount] = useState(0);
+  const [visitorCount, setVisitorCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
+  const [recentProjects, setRecentProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        // Proje sayısını çek
+        const { data: projectsData, error: projectError } = await supabase
+          .from('projects')
+          .select('id');
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Proje Yönetimi */}
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Layers size={24} className="text-arch-black mr-3" />
-              <h2 className="text-xl font-medium">Proje Yönetimi</h2>
-            </div>
-            <p className="text-arch-gray mb-4">Mevcut projeleri görüntüleyin, düzenleyin veya silin.</p>
-            <Link to="/admin/projects" className="w-full bg-arch-black text-white py-2 px-4 rounded-md hover:bg-arch-gray transition-colors flex items-center justify-center">
-              <span>Projeleri Yönet</span>
-            </Link>
-          </div>
+        if (projectError) throw projectError;
+        setProjectCount(projectsData ? projectsData.length : 0);
 
-          {/* Dosya Yönetimi */}
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <FileImage size={24} className="text-arch-black mr-3" />
-              <h2 className="text-xl font-medium">Görsel Yönetimi</h2>
-            </div>
-            <p className="text-arch-gray mb-4">Proje görsellerini yükleyin, düzenleyin ve organize edin.</p>
-            <Link to="/admin/images" className="w-full bg-arch-black text-white py-2 px-4 rounded-md hover:bg-arch-gray transition-colors flex items-center justify-center">
-              <span>Görselleri Yönet</span>
-            </Link>
-          </div>
+        // Öne çıkan projeleri çek
+        const { data: featuredData, error: featuredError } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('status', 'yayinda')
+          .eq('visible', true);
+        
+        if (featuredError) throw featuredError;
+        setFeaturedCount(featuredData ? featuredData.length : 0);
 
-          {/* Video Yönetimi */}
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Video size={24} className="text-arch-black mr-3" />
-              <h2 className="text-xl font-medium">Video Yönetimi</h2>
-            </div>
-            <p className="text-arch-gray mb-4">Proje videolarını yükleyin ve düzenleyin.</p>
-            <Link to="/admin/videos" className="w-full bg-arch-black text-white py-2 px-4 rounded-md hover:bg-arch-gray transition-colors flex items-center justify-center">
-              <span>Videoları Yönet</span>
-            </Link>
-          </div>
+        // Son projeleri çek
+        const { data: recentData, error: recentError } = await supabase
+          .from('projects')
+          .select('id, title, created_at, status')
+          .order('created_at', { ascending: false })
+          .limit(5);
+        
+        if (recentError) throw recentError;
+        setRecentProjects(recentData || []);
 
-          {/* Nokta Bulutu */}
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Package size={24} className="text-arch-black mr-3" />
-              <h2 className="text-xl font-medium">Nokta Bulutu</h2>
-            </div>
-            <p className="text-arch-gray mb-4">Nokta bulutu verilerini yönetin ve projeye ekleyin.</p>
-            <Link to="/admin/pointcloud" className="w-full bg-arch-black text-white py-2 px-4 rounded-md hover:bg-arch-gray transition-colors flex items-center justify-center">
-              <span>Nokta Bulutu Yönet</span>
-            </Link>
-          </div>
+        // Şimdilik ziyaretçi ve mesaj sayısı için örnek değerler
+        setVisitorCount(0);
+        setMessageCount(0);
+      } catch (error) {
+        console.error("Dashboard veri yükleme hatası:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-          {/* 3D Model */}
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Box size={24} className="text-arch-black mr-3" />
-              <h2 className="text-xl font-medium">3D Model</h2>
-            </div>
-            <p className="text-arch-gray mb-4">3D modelleri yükleyin ve projelere ekleyin.</p>
-            <Link to="/admin/3d-models" className="w-full bg-arch-black text-white py-2 px-4 rounded-md hover:bg-arch-gray transition-colors flex items-center justify-center">
-              <span>3D Modelleri Yönet</span>
+    fetchDashboardData();
+  }, []);
+  
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSidebar />
+      
+      <div className="flex-1 flex flex-col">
+        {/* Üst Menü */}
+        <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4">
+          <div className="flex items-center space-x-4">
+            <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
+              <ArrowLeftCircle size={20} className="mr-2" />
+              <span className="text-sm">Siteye Dön</span>
             </Link>
+            <h1 className="text-xl font-medium">Dashboard</h1>
           </div>
-        </div>
+          
+          <div>
+            <button className="flex items-center text-gray-600 hover:text-arch-black">
+              <span className="text-sm mr-2">Çıkış Yap</span>
+              <LogOut size={18} />
+            </button>
+          </div>
+        </header>
+        
+        {/* Ana İçerik */}
+        <main className="flex-1 overflow-auto p-6">
+          <AdminDashboard 
+            projectCount={projectCount}
+            featuredCount={featuredCount}
+            visitorCount={visitorCount}
+            messageCount={messageCount}
+            recentProjects={recentProjects}
+            loading={loading}
+          />
+        </main>
       </div>
-    </Layout>
+    </div>
   );
 };
 
