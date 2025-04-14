@@ -75,7 +75,7 @@ const About = () => {
                 <div key={member} className="text-center">
                   <div className="aspect-square bg-arch-light-gray mb-4">
                     <img 
-                      src={`https://images.unsplash.com/photo-151${9500${member}}019-7a5625340088?q=80&w=1888`}
+                      src={`https://images.unsplash.com/photo-151${9500}${member}-7a5625340088?q=80&w=1888`}
                       alt={`Team member ${member}`}
                       className="w-full h-full object-cover"
                     />
