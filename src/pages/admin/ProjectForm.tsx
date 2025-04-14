@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Project, ProjectStatus } from '@/types/project';
+import { Project, ProjectStatus, ProjectImage, ProjectVideo, Project3DModel } from '@/types/project';
 import { toast } from "sonner";
 import { 
   ArrowLeft, 
@@ -11,7 +12,11 @@ import {
   Image, 
   Box, 
   Settings, 
-  Plus 
+  Plus,
+  Video,
+  X,
+  UploadCloud,
+  Link2
 } from 'lucide-react';
 import { 
   Tabs, 
@@ -29,6 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import FileUploadBox from '@/components/admin/FileUploadBox';
+import { uploadProjectImage, addProjectVideo, upload3DModel, getProjectImages, getProjectVideos, getProject3DModels } from '@/utils/mediaHelpers';
 
 const ProjectForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +47,10 @@ const ProjectForm = () => {
   const [activeTab, setActiveTab] = useState<string>("genel");
   const [newTag, setNewTag] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [projectImages, setProjectImages] = useState<ProjectImage[]>([]);
+  const [projectVideos, setProjectVideos] = useState<ProjectVideo[]>([]);
+  const [project3DModels, setProject3DModels] = useState<Project3DModel[]>([]);
 
   const [project, setProject] = useState<Partial<Project>>({
     title: '',
@@ -72,6 +83,17 @@ const ProjectForm = () => {
 
       if (error) throw error;
       setProject(data || {});
+
+      // Projeye ait görselleri, videoları ve 3D modelleri getir
+      if (id) {
+        const images = await getProjectImages(id);
+        const videos = await getProjectVideos(id);
+        const models = await getProject3DModels(id);
+        
+        setProjectImages(images as ProjectImage[]);
+        setProjectVideos(videos as ProjectVideo[]);
+        setProject3DModels(models as Project3DModel[]);
+      }
     } catch (error) {
       console.error('Proje yüklenirken hata:', error);
       toast.error('Proje yüklenirken bir hata oluştu');
@@ -118,6 +140,132 @@ const ProjectForm = () => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
+  const handleVideoUrlAdd = async () => {
+    if (!videoUrl.trim()) {
+      toast.error('Video URL boş olamaz');
+      return;
+    }
+    
+    if (!id && !isEditing) {
+      toast.error('Önce projeyi kaydetmelisiniz');
+      return;
+    }
+    
+    try {
+      const success = await addProjectVideo(videoUrl, id!);
+      if (success) {
+        toast.success('Video başarıyla eklendi');
+        setVideoUrl('');
+        // Yeni video listesini getir
+        const videos = await getProjectVideos(id!);
+        setProjectVideos(videos as ProjectVideo[]);
+      } else {
+        toast.error('Video eklenirken bir hata oluştu');
+      }
+    } catch (error) {
+      console.error('Video eklenirken hata:', error);
+      toast.error('Video eklenirken bir hata oluştu');
+    }
+  };
+
+  const handleImageUpload = async (file: File, imageType: 'main' | 'gallery' | 'before' | 'after' = 'gallery') => {
+    if (!id && !isEditing) {
+      toast.error('Önce projeyi kaydetmelisiniz');
+      return;
+    }
+    
+    try {
+      const imageUrl = await uploadProjectImage(file, id!, imageType);
+      if (imageUrl) {
+        toast.success('Görsel başarıyla yüklendi');
+        // Yeni görsel listesini getir
+        const images = await getProjectImages(id!);
+        setProjectImages(images as ProjectImage[]);
+      } else {
+        toast.error('Görsel yüklenirken bir hata oluştu');
+      }
+    } catch (error) {
+      console.error('Görsel yüklenirken hata:', error);
+      toast.error('Görsel yüklenirken bir hata oluştu');
+    }
+  };
+
+  const handle3DModelUpload = async (file: File, modelType: '3d_model' | 'point_cloud' = '3d_model') => {
+    if (!id && !isEditing) {
+      toast.error('Önce projeyi kaydetmelisiniz');
+      return;
+    }
+    
+    try {
+      const modelUrl = await upload3DModel(file, id!, modelType);
+      if (modelUrl) {
+        toast.success('Model başarıyla yüklendi');
+        // Yeni model listesini getir
+        const models = await getProject3DModels(id!);
+        setProject3DModels(models as Project3DModel[]);
+      } else {
+        toast.error('Model yüklenirken bir hata oluştu');
+      }
+    } catch (error) {
+      console.error('Model yüklenirken hata:', error);
+      toast.error('Model yüklenirken bir hata oluştu');
+    }
+  };
+
+  const handleDeleteImage = async (imageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_images')
+        .delete()
+        .eq('id', imageId);
+      
+      if (error) throw error;
+      
+      // Güncel görsel listesini getir
+      setProjectImages(projectImages.filter(img => img.id !== imageId));
+      toast.success('Görsel başarıyla silindi');
+    } catch (error) {
+      console.error('Görsel silinirken hata:', error);
+      toast.error('Görsel silinirken bir hata oluştu');
+    }
+  };
+
+  const handleDeleteVideo = async (videoId: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_videos')
+        .delete()
+        .eq('id', videoId);
+      
+      if (error) throw error;
+      
+      // Güncel video listesini getir
+      setProjectVideos(projectVideos.filter(video => video.id !== videoId));
+      toast.success('Video başarıyla silindi');
+    } catch (error) {
+      console.error('Video silinirken hata:', error);
+      toast.error('Video silinirken bir hata oluştu');
+    }
+  };
+
+  const handleDelete3DModel = async (modelId: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_3d_models')
+        .delete()
+        .eq('id', modelId);
+      
+      if (error) throw error;
+      
+      // Güncel model listesini getir
+      setProject3DModels(project3DModels.filter(model => model.id !== modelId));
+      toast.success('Model başarıyla silindi');
+    } catch (error) {
+      console.error('Model silinirken hata:', error);
+      toast.error('Model silinirken bir hata oluştu');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -141,7 +289,7 @@ const ProjectForm = () => {
         if (error) throw error;
         toast.success('Proje başarıyla güncellendi');
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('projects')
           .insert({
             title: project.title!,
@@ -155,7 +303,8 @@ const ProjectForm = () => {
             architect: project.architect,
             status: project.status,
             visible: project.visible
-          });
+          })
+          .select();
           
         if (error) {
           if (error.code === '23505' && error.details?.includes('slug')) {
@@ -166,9 +315,14 @@ const ProjectForm = () => {
         }
         
         toast.success('Proje başarıyla oluşturuldu');
+        
+        // Yeni oluşturulan projenin düzenleme sayfasına git
+        if (data && data.length > 0) {
+          navigate(`/admin/projects/${data[0].id}/edit`);
+        } else {
+          navigate('/admin/projects');
+        }
       }
-      
-      navigate('/admin/projects');
     } catch (error) {
       console.error('Proje kaydedilirken hata:', error);
       toast.error('Proje kaydedilemedi');
@@ -517,73 +671,201 @@ const ProjectForm = () => {
               </div>
               
               <div className="space-y-6">
+                {/* Ana Görsel Yükleme */}
                 <div>
                   <h3 className="text-md font-medium mb-2">Ana Görsel</h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Image className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="mt-2">
-                      <Button variant="default">
-                        <Plus size={16} className="mr-1" /> Ana Görsel Yükle
-                      </Button>
+                  <FileUploadBox 
+                    onFileSelected={(file) => handleImageUpload(file, 'main')}
+                    title="Ana Görsel Yükle"
+                    description="PNG, JPG, GIF formatları desteklenir. Maksimum 5MB."
+                    icon={<Image className="mx-auto h-12 w-12 text-gray-400" />}
+                    allowedTypes={['jpg', 'jpeg', 'png', 'gif']}
+                  />
+
+                  {/* Ana Görsel Önizleme */}
+                  {projectImages.filter(img => img.image_type === 'main').length > 0 && (
+                    <div className="mt-4">
+                      {projectImages
+                        .filter(img => img.image_type === 'main')
+                        .map(img => (
+                          <div key={img.id} className="relative">
+                            <img 
+                              src={img.image_url} 
+                              alt="Ana görsel" 
+                              className="w-full h-48 object-cover rounded-md"
+                            />
+                            <Button 
+                              variant="destructive" 
+                              size="icon" 
+                              className="absolute top-2 right-2"
+                              onClick={() => handleDeleteImage(img.id)}
+                            >
+                              <X size={16} />
+                            </Button>
+                          </div>
+                        ))
+                      }
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      PNG, JPG, GIF formatları desteklenir. Maksimum 5MB.
-                    </p>
-                  </div>
+                  )}
                 </div>
                 
+                {/* Galeri Görselleri Yükleme */}
                 <div>
                   <h3 className="text-md font-medium mb-2">Galeri Görselleri</h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Image className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="mt-2">
-                      <Button variant="default">
-                        <Plus size={16} className="mr-1" /> Görsel Ekle
-                      </Button>
+                  <FileUploadBox 
+                    onFileSelected={(file) => handleImageUpload(file, 'gallery')}
+                    title="Görsel Ekle"
+                    description="Birden fazla görsel ekleyebilirsiniz. Sürükleyerek sıralayabilirsiniz."
+                    icon={<Image className="mx-auto h-12 w-12 text-gray-400" />}
+                    allowedTypes={['jpg', 'jpeg', 'png', 'gif']}
+                  />
+
+                  {/* Galeri Görselleri Listesi */}
+                  {projectImages.filter(img => img.image_type === 'gallery').length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                      {projectImages
+                        .filter(img => img.image_type === 'gallery')
+                        .map(img => (
+                          <div key={img.id} className="relative group">
+                            <img 
+                              src={img.image_url} 
+                              alt="Galeri görseli" 
+                              className="w-full h-24 object-cover rounded-md"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <Button 
+                                variant="destructive" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleDeleteImage(img.id)}
+                              >
+                                <X size={14} />
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      }
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      Birden fazla görsel ekleyebilirsiniz. Sürükleyerek sıralayabilirsiniz.
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                    {/* Burada yüklenmiş görseller listelenecek */}
-                  </div>
+                  )}
                 </div>
                 
+                {/* Video Ekleme */}
                 <div>
                   <h3 className="text-md font-medium mb-2">Video</h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <div className="mt-2">
-                      <Button variant="default">
-                        <Plus size={16} className="mr-1" /> Video Ekle
-                      </Button>
-                    </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      YouTube veya Vimeo video URL'si ekleyebilirsiniz.
-                    </p>
+                  <div className="flex gap-2 mb-4">
+                    <Input 
+                      placeholder="YouTube veya Vimeo video URL'si"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                    />
+                    <Button onClick={handleVideoUrlAdd}>
+                      <Plus size={16} className="mr-1" /> Ekle
+                    </Button>
                   </div>
+
+                  {/* Video Listesi */}
+                  {projectVideos.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      {projectVideos.map(video => (
+                        <div key={video.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                          <div className="flex items-center">
+                            <Video className="h-5 w-5 mr-2 text-gray-500" />
+                            <a 
+                              href={video.video_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:underline text-sm truncate max-w-md"
+                            >
+                              {video.video_url}
+                            </a>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDeleteVideo(video.id)}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
+                {/* Before/After Görselleri */}
                 <div>
                   <h3 className="text-md font-medium mb-2">Before/After Görselleri</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                      <Image className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="mt-2">
-                        <Button variant="default">
-                          <Plus size={16} className="mr-1" /> Öncesi
-                        </Button>
-                      </div>
+                    <div>
+                      <FileUploadBox 
+                        onFileSelected={(file) => handleImageUpload(file, 'before')}
+                        title="Öncesi Görseli"
+                        description="Önceki durumu gösteren görsel"
+                        icon={<Image className="mx-auto h-12 w-12 text-gray-400" />}
+                        allowedTypes={['jpg', 'jpeg', 'png']}
+                      />
+                      
+                      {/* Before Görsel Önizleme */}
+                      {projectImages.filter(img => img.image_type === 'before').length > 0 && (
+                        <div className="mt-4">
+                          {projectImages
+                            .filter(img => img.image_type === 'before')
+                            .map(img => (
+                              <div key={img.id} className="relative">
+                                <img 
+                                  src={img.image_url} 
+                                  alt="Before görseli" 
+                                  className="w-full h-32 object-cover rounded-md"
+                                />
+                                <Button 
+                                  variant="destructive" 
+                                  size="icon" 
+                                  className="absolute top-2 right-2"
+                                  onClick={() => handleDeleteImage(img.id)}
+                                >
+                                  <X size={16} />
+                                </Button>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                      <Image className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="mt-2">
-                        <Button variant="default">
-                          <Plus size={16} className="mr-1" /> Sonrası
-                        </Button>
-                      </div>
+                    <div>
+                      <FileUploadBox 
+                        onFileSelected={(file) => handleImageUpload(file, 'after')}
+                        title="Sonrası Görseli"
+                        description="Mevcut durumu gösteren görsel"
+                        icon={<Image className="mx-auto h-12 w-12 text-gray-400" />}
+                        allowedTypes={['jpg', 'jpeg', 'png']}
+                      />
+                      
+                      {/* After Görsel Önizleme */}
+                      {projectImages.filter(img => img.image_type === 'after').length > 0 && (
+                        <div className="mt-4">
+                          {projectImages
+                            .filter(img => img.image_type === 'after')
+                            .map(img => (
+                              <div key={img.id} className="relative">
+                                <img 
+                                  src={img.image_url} 
+                                  alt="After görseli" 
+                                  className="w-full h-32 object-cover rounded-md"
+                                />
+                                <Button 
+                                  variant="destructive" 
+                                  size="icon" 
+                                  className="absolute top-2 right-2"
+                                  onClick={() => handleDeleteImage(img.id)}
+                                >
+                                  <X size={16} />
+                                </Button>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -596,17 +878,47 @@ const ProjectForm = () => {
                 <p className="text-sm text-gray-500">Projeye ait nokta bulutu verilerini buradan yükleyebilirsiniz.</p>
               </div>
               
-              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                <Box className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="mt-4">
-                  <Button variant="default">
-                    <Plus size={16} className="mr-1" /> Nokta Bulutu Yükle
-                  </Button>
+              <FileUploadBox 
+                onFileSelected={(file) => handle3DModelUpload(file, 'point_cloud')}
+                title="Nokta Bulutu Yükle"
+                description="PLY, XYZ, PTS formatları desteklenir. Yüklenen dosyalar Potree ile görüntülenecektir."
+                icon={<Box className="mx-auto h-12 w-12 text-gray-400" />}
+                allowedTypes={['ply', 'xyz', 'pts']}
+              />
+
+              {/* Nokta Bulutu Listesi */}
+              {project3DModels.filter(model => model.model_type === 'point_cloud').length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-md font-medium mb-2">Yüklü Nokta Bulutu Dosyaları</h3>
+                  <div className="space-y-2">
+                    {project3DModels
+                      .filter(model => model.model_type === 'point_cloud')
+                      .map(model => (
+                        <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                          <div className="flex items-center">
+                            <Box className="h-5 w-5 mr-2 text-gray-500" />
+                            <a 
+                              href={model.model_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:underline text-sm truncate max-w-md"
+                            >
+                              {model.model_url.split('/').pop()}
+                            </a>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDelete3DModel(model.id)}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      ))
+                    }
+                  </div>
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  PLY, XYZ, PTS formatları desteklenir. Yüklenen dosyalar Potree ile görüntülenecektir.
-                </p>
-              </div>
+              )}
             </TabsContent>
             
             <TabsContent value="3d-model" className="bg-white p-6 rounded-md shadow-sm">
@@ -615,17 +927,47 @@ const ProjectForm = () => {
                 <p className="text-sm text-gray-500">Projeye ait 3D modelleri buradan yükleyebilirsiniz.</p>
               </div>
               
-              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                <Box className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="mt-4">
-                  <Button variant="default">
-                    <Plus size={16} className="mr-1" /> 3D Model Yükle
-                  </Button>
+              <FileUploadBox 
+                onFileSelected={(file) => handle3DModelUpload(file, '3d_model')}
+                title="3D Model Yükle"
+                description="OBJ, GLTF, GLB formatları desteklenir. Modeller Three.js ile görüntülenecektir."
+                icon={<Box className="mx-auto h-12 w-12 text-gray-400" />}
+                allowedTypes={['obj', 'gltf', 'glb']}
+              />
+
+              {/* 3D Model Listesi */}
+              {project3DModels.filter(model => model.model_type === '3d_model').length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-md font-medium mb-2">Yüklü 3D Modeller</h3>
+                  <div className="space-y-2">
+                    {project3DModels
+                      .filter(model => model.model_type === '3d_model')
+                      .map(model => (
+                        <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                          <div className="flex items-center">
+                            <Box className="h-5 w-5 mr-2 text-gray-500" />
+                            <a 
+                              href={model.model_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:underline text-sm truncate max-w-md"
+                            >
+                              {model.model_url.split('/').pop()}
+                            </a>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDelete3DModel(model.id)}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      ))
+                    }
+                  </div>
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  OBJ, GLTF, GLB formatları desteklenir. Modeller Three.js ile görüntülenecektir.
-                </p>
-              </div>
+              )}
             </TabsContent>
             
             <TabsContent value="ayarlar" className="bg-white p-6 rounded-md shadow-sm">
