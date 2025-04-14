@@ -1,7 +1,8 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 interface PointCloudViewerProps {
   pointCloudUrl: string;
@@ -39,8 +40,39 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
       try {
         setIsLoading(true);
         
-        await loadPotreeScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/build/potree/potree.min.js');
-        await loadPotreeScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/libs/other/BinaryHeap.js');
+        // Scripts'i yükleme fonksiyonu
+        const loadScript = (url: string): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${url}"]`)) {
+              console.log("Script zaten yüklü:", url);
+              resolve();
+              return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = url;
+            script.crossOrigin = 'anonymous';
+            script.onload = () => {
+              console.log("Script yüklendi:", url);
+              resolve();
+            };
+            script.onerror = (error) => {
+              console.error("Script yükleme hatası:", url, error);
+              reject(new Error(`Script yüklenemedi: ${url}`));
+            };
+            
+            document.head.appendChild(script);
+          });
+        };
+        
+        // Potree scriptlerini sırayla yükle
+        try {
+          await loadScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/build/potree/potree.min.js');
+          await loadScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/libs/other/BinaryHeap.js');
+        } catch (err) {
+          console.error("Potree scriptleri yüklenemedi:", err);
+          throw new Error("Potree yüklenemedi: " + (err instanceof Error ? err.message : String(err)));
+        }
         
         const potree = (window as any).Potree;
         
@@ -87,7 +119,21 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
           if (potree.PointCloudOctreeLoader) {
             const pcoLoader = new potree.PointCloudOctreeLoader();
             
-            pcoLoader.load(pointCloudUrl).then((points: any) => {
+            // Promise ile load metodu
+            new Promise<any>((resolve, reject) => {
+              try {
+                pcoLoader.load(pointCloudUrl)
+                  .then((points: any) => {
+                    resolve(points);
+                  })
+                  .catch((err: any) => {
+                    reject(err);
+                  });
+              } catch (loadError) {
+                reject(loadError);
+              }
+            })
+            .then((points) => {
               if (!points) {
                 throw new Error("Nokta bulutu yüklenemedi");
               }
@@ -117,9 +163,10 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
               }
               
               setIsLoading(false);
-            }).catch((err: Error) => {
+            })
+            .catch((err) => {
               console.error("Nokta bulutu yükleme hatası:", err);
-              setError(`Nokta bulutu yüklenirken hata: ${err.message}`);
+              setError(`Nokta bulutu yüklenirken hata: ${err instanceof Error ? err.message : String(err)}`);
               setIsLoading(false);
             });
           } else {
@@ -195,30 +242,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
       }
     };
   }, [pointCloudUrl]);
-  
-  const loadPotreeScript = (url: string): Promise<boolean> => {
-    return new Promise<boolean>((resolve, reject) => {
-      if (document.querySelector(`script[src="${url}"]`)) {
-        console.log("Potree script zaten yüklü");
-        resolve(true);
-        return;
-      }
-      
-      const script = document.createElement('script');
-      script.src = url;
-      script.crossOrigin = 'anonymous';
-      script.onload = () => {
-        console.log("Potree script yüklendi");
-        resolve(true);
-      };
-      script.onerror = (error) => {
-        console.error("Potree script yükleme hatası:", error);
-        reject(new Error("Potree script yüklenemedi"));
-      };
-      
-      document.head.appendChild(script);
-    });
-  };
   
   if (!isValidUrl) {
     return (
