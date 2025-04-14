@@ -9,7 +9,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 const ProjectForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isEditing = id !== 'new';
+  const isEditing = id !== undefined && id !== 'new';
 
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
@@ -99,9 +99,10 @@ const ProjectForm = () => {
         if (error) throw error;
         toast.success('Proje başarıyla güncellendi');
       } else {
+        // Obje dizisi olarak değil, tek obje olarak gönderiyoruz
         const { error } = await supabase
           .from('projects')
-          .insert([project]);
+          .insert(project);
           
         if (error) {
           // Slug benzersizlik hatası kontrolü
