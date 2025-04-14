@@ -99,10 +99,23 @@ const ProjectForm = () => {
         if (error) throw error;
         toast.success('Proje başarıyla güncellendi');
       } else {
-        // Obje dizisi olarak değil, tek obje olarak gönderiyoruz
+        // Tip hatası düzeltildi: Nesne olarak gönderdiğimizden emin oluyoruz
+        // ve title ve slug'un kesinlikle var olduğunu garantiliyoruz
         const { error } = await supabase
           .from('projects')
-          .insert(project);
+          .insert({
+            title: project.title!,
+            slug: project.slug!,
+            description: project.description,
+            location: project.location,
+            category: project.category,
+            year: project.year,
+            client: project.client,
+            area: project.area,
+            architect: project.architect,
+            status: project.status,
+            visible: project.visible
+          });
           
         if (error) {
           // Slug benzersizlik hatası kontrolü
