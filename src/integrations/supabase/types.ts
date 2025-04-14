@@ -9,7 +9,159 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      project_3d_models: {
+        Row: {
+          created_at: string | null
+          id: string
+          model_type: string
+          model_url: string
+          project_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          model_type: string
+          model_url: string
+          project_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          model_type?: string
+          model_url?: string
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_3d_models_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_images: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_type: string
+          image_url: string
+          project_id: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_type: string
+          image_url: string
+          project_id?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_type?: string
+          image_url?: string
+          project_id?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_videos: {
+        Row: {
+          created_at: string | null
+          id: string
+          project_id: string | null
+          sort_order: number | null
+          thumbnail_url: string | null
+          video_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          video_url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_videos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          architect: string | null
+          area: string | null
+          category: string | null
+          client: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          location: string | null
+          slug: string
+          status: Database["public"]["Enums"]["project_status"] | null
+          title: string
+          updated_at: string | null
+          visible: boolean | null
+          year: string | null
+        }
+        Insert: {
+          architect?: string | null
+          area?: string | null
+          category?: string | null
+          client?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["project_status"] | null
+          title: string
+          updated_at?: string | null
+          visible?: boolean | null
+          year?: string | null
+        }
+        Update: {
+          architect?: string | null
+          area?: string | null
+          category?: string | null
+          client?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["project_status"] | null
+          title?: string
+          updated_at?: string | null
+          visible?: boolean | null
+          year?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +170,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      project_status: "taslak" | "yayinda" | "arsiv"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +285,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      project_status: ["taslak", "yayinda", "arsiv"],
+    },
   },
 } as const

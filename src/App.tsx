@@ -10,6 +10,8 @@ import Contact from "./pages/Contact";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Admin from "./pages/Admin";
+import ProjectList from "./pages/admin/ProjectList";
+import ProjectForm from "./pages/admin/ProjectForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,9 @@ const App = () => (
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/projects" element={<ProjectList />} />
+          <Route path="/admin/projects/new" element={<ProjectForm />} />
+          <Route path="/admin/projects/:id/edit" element={<ProjectForm />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
