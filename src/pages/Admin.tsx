@@ -1,8 +1,7 @@
-
 import React from 'react';
 import Layout from '../components/layout/Layout';
 import { Link } from 'react-router-dom';
-import { Settings, Layers, FileImage, Video, Package, Box3D } from 'lucide-react';
+import { Settings, Layers, FileImage, Video, Package, Box } from 'lucide-react';
 
 const Admin = () => {
   return (
@@ -65,7 +64,7 @@ const Admin = () => {
           {/* 3D Model */}
           <div className="bg-white shadow-md rounded-lg p-6">
             <div className="flex items-center mb-4">
-              <Box3D size={24} className="text-arch-black mr-3" />
+              <Box size={24} className="text-arch-black mr-3" />
               <h2 className="text-xl font-medium">3D Model</h2>
             </div>
             <p className="text-arch-gray mb-4">3D modelleri yükleyin ve projelere ekleyin.</p>
