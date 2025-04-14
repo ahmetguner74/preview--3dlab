@@ -1,8 +1,7 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 interface PointCloudViewerProps {
   pointCloudUrl: string;
@@ -15,7 +14,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
   const [isValidUrl, setIsValidUrl] = useState<boolean>(true);
   
   useEffect(() => {
-    // URL'nin geçerli bir nokta bulutu dosyası olup olmadığını kontrol et
     if (!pointCloudUrl) {
       setIsValidUrl(false);
       setIsLoading(false);
@@ -31,27 +29,19 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
       return;
     }
 
-    // Değişkenler
     let scene: THREE.Scene | null = null;
     let camera: THREE.PerspectiveCamera | null = null;
     let renderer: THREE.WebGLRenderer | null = null;
     let controls: OrbitControls | null = null;
     let pointcloud: any = null;
     
-    // Potree'yi yükle
     const initScene = async () => {
       try {
         setIsLoading(true);
         
-        // Potree'yi CDN üzerinden dinamik olarak yükle
-        const potreeLoaded = await loadPotreeScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/build/potree/potree.min.js');
-        if (!potreeLoaded) {
-          throw new Error("Potree yüklenemedi");
-        }
-        
+        await loadPotreeScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/build/potree/potree.min.js');
         await loadPotreeScript('https://cdn.jsdelivr.net/gh/potree/potree@1.8/libs/other/BinaryHeap.js');
         
-        // Global potree değişkenini al
         const potree = (window as any).Potree;
         
         if (!potree) {
@@ -60,28 +50,23 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         
         if (!containerRef.current) return;
         
-        // Mevcut container içeriğini temizle
         if (containerRef.current.children.length > 0) {
           containerRef.current.innerHTML = '';
         }
         
-        // THREE.js sahne kurulumu
         scene = new THREE.Scene();
         
-        // Kamera ayarları
         const width = containerRef.current.clientWidth;
         const height = containerRef.current.clientHeight;
         camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
         camera.position.set(0, 0, 5);
         
-        // WebGL renderer
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(width, height);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor(0xffffff);
         containerRef.current.appendChild(renderer.domElement);
         
-        // Kontroller
         controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
@@ -89,7 +74,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         controls.maxPolarAngle = Math.PI / 1.8;
         controls.target.set(0, 0, 0);
         
-        // Işıklandırma
         const ambientLight = new THREE.AmbientLight(0x404040);
         scene.add(ambientLight);
         
@@ -97,52 +81,47 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         directionalLight.position.set(1, 1, 1);
         scene.add(directionalLight);
         
-        // Nokta bulutu yükleme
         console.log("Nokta bulutu yükleniyor:", pointCloudUrl);
         
         try {
-          // Potree loaderı ile dosyayı yükle
           if (potree.PointCloudOctreeLoader) {
             const pcoLoader = new potree.PointCloudOctreeLoader();
-            pcoLoader.load(pointCloudUrl)
-              .then((points: any) => {
-                if (!points) {
-                  throw new Error("Nokta bulutu yüklenemedi");
+            
+            pcoLoader.load(pointCloudUrl).then((points: any) => {
+              if (!points) {
+                throw new Error("Nokta bulutu yüklenemedi");
+              }
+              
+              pointcloud = points;
+              if (scene) scene.add(pointcloud);
+              
+              if (pointcloud.material) {
+                pointcloud.material.size = 1;
+                pointcloud.material.pointSizeType = 0; // fixed
+                pointcloud.material.shape = 1; // square point shape
+              }
+              
+              if (pointcloud.boundingBox) {
+                const box = pointcloud.boundingBox;
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                
+                if (camera) {
+                  camera.position.copy(center);
+                  camera.position.z += Math.max(size.x, size.y, size.z) * 2;
                 }
                 
-                pointcloud = points;
-                scene?.add(pointcloud);
-                
-                // Nokta bulutu özelliklerini ayarla
-                if (pointcloud.material) {
-                  pointcloud.material.size = 1;
-                  pointcloud.material.pointSizeType = 0; // fixed
-                  pointcloud.material.shape = 1; // square point shape
+                if (controls) {
+                  controls.target.copy(center);
                 }
-                
-                // Otomatik merkezleme
-                if (pointcloud.boundingBox) {
-                  const box = pointcloud.boundingBox;
-                  const size = box.getSize(new THREE.Vector3());
-                  const center = box.getCenter(new THREE.Vector3());
-                  
-                  if (camera) {
-                    camera.position.copy(center);
-                    camera.position.z += Math.max(size.x, size.y, size.z) * 2;
-                  }
-                  
-                  if (controls) {
-                    controls.target.copy(center);
-                  }
-                }
-                
-                setIsLoading(false);
-              })
-              .catch((err: Error) => {
-                console.error("Nokta bulutu yükleme hatası:", err);
-                setError(`Nokta bulutu yüklenirken hata: ${err.message}`);
-                setIsLoading(false);
-              });
+              }
+              
+              setIsLoading(false);
+            }).catch((err: Error) => {
+              console.error("Nokta bulutu yükleme hatası:", err);
+              setError(`Nokta bulutu yüklenirken hata: ${err.message}`);
+              setIsLoading(false);
+            });
           } else {
             throw new Error("Potree PointCloudOctreeLoader bulunamadı");
           }
@@ -151,7 +130,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
           throw loadError;
         }
         
-        // Yeniden boyutlandırma olayı
         const handleResize = () => {
           if (!containerRef.current || !camera || !renderer) return;
           
@@ -165,13 +143,11 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         
         window.addEventListener('resize', handleResize);
         
-        // Animasyon döngüsü
         const animate = () => {
           if (scene && camera && renderer && controls) {
             requestAnimationFrame(animate);
             controls.update();
             
-            // Nokta bulutu varsa güncelle
             if (pointcloud && pointcloud.material && pointcloud.material.uniforms) {
               pointcloud.material.uniforms.uScreenHeight.value = renderer.domElement.clientHeight;
               pointcloud.material.uniforms.uScreenWidth.value = renderer.domElement.clientWidth;
@@ -184,7 +160,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         
         animate();
         
-        // Temizlik için işlevi kaydet
         return () => {
           window.removeEventListener('resize', handleResize);
           
@@ -214,7 +189,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
     
     const cleanup = initScene();
     
-    // Komponentin umount olduğunda temizlik işlemi yap
     return () => {
       if (cleanup && typeof cleanup === 'function') {
         cleanup();
@@ -222,10 +196,8 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
     };
   }, [pointCloudUrl]);
   
-  // Potree script yükleyici yardımcı fonksiyonu
   const loadPotreeScript = (url: string): Promise<boolean> => {
     return new Promise<boolean>((resolve, reject) => {
-      // Eğer script zaten yüklüyse tekrar yükleme
       if (document.querySelector(`script[src="${url}"]`)) {
         console.log("Potree script zaten yüklü");
         resolve(true);
@@ -282,12 +254,10 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         style={{ visibility: isLoading ? 'hidden' : 'visible' }}
       />
       
-      {/* Nokta bulutu bilgisi */}
       <div className="absolute bottom-4 left-4 z-20 bg-white/80 p-2 rounded text-xs">
         <strong>Dosya:</strong> {pointCloudUrl.split('/').pop()}
       </div>
       
-      {/* Yardım bilgisi */}
       <div className="absolute top-4 right-4 z-20 bg-white/80 p-2 rounded text-xs">
         <p>Fare ile çevir, yaklaşma-uzaklaşma için kaydırın</p>
       </div>
@@ -295,7 +265,6 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
   );
 };
 
-// TypeScript için global tanımlamalar
 declare global {
   interface Window {
     Potree: any;
