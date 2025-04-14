@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,6 +13,12 @@ export const uploadFileToStorage = async (
   try {
     const fileExt = file.name.split('.').pop();
     const filePath = `${folderPath}${uuidv4()}.${fileExt}`;
+    
+    // Büyük dosya kontrolü
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+    if (file.size > MAX_SIZE) {
+      throw new Error(`Dosya boyutu 50MB'ı aşamaz (Mevcut boyut: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+    }
     
     // Dosyayı doğrudan yükle, bucket kontrolü kaldırıldı
     const { data, error } = await supabase.storage
