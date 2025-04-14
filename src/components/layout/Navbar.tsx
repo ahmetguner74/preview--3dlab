@@ -30,7 +30,7 @@ const Navbar = () => {
   }];
   return <header className={`fixed w-full z-30 transition-all duration-300 ${scrolled ? 'py-3 bg-white shadow-sm' : 'py-5 bg-transparent'}`}>
       <div className="arch-container flex justify-between items-center">
-        <NavLink to="/" className="text-xl md:text-2xl font-display font-medium-gradyan">Digital LAB</NavLink>
+        <NavLink to="/" className="text-xl md:text-2xl font-display font-medium-gradyan-green">Digital LAB</NavLink>
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
