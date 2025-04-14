@@ -1,6 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Cloud, AlertTriangle } from 'lucide-react';
+import * as THREE from 'three';
 
 interface PointCloudViewerProps {
   pointCloudUrl: string;
@@ -11,6 +12,12 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isValidUrl, setIsValidUrl] = useState<boolean>(true);
+  
+  // Global olarak THREE'yi tanımla (Potree'nin ihtiyacı var)
+  useEffect(() => {
+    // THREE'yi global scope'a at - Potree buna ihtiyaç duyuyor
+    window.THREE = THREE;
+  }, []);
   
   // Potree yükleme ve kurulumu
   useEffect(() => {
@@ -52,6 +59,9 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         potreeViewer.setFOV(60);
         potreeViewer.setPointBudget(1_000_000);
         potreeViewer.loadSettingsFromURL();
+        
+        // Potree viewer'ı global değişkene kaydet (yeniden boyutlandırma için)
+        window.potreeViewer = potreeViewer;
         
         // Nokta bulutu yükleme
         Potree.loadPointCloud(pointCloudUrl, "pointcloud", (e: any) => {
@@ -152,6 +162,7 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
 declare global {
   interface Window {
     potreeViewer: any;
+    THREE: typeof THREE;
   }
 }
 
