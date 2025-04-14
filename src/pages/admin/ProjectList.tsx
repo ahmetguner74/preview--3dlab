@@ -30,8 +30,8 @@ const ProjectList = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     fetchProjects();
@@ -114,8 +114,8 @@ const ProjectList = () => {
   // Filtreleme fonksiyonu
   const filteredProjects = projects.filter(project => {
     const titleMatch = project.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const categoryMatch = categoryFilter ? project.category === categoryFilter : true;
-    const statusMatch = statusFilter ? project.status === statusFilter : true;
+    const categoryMatch = categoryFilter === 'all' ? true : project.category === categoryFilter;
+    const statusMatch = statusFilter === 'all' ? true : project.status === statusFilter;
     return titleMatch && categoryMatch && statusMatch;
   });
 
@@ -166,9 +166,9 @@ const ProjectList = () => {
                     <SelectValue placeholder="Kategori" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tüm Kategoriler</SelectItem>
+                    <SelectItem value="all">Tüm Kategoriler</SelectItem>
                     {categories.map((category, index) => (
-                      <SelectItem key={index} value={category || ''}>
+                      <SelectItem key={index} value={category || 'undefined'}>
                         {category}
                       </SelectItem>
                     ))}
@@ -182,7 +182,7 @@ const ProjectList = () => {
                     <SelectValue placeholder="Durum" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tüm Durumlar</SelectItem>
+                    <SelectItem value="all">Tüm Durumlar</SelectItem>
                     <SelectItem value="taslak">Taslak</SelectItem>
                     <SelectItem value="yayinda">Yayında</SelectItem>
                     <SelectItem value="arsiv">Arşiv</SelectItem>
@@ -236,10 +236,10 @@ const ProjectList = () => {
                   ) : filteredProjects.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                        {searchTerm || categoryFilter || statusFilter ? 
+                        {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' ? 
                           'Arama kriterlerine uygun proje bulunamadı' : 
                           'Henüz hiç proje eklenmemiş'}
-                        {!searchTerm && !categoryFilter && !statusFilter && (
+                        {!searchTerm && categoryFilter === 'all' && statusFilter === 'all' && (
                           <div className="mt-4">
                             <Link 
                               to="/admin/projects/new"
