@@ -31,16 +31,24 @@ function Model({ url }: { url: string }) {
     box.getSize(size);
     
     const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = camera.fov * (Math.PI / 180);
-    let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
     
-    // Biraz daha iyi bir görünüm için uzaklığı artır
-    cameraZ *= 1.5;
-    
-    camera.position.z = cameraZ;
-    
-    // Y ekseninde biraz aşağıda başla (modele daha iyi açıdan bakmak için)
-    camera.position.y = center.y;
+    // Kamera tipini kontrol et ve ona göre ayarla
+    if (camera instanceof THREE.PerspectiveCamera) {
+      const fov = camera.fov * (Math.PI / 180);
+      let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+      
+      // Biraz daha iyi bir görünüm için uzaklığı artır
+      cameraZ *= 1.5;
+      
+      camera.position.z = cameraZ;
+      
+      // Y ekseninde biraz aşağıda başla (modele daha iyi açıdan bakmak için)
+      camera.position.y = center.y;
+    } else {
+      // OrthographicCamera veya başka bir kamera tipi için
+      camera.position.z = maxDim * 2;
+      camera.position.y = center.y;
+    }
     
     // Kamerayı modelin merkezine doğrult
     camera.lookAt(center);
@@ -79,9 +87,9 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
           shadows
           dpr={[1, 2]}
           style={{ background: backgroundColor }}
-          camera={{ position: [0, 0, 5], fov: 50 }}
           gl={{ preserveDrawingBuffer: true }}
         >
+          <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
           <Suspense fallback={<Loader />}>
