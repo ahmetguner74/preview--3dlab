@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -6,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Project } from '@/types/project';
+import ThreeModelViewer from '@/components/viewers/ThreeModelViewer';
+import PointCloudViewer from '@/components/viewers/PointCloudViewer';
 
 const ProjectDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -18,7 +19,6 @@ const ProjectDetail = () => {
   const [beforeImage, setBeforeImage] = useState<string | null>(null);
   const [afterImage, setAfterImage] = useState<string | null>(null);
   
-  // Projeyi ve iligli medyaları yükle
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
@@ -29,7 +29,6 @@ const ProjectDetail = () => {
           return;
         }
         
-        // Projeyi getir
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
           .select('*')
@@ -47,7 +46,6 @@ const ProjectDetail = () => {
         
         setProject(projectData);
         
-        // Proje resimlerini getir
         const { data: imageData, error: imageError } = await supabase
           .from('project_images')
           .select('*')
@@ -59,13 +57,11 @@ const ProjectDetail = () => {
         } else {
           const allImages = imageData || [];
           
-          // Tüm resimleri images dizisine ekle
           setImages(allImages.map(img => ({
             url: img.image_url,
             type: img.image_type
           })));
           
-          // Before/After resimleri ayarla
           const beforeImg = allImages.find(img => img.image_type === 'before');
           const afterImg = allImages.find(img => img.image_type === 'after');
           
@@ -73,7 +69,6 @@ const ProjectDetail = () => {
           if (afterImg) setAfterImage(afterImg.image_url);
         }
         
-        // Proje videolarını getir
         const { data: videoData, error: videoError } = await supabase
           .from('project_videos')
           .select('*')
@@ -89,7 +84,6 @@ const ProjectDetail = () => {
           })));
         }
         
-        // 3D Modelleri getir
         const { data: modelData, error: modelError } = await supabase
           .from('project_3d_models')
           .select('*')
@@ -114,7 +108,6 @@ const ProjectDetail = () => {
     fetchProjectDetails();
   }, [slug]);
   
-  // Veri yüklenirken gösterilecek loading ekranı
   if (loading) {
     return (
       <Layout>
@@ -126,7 +119,6 @@ const ProjectDetail = () => {
     );
   }
 
-  // Proje bulunamadıysa hata mesajı göster
   if (!project) {
     return (
       <Layout>
@@ -141,33 +133,34 @@ const ProjectDetail = () => {
     );
   }
 
-  // Bir sonraki görsele geç
   const nextImage = () => {
     setCurrentImageIndex((prev) => 
       prev === images.length - 1 ? 0 : prev + 1
     );
   };
 
-  // Bir önceki görsele dön
   const prevImage = () => {
     setCurrentImageIndex((prev) => 
       prev === 0 ? images.length - 1 : prev - 1
     );
   };
 
-  // Varsayılan bir görsel belirle (yoksa placeholder)
   const mainImage = images.length > 0 
     ? images[0].url 
     : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
     
-  // Before/After görsellerini belirle (yoksa placeholder)
   const beforeImageUrl = beforeImage || 'https://images.unsplash.com/photo-1503174971373-b1f69850bded?q=80&w=2013';
   const afterImageUrl = afterImage || mainImage;
   
-  // Video URL'i belirle (yoksa placeholder)
   const videoUrl = videos.length > 0 
     ? videos[0].url
     : 'https://player.vimeo.com/video/451913264?autoplay=1&loop=1&muted=1';
+
+  const threeDModels = models.filter(model => model.type === '3d_model');
+  const pointCloudModels = models.filter(model => model.type === 'point_cloud');
+  
+  const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
+  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : null;
 
   return (
     <Layout>
@@ -243,12 +236,20 @@ const ProjectDetail = () => {
                     Video
                   </TabsTrigger>
                 )}
-                {models.length > 0 && (
+                {threeDModels.length > 0 && (
                   <TabsTrigger 
                     value="3d-model"
                     className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
                   >
                     3D Model
+                  </TabsTrigger>
+                )}
+                {pointCloudModels.length > 0 && (
+                  <TabsTrigger 
+                    value="point-cloud"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                  >
+                    Nokta Bulutu
                   </TabsTrigger>
                 )}
               </TabsList>
@@ -333,14 +334,36 @@ const ProjectDetail = () => {
                 </TabsContent>
               )}
               
-              {models.length > 0 && (
+              {threeDModels.length > 0 && (
                 <TabsContent value="3d-model">
-                  <div className="flex items-center justify-center h-[500px] bg-arch-light-gray">
-                    {/* 3D Model entegrasyonu burada olacak - ilerleyen zamanlarda Potree veya Three.js ile */}
-                    <p className="text-arch-gray">
-                      3D Model görüntüleyici burada Three.js entegrasyonu ile yer alacak
-                    </p>
+                  <div className="h-[500px] bg-arch-light-gray">
+                    {activeThreeDModel ? (
+                      <ThreeModelViewer modelUrl={activeThreeDModel} backgroundColor="#f5f5f5" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-arch-gray">
+                        3D model bulunamadı
+                      </div>
+                    )}
                   </div>
+                  
+                  {threeDModels.length > 1 && (
+                    <div className="mt-4">
+                      <h3 className="text-lg font-medium mb-2">Diğer 3D Modeller</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {threeDModels.map((model, idx) => (
+                          <div key={idx} className="p-4 border rounded hover:bg-gray-50 cursor-pointer">
+                            <p className="truncate text-sm">{model.url.split('/').pop()}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+              )}
+              
+              {pointCloudModels.length > 0 && (
+                <TabsContent value="point-cloud">
+                  <PointCloudViewer pointCloudUrl={activePointCloud || ''} />
                 </TabsContent>
               )}
             </Tabs>
