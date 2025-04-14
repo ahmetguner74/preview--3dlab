@@ -28,9 +28,12 @@ const ModelTab: React.FC<ModelTabProps> = ({
     }
     
     try {
+      console.log(`3D model yükleme başlatılıyor: ${file.name}`);
       const modelUrl = await upload3DModel(file, projectId!, '3d_model');
       if (modelUrl) {
         toast.success('Model başarıyla yüklendi');
+        console.log('Model URL alındı:', modelUrl);
+        
         // Yeni model listesini güncelle
         const { data, error } = await supabase
           .from('project_3d_models')
@@ -39,6 +42,8 @@ const ModelTab: React.FC<ModelTabProps> = ({
           .eq('model_type', '3d_model');
           
         if (!error && data) {
+          console.log('Supabase\'den gelen model verileri:', data);
+          
           // Tip dönüşümünü açıkça yaparak model_type'ın "3d_model" veya "point_cloud" olduğundan emin olalım
           const typedModels = data.map(model => ({
             ...model,
@@ -47,11 +52,14 @@ const ModelTab: React.FC<ModelTabProps> = ({
           
           setProject3DModels(prev => [
             ...prev.filter(model => model.model_type !== '3d_model'),
-            ...typedModels as Project3DModel[]
+            ...(typedModels as Project3DModel[])
           ]);
+        } else {
+          console.error('Model verileri alınırken hata:', error);
         }
       } else {
         toast.error('Model yüklenirken bir hata oluştu');
+        console.error('Model URL alınamadı');
       }
     } catch (error) {
       console.error('Model yüklenirken hata:', error);

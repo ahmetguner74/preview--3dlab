@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, X } from 'lucide-react';
+import { Cloud, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import { Project3DModel } from '@/types/project';
@@ -21,17 +21,20 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
   project3DModels,
   setProject3DModels
 }) => {
-  const handle3DModelUpload = async (file: File, modelType: '3d_model' | 'point_cloud' = 'point_cloud') => {
+  const handlePointCloudUpload = async (file: File) => {
     if (!projectId && !isEditing) {
       toast.error('Önce projeyi kaydetmelisiniz');
       return;
     }
     
     try {
-      const modelUrl = await upload3DModel(file, projectId!, modelType);
+      console.log(`Nokta bulutu yükleme başlatılıyor: ${file.name}`);
+      const modelUrl = await upload3DModel(file, projectId!, 'point_cloud');
       if (modelUrl) {
-        toast.success('Model başarıyla yüklendi');
-        // Yeni model listesini güncelle
+        toast.success('Nokta bulutu başarıyla yüklendi');
+        console.log('Nokta bulutu URL alındı:', modelUrl);
+        
+        // Yeni nokta bulutu listesini güncelle
         const { data, error } = await supabase
           .from('project_3d_models')
           .select('*')
@@ -39,6 +42,8 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
           .eq('model_type', 'point_cloud');
           
         if (!error && data) {
+          console.log('Supabase\'den gelen nokta bulutu verileri:', data);
+          
           // Tip dönüşümünü açıkça yaparak model_type'ın "3d_model" veya "point_cloud" olduğundan emin olalım
           const typedModels = data.map(model => ({
             ...model,
@@ -47,19 +52,22 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
           
           setProject3DModels(prev => [
             ...prev.filter(model => model.model_type !== 'point_cloud'),
-            ...typedModels as Project3DModel[]
+            ...(typedModels as Project3DModel[])
           ]);
+        } else {
+          console.error('Nokta bulutu verileri alınırken hata:', error);
         }
       } else {
-        toast.error('Model yüklenirken bir hata oluştu');
+        toast.error('Nokta bulutu yüklenirken bir hata oluştu');
+        console.error('Nokta bulutu URL alınamadı');
       }
     } catch (error) {
-      console.error('Model yüklenirken hata:', error);
-      toast.error('Model yüklenirken bir hata oluştu');
+      console.error('Nokta bulutu yüklenirken hata:', error);
+      toast.error('Nokta bulutu yüklenirken bir hata oluştu');
     }
   };
 
-  const handleDelete3DModel = async (modelId: string) => {
+  const handleDeletePointCloud = async (modelId: string) => {
     try {
       const { error } = await supabase
         .from('project_3d_models')
@@ -69,10 +77,10 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
       if (error) throw error;
       
       setProject3DModels(project3DModels.filter(model => model.id !== modelId));
-      toast.success('Model başarıyla silindi');
+      toast.success('Nokta bulutu başarıyla silindi');
     } catch (error) {
-      console.error('Model silinirken hata:', error);
-      toast.error('Model silinirken bir hata oluştu');
+      console.error('Nokta bulutu silinirken hata:', error);
+      toast.error('Nokta bulutu silinirken bir hata oluştu');
     }
   };
 
@@ -81,27 +89,27 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
   return (
     <div className="bg-white p-6 rounded-md shadow-sm">
       <div className="mb-6">
-        <h2 className="text-xl font-medium mb-1">Nokta Bulutu</h2>
+        <h2 className="text-xl font-medium mb-1">Nokta Bulutu (Point Cloud)</h2>
         <p className="text-sm text-gray-500">Projeye ait nokta bulutu verilerini buradan yükleyebilirsiniz.</p>
       </div>
       
       <FileUploadBox 
-        onFileSelected={(file) => handle3DModelUpload(file, 'point_cloud')}
+        onFileSelected={handlePointCloudUpload}
         title="Nokta Bulutu Yükle"
-        description="PLY, XYZ, PTS formatları desteklenir. Yüklenen dosyalar Potree ile görüntülenecektir."
-        icon={<Box className="mx-auto h-12 w-12 text-gray-400" />}
-        allowedTypes={['ply', 'xyz', 'pts']}
+        description="LAZ, LAS formatları desteklenir. Nokta bulutu Potree ile görüntülenecektir."
+        icon={<Cloud className="mx-auto h-12 w-12 text-gray-400" />}
+        allowedTypes={['laz', 'las', 'xyz', 'pts']}
       />
 
       {/* Nokta Bulutu Listesi */}
       {pointCloudModels.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-md font-medium mb-2">Yüklü Nokta Bulutu Dosyaları</h3>
+          <h3 className="text-md font-medium mb-2">Yüklü Nokta Bulutları</h3>
           <div className="space-y-2">
             {pointCloudModels.map(model => (
               <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
                 <div className="flex items-center">
-                  <Box className="h-5 w-5 mr-2 text-gray-500" />
+                  <Cloud className="h-5 w-5 mr-2 text-gray-500" />
                   <a 
                     href={model.model_url} 
                     target="_blank" 
@@ -114,7 +122,7 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  onClick={() => handleDelete3DModel(model.id)}
+                  onClick={() => handleDeletePointCloud(model.id)}
                 >
                   <X size={16} />
                 </Button>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from "sonner";
 
 interface FileUploadBoxProps {
   onFileSelected: (file: File) => Promise<void>;
@@ -20,6 +21,7 @@ const FileUploadBox = ({
 }: FileUploadBoxProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -52,15 +54,22 @@ const FileUploadBox = ({
     // Dosya türünü kontrol et
     const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
     if (allowedTypes && !allowedTypes.includes(fileExt)) {
-      alert(`Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`);
+      setErrorMessage(`Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`);
+      toast.error(`Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`);
       return;
     }
 
     try {
       setIsUploading(true);
+      setErrorMessage(null);
+      console.log(`Dosya yükleme başlatılıyor: ${file.name} (${file.size} bytes)`);
       await onFileSelected(file);
+      console.log('Dosya yükleme işlevi tamamlandı');
     } catch (error) {
       console.error("Dosya yükleme hatası:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu';
+      setErrorMessage(errorMessage);
+      toast.error(`Dosya yüklenemedi: ${errorMessage}`);
     } finally {
       setIsUploading(false);
       // Dosya input'unu temizle ki aynı dosyayı tekrar seçebilsin
@@ -94,6 +103,10 @@ const FileUploadBox = ({
           {icon || <Upload className="mx-auto h-12 w-12 text-gray-400" />}
           <h3 className="mt-2 text-sm font-medium text-gray-900">{title}</h3>
           {description && <p className="mt-1 text-xs text-gray-500">{description}</p>}
+          
+          {errorMessage && (
+            <div className="mt-2 text-xs text-red-500">{errorMessage}</div>
+          )}
           
           <div className="mt-4">
             <Button 

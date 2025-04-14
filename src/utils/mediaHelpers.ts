@@ -14,17 +14,32 @@ export const uploadFileToStorage = async (
     const fileExt = file.name.split('.').pop();
     const filePath = `${folderPath}${uuidv4()}.${fileExt}`;
     
-    // Bucket yoksa oluştur
-    const { data: bucketData, error: bucketError } = await supabase.storage.getBucket(bucketName);
+    // Önce bucket'ların listesini kontrol et
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
-    if (bucketError && bucketError.message.includes('The resource was not found')) {
-      await supabase.storage.createBucket(bucketName, {
+    if (listError) {
+      console.error('Bucket listeleme hatası:', listError);
+      throw listError;
+    }
+    
+    // Bucket yoksa oluştur
+    const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+    if (!bucketExists) {
+      console.log(`${bucketName} bucket'ı bulunamadı, oluşturuluyor...`);
+      const { error: createError } = await supabase.storage.createBucket(bucketName, {
         public: true,
         fileSizeLimit: 50 * 1024 * 1024, // 50MB limit
       });
+      
+      if (createError) {
+        console.error('Bucket oluşturma hatası:', createError);
+        throw createError;
+      }
+      console.log(`${bucketName} bucket'ı başarıyla oluşturuldu`);
     }
     
     // Dosyayı yükle
+    console.log(`${bucketName} bucket'ına dosya yükleniyor: ${filePath}`);
     const { error: uploadError } = await supabase.storage
       .from(bucketName)
       .upload(filePath, file, {
@@ -32,10 +47,14 @@ export const uploadFileToStorage = async (
         upsert: false,
       });
     
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Dosya yükleme hatası:', uploadError);
+      throw uploadError;
+    }
     
     // Yüklenen dosyanın URL'ini al
     const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+    console.log('Dosya başarıyla yüklendi:', data.publicUrl);
     
     return data.publicUrl;
   } catch (error) {
