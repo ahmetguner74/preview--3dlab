@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Image, Video, X, Plus } from 'lucide-react';
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,7 @@ import FileUploadBox from '@/components/admin/FileUploadBox';
 import { ProjectImage, ProjectVideo } from '@/types/project';
 import { uploadProjectImage, addProjectVideo, getProjectImages, getProjectVideos } from '@/utils/mediaHelpers';
 import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
 
 interface MediaTabProps {
   projectId: string | undefined;
@@ -37,7 +37,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
       const imageUrl = await uploadProjectImage(file, projectId!, imageType);
       if (imageUrl) {
         toast.success('Görsel başarıyla yüklendi');
-        // Yeni görsel listesini getir
         const images = await getProjectImages(projectId!);
         setProjectImages(images as ProjectImage[]);
       } else {
@@ -65,7 +64,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
       if (success) {
         toast.success('Video başarıyla eklendi');
         setVideoUrl('');
-        // Yeni video listesini getir
         const videos = await getProjectVideos(projectId!);
         setProjectVideos(videos as ProjectVideo[]);
       } else {
@@ -86,7 +84,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
       
       if (error) throw error;
       
-      // Güncel görsel listesini getir
       setProjectImages(projectImages.filter(img => img.id !== imageId));
       toast.success('Görsel başarıyla silindi');
     } catch (error) {
@@ -104,7 +101,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
       
       if (error) throw error;
       
-      // Güncel video listesini getir
       setProjectVideos(projectVideos.filter(video => video.id !== videoId));
       toast.success('Video başarıyla silindi');
     } catch (error) {
@@ -121,7 +117,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
       </div>
       
       <div className="space-y-6">
-        {/* Ana Görsel Yükleme */}
         <div>
           <h3 className="text-md font-medium mb-2">Ana Görsel</h3>
           <FileUploadBox 
@@ -132,7 +127,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
             allowedTypes={['jpg', 'jpeg', 'png', 'gif']}
           />
 
-          {/* Ana Görsel Önizleme */}
           {projectImages.filter(img => img.image_type === 'main').length > 0 && (
             <div className="mt-4">
               {projectImages
@@ -159,7 +153,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
           )}
         </div>
         
-        {/* Galeri Görselleri Yükleme */}
         <div>
           <h3 className="text-md font-medium mb-2">Galeri Görselleri</h3>
           <FileUploadBox 
@@ -170,7 +163,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
             allowedTypes={['jpg', 'jpeg', 'png', 'gif']}
           />
 
-          {/* Galeri Görselleri Listesi */}
           {projectImages.filter(img => img.image_type === 'gallery').length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
               {projectImages
@@ -199,7 +191,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
           )}
         </div>
         
-        {/* Video Ekleme */}
         <div>
           <h3 className="text-md font-medium mb-2">Video</h3>
           <div className="flex gap-2 mb-4">
@@ -213,7 +204,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
             </Button>
           </div>
 
-          {/* Video Listesi */}
           {projectVideos.length > 0 && (
             <div className="space-y-2 mt-4">
               {projectVideos.map(video => (
@@ -242,7 +232,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
           )}
         </div>
         
-        {/* Before/After Görselleri */}
         <div>
           <h3 className="text-md font-medium mb-2">Before/After Görselleri</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -255,7 +244,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
                 allowedTypes={['jpg', 'jpeg', 'png']}
               />
               
-              {/* Before Görsel Önizleme */}
               {projectImages.filter(img => img.image_type === 'before').length > 0 && (
                 <div className="mt-4">
                   {projectImages
@@ -291,7 +279,6 @@ const MediaTab: React.FC<MediaTabProps> = ({
                 allowedTypes={['jpg', 'jpeg', 'png']}
               />
               
-              {/* After Görsel Önizleme */}
               {projectImages.filter(img => img.image_type === 'after').length > 0 && (
                 <div className="mt-4">
                   {projectImages

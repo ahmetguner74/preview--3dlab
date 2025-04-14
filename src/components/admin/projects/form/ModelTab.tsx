@@ -39,9 +39,15 @@ const ModelTab: React.FC<ModelTabProps> = ({
           .eq('model_type', '3d_model');
           
         if (!error && data) {
+          // Tip dönüşümünü açıkça yaparak model_type'ın "3d_model" veya "point_cloud" olduğundan emin olalım
+          const typedModels = data.map(model => ({
+            ...model,
+            model_type: model.model_type as "3d_model" | "point_cloud"
+          }));
+          
           setProject3DModels(prev => [
             ...prev.filter(model => model.model_type !== '3d_model'),
-            ...data
+            ...typedModels as Project3DModel[]
           ]);
         }
       } else {
