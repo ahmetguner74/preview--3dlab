@@ -1,6 +1,9 @@
 
-import React, { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import PointCloudError from './point-cloud/PointCloudError';
+import PointCloudLoading from './point-cloud/PointCloudLoading';
+import PointCloudIframe from './point-cloud/PointCloudIframe';
+import PointCloudSource from './point-cloud/PointCloudSource';
 
 interface PointCloudViewerProps {
   pointCloudUrl: string;
@@ -12,7 +15,7 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
   const [isValidUrl, setIsValidUrl] = useState<boolean>(true);
   
   // URL doğrulama
-  React.useEffect(() => {
+  useEffect(() => {
     if (!pointCloudUrl) {
       setIsValidUrl(false);
       setIsLoading(false);
@@ -41,48 +44,22 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
     setIsLoading(false);
   };
   
-  if (!isValidUrl) {
-    return (
-      <div className="w-full h-[500px] flex flex-col items-center justify-center bg-gray-100 text-gray-500">
-        <AlertTriangle className="h-12 w-12 text-gray-400 mb-2" />
-        <p>Geçersiz nokta bulutu URL'si.</p>
-        <p className="text-sm">Lütfen geçerli bir Potree URL'si girin</p>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="w-full h-[500px] flex flex-col items-center justify-center bg-gray-100 text-gray-500">
-        <AlertTriangle className="h-12 w-12 text-gray-400 mb-2" />
-        <p>{error}</p>
-        <p className="text-sm">Potree nokta bulutu görüntüleyici yüklenirken bir hata oluştu.</p>
-      </div>
-    );
+  // Hata kontrolü
+  if (!isValidUrl || error) {
+    return <PointCloudError isValidUrl={isValidUrl} error={error} />;
   }
   
   return (
     <div className="w-full h-[500px] relative">
-      {isLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 z-10">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em]"></div>
-          <p className="mt-2 text-sm">Nokta bulutu yükleniyor...</p>
-        </div>
-      )}
+      <PointCloudLoading isLoading={isLoading} />
       
-      <iframe 
-        src={pointCloudUrl}
-        className="w-full h-full border-0"
+      <PointCloudIframe 
+        url={pointCloudUrl}
         onLoad={handleIframeLoaded}
         onError={handleIframeError}
-        title="Potree Nokta Bulutu Görüntüleyici"
-        sandbox="allow-scripts allow-same-origin"
-        allow="fullscreen; autoplay"
       />
       
-      <div className="absolute bottom-4 left-4 z-20 bg-white/80 p-2 rounded text-xs">
-        <strong>Kaynak:</strong> <a href={pointCloudUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{new URL(pointCloudUrl).hostname}</a>
-      </div>
+      <PointCloudSource url={pointCloudUrl} />
     </div>
   );
 };

@@ -1,16 +1,25 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Layout from '../components/layout/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Project } from '@/types/project';
-import ThreeModelViewer from '@/components/viewers/ThreeModelViewer';
-import PointCloudViewer from '@/components/viewers/PointCloudViewer';
+import Layout from '../components/layout/Layout';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Yeni bileşenleri import et
+import ProjectHeader from '@/components/project-detail/ProjectHeader';
+import ProjectMainImage from '@/components/project-detail/ProjectMainImage';
+import ProjectDescription from '@/components/project-detail/ProjectDescription';
+import ProjectGallery from '@/components/project-detail/ProjectGallery';
+import ProjectBeforeAfter from '@/components/project-detail/ProjectBeforeAfter';
+import ProjectVideo from '@/components/project-detail/ProjectVideo';
+import ProjectThreeDModel from '@/components/project-detail/ProjectThreeDModel';
+import ProjectPointCloud from '@/components/project-detail/ProjectPointCloud';
+import ProjectSimilar from '@/components/project-detail/ProjectSimilar';
 
 const ProjectDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<{url: string, type: string}[]>([]);
@@ -46,6 +55,7 @@ const ProjectDetail = () => {
         
         setProject(projectData);
         
+        // Resim verilerini yükle
         const { data: imageData, error: imageError } = await supabase
           .from('project_images')
           .select('*')
@@ -69,6 +79,7 @@ const ProjectDetail = () => {
           if (afterImg) setAfterImage(afterImg.image_url);
         }
         
+        // Video verilerini yükle
         const { data: videoData, error: videoError } = await supabase
           .from('project_videos')
           .select('*')
@@ -84,6 +95,7 @@ const ProjectDetail = () => {
           })));
         }
         
+        // 3D model verilerini yükle
         const { data: modelData, error: modelError } = await supabase
           .from('project_3d_models')
           .select('*')
@@ -107,6 +119,33 @@ const ProjectDetail = () => {
 
     fetchProjectDetails();
   }, [slug]);
+
+  // Model seçim işleyicileri
+  const handleThreeDModelSelect = (modelUrl: string) => {
+    setModels(prev => {
+      const newModels = [...prev];
+      const selectedModel = newModels.find(m => m.url === modelUrl && m.type === '3d_model');
+      const otherModels = newModels.filter(m => m.url !== modelUrl || m.type !== '3d_model');
+      
+      if (selectedModel) {
+        return [selectedModel, ...otherModels];
+      }
+      return newModels;
+    });
+  };
+  
+  const handlePointCloudSelect = (modelUrl: string) => {
+    setModels(prev => {
+      const newModels = [...prev];
+      const selectedModel = newModels.find(m => m.url === modelUrl && m.type === 'point_cloud');
+      const otherModels = newModels.filter(m => m.url !== modelUrl || m.type !== 'point_cloud');
+      
+      if (selectedModel) {
+        return [selectedModel, ...otherModels];
+      }
+      return newModels;
+    });
+  };
   
   if (loading) {
     return (
@@ -133,18 +172,7 @@ const ProjectDetail = () => {
     );
   }
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === images.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? images.length - 1 : prev - 1
-    );
-  };
-
+  // Veri hazırlama
   const mainImage = images.length > 0 
     ? images[0].url 
     : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
@@ -161,56 +189,19 @@ const ProjectDetail = () => {
   
   const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
   
-  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : 'https://potree.github.io/potree/examples/clipping_volume.html';
+  const activePointCloud = pointCloudModels.length > 0 
+    ? pointCloudModels[0].url 
+    : 'https://potree.github.io/potree/examples/clipping_volume.html';
 
   return (
     <Layout>
       <section className="pt-16 md:pt-24">
         <div className="arch-container">
-          <h1 className="text-3xl md:text-5xl font-display font-light mb-6">{project.title}</h1>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 mb-16">
-            <p className="text-arch-gray">{project.category || 'Kategori Belirtilmemiş'}</p>
-            <p className="text-arch-gray">•</p>
-            <p className="text-arch-gray">{project.location || 'Konum Belirtilmemiş'}</p>
-            <p className="text-arch-gray">•</p>
-            <p className="text-arch-gray">{project.year || 'Yıl Belirtilmemiş'}</p>
-          </div>
+          <ProjectHeader project={project} />
           
-          <div className="w-full h-96 md:h-[600px] mb-16 bg-arch-light-gray">
-            <img 
-              src={mainImage} 
-              alt={project.title} 
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <ProjectMainImage imageUrl={mainImage} title={project.title} />
           
-          <div className="grid md:grid-cols-3 gap-12 mb-16">
-            <div className="md:col-span-2">
-              <h2 className="text-xl md:text-2xl font-display mb-6">Proje Hakkında</h2>
-              <p className="text-arch-gray">
-                {project.description || 'Bu proje için henüz bir açıklama girilmemiş.'}
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm uppercase text-arch-gray">Müşteri</h3>
-                <p>{project.client || '-'}</p>
-              </div>
-              <div>
-                <h3 className="text-sm uppercase text-arch-gray">Alan</h3>
-                <p>{project.area || '-'}</p>
-              </div>
-              <div>
-                <h3 className="text-sm uppercase text-arch-gray">Yıl</h3>
-                <p>{project.year || '-'}</p>
-              </div>
-              <div>
-                <h3 className="text-sm uppercase text-arch-gray">Mimar</h3>
-                <p>{project.architect || '-'}</p>
-              </div>
-            </div>
-          </div>
+          <ProjectDescription project={project} />
           
           <div className="mb-16">
             <Tabs defaultValue="photos">
@@ -256,160 +247,52 @@ const ProjectDetail = () => {
               </TabsList>
               
               <TabsContent value="photos">
-                <div className="grid md:grid-cols-4 gap-6">
-                  <div className="md:col-span-1 space-y-4">
-                    <h3 className="text-xl font-display">Proje Galerisi</h3>
-                    <p className="text-arch-gray text-sm">
-                      {project.title}'nin farklı açılardan görüntülerini inceleyebilirsiniz.
-                    </p>
-                    {images.length > 1 && (
-                      <>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={prevImage}
-                            className="w-12 h-12 flex items-center justify-center border border-arch-black hover:bg-arch-black hover:text-white transition-colors"
-                          >
-                            <ChevronLeft size={20} />
-                          </button>
-                          <button 
-                            onClick={nextImage}
-                            className="w-12 h-12 flex items-center justify-center border border-arch-black hover:bg-arch-black hover:text-white transition-colors"
-                          >
-                            <ChevronRight size={20} />
-                          </button>
-                        </div>
-                        <p className="text-sm">
-                          {currentImageIndex + 1} / {images.length}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                  <div className="md:col-span-3 h-96 md:h-[500px] bg-arch-light-gray">
-                    <img 
-                      src={images.length > 0 ? images[currentImageIndex].url : mainImage} 
-                      alt={`${project.title} - Görsel ${currentImageIndex + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+                <ProjectGallery 
+                  images={images} 
+                  title={project.title}
+                  mainImage={mainImage} 
+                />
               </TabsContent>
               
               {beforeImage && afterImage && (
                 <TabsContent value="before-after">
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-display">Öncesi</h3>
-                      <div className="h-80 bg-arch-light-gray">
-                        <img 
-                          src={beforeImageUrl}
-                          alt={`${project.title} - Öncesi`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-display">Sonrası</h3>
-                      <div className="h-80 bg-arch-light-gray">
-                        <img 
-                          src={afterImageUrl}
-                          alt={`${project.title} - Sonrası`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <ProjectBeforeAfter 
+                    beforeImageUrl={beforeImageUrl}
+                    afterImageUrl={afterImageUrl}
+                    title={project.title}
+                  />
                 </TabsContent>
               )}
               
               {videos.length > 0 && (
                 <TabsContent value="video">
-                  <div className="aspect-w-16 aspect-h-9">
-                    <iframe 
-                      src={videoUrl}
-                      frameBorder="0" 
-                      allow="autoplay; fullscreen" 
-                      allowFullScreen
-                      className="w-full h-[500px]"
-                    ></iframe>
-                  </div>
+                  <ProjectVideo videoUrl={videoUrl} />
                 </TabsContent>
               )}
               
               {threeDModels.length > 0 && (
                 <TabsContent value="3d-model">
-                  <div className="h-[500px] bg-arch-light-gray">
-                    {activeThreeDModel ? (
-                      <ThreeModelViewer modelUrl={activeThreeDModel} backgroundColor="#f5f5f5" />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-arch-gray">
-                        3D model bulunamadı
-                      </div>
-                    )}
-                  </div>
-                  
-                  {threeDModels.length > 1 && (
-                    <div className="mt-4">
-                      <h3 className="text-lg font-medium mb-2">Diğer 3D Modeller</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {threeDModels.map((model, idx) => (
-                          <div key={idx} className="p-4 border rounded hover:bg-gray-50 cursor-pointer">
-                            <p className="truncate text-sm">{model.url.split('/').pop()}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <ProjectThreeDModel 
+                    models={threeDModels}
+                    activeModelUrl={activeThreeDModel}
+                    onModelSelect={handleThreeDModelSelect}
+                  />
                 </TabsContent>
               )}
               
               {pointCloudModels.length > 0 && (
                 <TabsContent value="point-cloud">
-                  <PointCloudViewer pointCloudUrl={activePointCloud} />
-                  
-                  {pointCloudModels.length > 1 && (
-                    <div className="mt-4">
-                      <h3 className="text-lg font-medium mb-2">Diğer Nokta Bulutları</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {pointCloudModels.map((model, idx) => (
-                          <div 
-                            key={idx} 
-                            className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
-                            onClick={() => setModels(prev => {
-                              const newModels = [...prev];
-                              const selectedModel = newModels.find(m => m.url === model.url && m.type === 'point_cloud');
-                              const otherModels = newModels.filter(m => m.url !== model.url || m.type !== 'point_cloud');
-                              
-                              if (selectedModel) {
-                                return [selectedModel, ...otherModels];
-                              }
-                              return newModels;
-                            })}
-                          >
-                            <p className="truncate text-sm">{model.url.split('/').pop()}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <ProjectPointCloud
+                    models={pointCloudModels}
+                    activePointCloudUrl={activePointCloud}
+                    onPointCloudSelect={handlePointCloudSelect}
+                  />
                 </TabsContent>
               )}
             </Tabs>
           </div>
           
-          <div className="text-center mb-16">
-            <h2 className="text-xl md:text-2xl font-display mb-8">Benzer Projeler</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="h-64 bg-arch-light-gray">
-                  <img 
-                    src={`https://images.unsplash.com/photo-${1600607000000 + item * 100}-4e2a09cf159d?q=80&w=2070`}
-                    alt={`Benzer proje ${item}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProjectSimilar title={project.title} />
         </div>
       </section>
     </Layout>
