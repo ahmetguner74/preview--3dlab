@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Menu, X, Settings } from 'lucide-react';
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -19,9 +17,7 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   const navItems = [{
     path: '/',
     label: 'Projects'
@@ -32,10 +28,9 @@ const Navbar = () => {
     path: '/contact',
     label: 'Contact'
   }];
-
   return <header className={`fixed w-full z-30 transition-all duration-300 ${scrolled ? 'py-3 bg-white shadow-sm' : 'py-5 bg-transparent'}`}>
       <div className="arch-container flex justify-between items-center">
-        <NavLink to="/" className="text-xl md:text-2xl font-display font-medium-gradyan-green">Digital LAB</NavLink>
+        <NavLink to="/" className="text-xl md:text-2xl font-display font-medium-bold">Digital LAB</NavLink>
         
         {/* Desktop Navigation */}
         <div className="flex items-center space-x-4">
@@ -48,20 +43,14 @@ const Navbar = () => {
           </nav>
 
           {/* Admin Button */}
-          <Link 
-            to="/admin" 
-            className="hidden md:flex items-center gap-2 bg-arch-black text-white px-4 py-2 rounded-md text-sm hover:bg-arch-gray transition-colors"
-          >
+          <Link to="/admin" className="hidden md:flex items-center gap-2 bg-arch-black text-white px-4 py-2 rounded-md text-sm hover:bg-arch-gray transition-colors">
             <Settings size={16} /> Admin
           </Link>
         </div>
 
         {/* Mobile Navigation Toggle */}
         <div className="flex items-center space-x-2">
-          <Link 
-            to="/admin" 
-            className="md:hidden text-arch-black"
-          >
+          <Link to="/admin" className="md:hidden text-arch-black">
             <Settings size={24} />
           </Link>
           <button className="md:hidden text-arch-black" onClick={toggleMenu} aria-label="Toggle menu">
@@ -85,11 +74,7 @@ const Navbar = () => {
           }) => `text-2xl uppercase tracking-wider hover:text-arch-gray transition-colors ${isActive ? 'font-medium' : 'font-normal'}`}>
                   {item.label}
                 </NavLink>)}
-              <Link 
-                to="/admin" 
-                onClick={toggleMenu}
-                className="text-2xl uppercase tracking-wider hover:text-arch-gray transition-colors"
-              >
+              <Link to="/admin" onClick={toggleMenu} className="text-2xl uppercase tracking-wider hover:text-arch-gray transition-colors">
                 Admin
               </Link>
             </div>
@@ -97,5 +82,4 @@ const Navbar = () => {
       </div>
     </header>;
 };
-
 export default Navbar;
