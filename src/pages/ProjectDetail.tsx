@@ -160,7 +160,8 @@ const ProjectDetail = () => {
   const pointCloudModels = models.filter(model => model.type === 'point_cloud');
   
   const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
-  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : null;
+  
+  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : 'https://potree.github.io/potree/examples/clipping_volume.html';
 
   return (
     <Layout>
@@ -363,7 +364,33 @@ const ProjectDetail = () => {
               
               {pointCloudModels.length > 0 && (
                 <TabsContent value="point-cloud">
-                  <PointCloudViewer pointCloudUrl={activePointCloud || ''} />
+                  <PointCloudViewer pointCloudUrl={activePointCloud} />
+                  
+                  {pointCloudModels.length > 1 && (
+                    <div className="mt-4">
+                      <h3 className="text-lg font-medium mb-2">Diğer Nokta Bulutları</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {pointCloudModels.map((model, idx) => (
+                          <div 
+                            key={idx} 
+                            className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
+                            onClick={() => setModels(prev => {
+                              const newModels = [...prev];
+                              const selectedModel = newModels.find(m => m.url === model.url && m.type === 'point_cloud');
+                              const otherModels = newModels.filter(m => m.url !== model.url || m.type !== 'point_cloud');
+                              
+                              if (selectedModel) {
+                                return [selectedModel, ...otherModels];
+                              }
+                              return newModels;
+                            })}
+                          >
+                            <p className="truncate text-sm">{model.url.split('/').pop()}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </TabsContent>
               )}
             </Tabs>
