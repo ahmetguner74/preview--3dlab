@@ -15,9 +15,9 @@ export const uploadFileToStorage = async (
     const filePath = `${folderPath}${uuidv4()}.${fileExt}`;
     
     // Büyük dosya kontrolü
-    const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_SIZE = 20 * 1024 * 1024; // 20MB - Supabase limiti
     if (file.size > MAX_SIZE) {
-      throw new Error(`Dosya boyutu 50MB'ı aşamaz (Mevcut boyut: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+      throw new Error(`Dosya boyutu 20MB'ı aşamaz (Mevcut boyut: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
     }
     
     // Dosyayı doğrudan yükle, bucket kontrolü kaldırıldı
