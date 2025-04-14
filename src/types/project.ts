@@ -1,21 +1,21 @@
-
 export type ProjectStatus = 'taslak' | 'yayinda' | 'arsiv';
 
 export interface Project {
   id: string;
   title: string;
   slug: string;
-  description?: string;
-  location?: string;
-  category?: string;
-  year?: string;
-  client?: string;
-  area?: string;
-  architect?: string;
+  description: string | null;
+  location: string | null;
+  category: string | null;
+  year: string | null;
+  client: string | null;
+  area: string | null;
+  architect: string | null;
   status: ProjectStatus;
   visible: boolean;
   created_at: string;
   updated_at: string;
+  thumbnail?: string; // Önizleme görselinin URL'si
 }
 
 export interface ProjectImage {

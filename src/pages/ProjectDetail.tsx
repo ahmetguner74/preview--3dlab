@@ -1,59 +1,173 @@
 
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-// This will come from Supabase in the real implementation
-const projectDetails = {
-  'modern-residence': {
-    id: 1,
-    title: 'Modern Residence',
-    location: 'New York',
-    category: 'Residential',
-    year: '2023',
-    client: 'Private Client',
-    area: '450 sqm',
-    architect: 'Lead Architect Name',
-    description: 'This modern residential project harmoniously integrates with its surroundings while providing a sleek, contemporary living space. The design emphasizes open spaces, natural light, and sustainable materials.',
-    images: [
-      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070',
-      'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?q=80&w=2070',
-      'https://images.unsplash.com/photo-1600566752355-35792bedcfea?q=80&w=2070',
-    ],
-    beforeImage: 'https://images.unsplash.com/photo-1503174971373-b1f69850bded?q=80&w=2013',
-    afterImage: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070',
-    videoUrl: 'https://player.vimeo.com/video/451913264?autoplay=1&loop=1&muted=1'
-  }
-};
+import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Project } from '@/types/project';
 
 const ProjectDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const project = slug ? projectDetails[slug as keyof typeof projectDetails] : undefined;
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [images, setImages] = useState<{url: string, type: string}[]>([]);
+  const [videos, setVideos] = useState<{url: string, thumbnail?: string}[]>([]);
+  const [models, setModels] = useState<{url: string, type: string}[]>([]);
+  const [beforeImage, setBeforeImage] = useState<string | null>(null);
+  const [afterImage, setAfterImage] = useState<string | null>(null);
   
-  if (!project) {
+  // Projeyi ve iligli medyaları yükle
+  useEffect(() => {
+    const fetchProjectDetails = async () => {
+      try {
+        setLoading(true);
+        
+        if (!slug) {
+          console.error('Slug bulunamadı');
+          return;
+        }
+        
+        // Projeyi getir
+        const { data: projectData, error: projectError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+          
+        if (projectError) {
+          throw projectError;
+        }
+        
+        if (!projectData) {
+          console.error('Proje bulunamadı');
+          return;
+        }
+        
+        setProject(projectData);
+        
+        // Proje resimlerini getir
+        const { data: imageData, error: imageError } = await supabase
+          .from('project_images')
+          .select('*')
+          .eq('project_id', projectData.id)
+          .order('sort_order', { ascending: true });
+          
+        if (imageError) {
+          console.error('Resimler yüklenirken hata oluştu:', imageError);
+        } else {
+          const allImages = imageData || [];
+          
+          // Tüm resimleri images dizisine ekle
+          setImages(allImages.map(img => ({
+            url: img.image_url,
+            type: img.image_type
+          })));
+          
+          // Before/After resimleri ayarla
+          const beforeImg = allImages.find(img => img.image_type === 'before');
+          const afterImg = allImages.find(img => img.image_type === 'after');
+          
+          if (beforeImg) setBeforeImage(beforeImg.image_url);
+          if (afterImg) setAfterImage(afterImg.image_url);
+        }
+        
+        // Proje videolarını getir
+        const { data: videoData, error: videoError } = await supabase
+          .from('project_videos')
+          .select('*')
+          .eq('project_id', projectData.id)
+          .order('sort_order', { ascending: true });
+          
+        if (videoError) {
+          console.error('Videolar yüklenirken hata oluştu:', videoError);
+        } else {
+          setVideos((videoData || []).map(video => ({
+            url: video.video_url,
+            thumbnail: video.thumbnail_url || undefined
+          })));
+        }
+        
+        // 3D Modelleri getir
+        const { data: modelData, error: modelError } = await supabase
+          .from('project_3d_models')
+          .select('*')
+          .eq('project_id', projectData.id);
+          
+        if (modelError) {
+          console.error('3D Modeller yüklenirken hata oluştu:', modelError);
+        } else {
+          setModels((modelData || []).map(model => ({
+            url: model.model_url,
+            type: model.model_type
+          })));
+        }
+        
+      } catch (error) {
+        console.error('Proje detayları yüklenirken hata oluştu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjectDetails();
+  }, [slug]);
+  
+  // Veri yüklenirken gösterilecek loading ekranı
+  if (loading) {
     return (
       <Layout>
-        <div className="arch-container py-24">
-          <h1 className="text-2xl">Project not found</h1>
+        <div className="arch-container py-24 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em]"></div>
+          <p className="mt-2">Yükleniyor...</p>
         </div>
       </Layout>
     );
   }
 
+  // Proje bulunamadıysa hata mesajı göster
+  if (!project) {
+    return (
+      <Layout>
+        <div className="arch-container py-24">
+          <h1 className="text-2xl">Proje bulunamadı</h1>
+          <Link to="/projects" className="inline-flex items-center mt-4 text-arch-black hover:underline">
+            <ArrowLeft size={18} className="mr-2" />
+            Projelere dön
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Bir sonraki görsele geç
   const nextImage = () => {
     setCurrentImageIndex((prev) => 
-      prev === project.images.length - 1 ? 0 : prev + 1
+      prev === images.length - 1 ? 0 : prev + 1
     );
   };
 
+  // Bir önceki görsele dön
   const prevImage = () => {
     setCurrentImageIndex((prev) => 
-      prev === 0 ? project.images.length - 1 : prev - 1
+      prev === 0 ? images.length - 1 : prev - 1
     );
   };
+
+  // Varsayılan bir görsel belirle (yoksa placeholder)
+  const mainImage = images.length > 0 
+    ? images[0].url 
+    : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
+    
+  // Before/After görsellerini belirle (yoksa placeholder)
+  const beforeImageUrl = beforeImage || 'https://images.unsplash.com/photo-1503174971373-b1f69850bded?q=80&w=2013';
+  const afterImageUrl = afterImage || mainImage;
+  
+  // Video URL'i belirle (yoksa placeholder)
+  const videoUrl = videos.length > 0 
+    ? videos[0].url
+    : 'https://player.vimeo.com/video/451913264?autoplay=1&loop=1&muted=1';
 
   return (
     <Layout>
@@ -61,16 +175,16 @@ const ProjectDetail = () => {
         <div className="arch-container">
           <h1 className="text-3xl md:text-5xl font-display font-light mb-6">{project.title}</h1>
           <div className="flex flex-wrap gap-x-6 gap-y-2 mb-16">
-            <p className="text-arch-gray">{project.category}</p>
+            <p className="text-arch-gray">{project.category || 'Kategori Belirtilmemiş'}</p>
             <p className="text-arch-gray">•</p>
-            <p className="text-arch-gray">{project.location}</p>
+            <p className="text-arch-gray">{project.location || 'Konum Belirtilmemiş'}</p>
             <p className="text-arch-gray">•</p>
-            <p className="text-arch-gray">{project.year}</p>
+            <p className="text-arch-gray">{project.year || 'Yıl Belirtilmemiş'}</p>
           </div>
           
           <div className="w-full h-96 md:h-[600px] mb-16 bg-arch-light-gray">
             <img 
-              src={project.images[0]} 
+              src={mainImage} 
               alt={project.title} 
               className="w-full h-full object-cover"
             />
@@ -78,28 +192,28 @@ const ProjectDetail = () => {
           
           <div className="grid md:grid-cols-3 gap-12 mb-16">
             <div className="md:col-span-2">
-              <h2 className="text-xl md:text-2xl font-display mb-6">About the Project</h2>
+              <h2 className="text-xl md:text-2xl font-display mb-6">Proje Hakkında</h2>
               <p className="text-arch-gray">
-                {project.description}
+                {project.description || 'Bu proje için henüz bir açıklama girilmemiş.'}
               </p>
             </div>
             
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm uppercase text-arch-gray">Client</h3>
-                <p>{project.client}</p>
+                <h3 className="text-sm uppercase text-arch-gray">Müşteri</h3>
+                <p>{project.client || '-'}</p>
               </div>
               <div>
-                <h3 className="text-sm uppercase text-arch-gray">Area</h3>
-                <p>{project.area}</p>
+                <h3 className="text-sm uppercase text-arch-gray">Alan</h3>
+                <p>{project.area || '-'}</p>
               </div>
               <div>
-                <h3 className="text-sm uppercase text-arch-gray">Year</h3>
-                <p>{project.year}</p>
+                <h3 className="text-sm uppercase text-arch-gray">Yıl</h3>
+                <p>{project.year || '-'}</p>
               </div>
               <div>
-                <h3 className="text-sm uppercase text-arch-gray">Architect</h3>
-                <p>{project.architect}</p>
+                <h3 className="text-sm uppercase text-arch-gray">Mimar</h3>
+                <p>{project.architect || '-'}</p>
               </div>
             </div>
           </div>
@@ -111,118 +225,135 @@ const ProjectDetail = () => {
                   value="photos"
                   className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
                 >
-                  Gallery
+                  Galeri
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="before-after"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
-                >
-                  Before/After
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="video"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
-                >
-                  Video
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="3d-model"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
-                >
-                  3D Model
-                </TabsTrigger>
+                {beforeImage && afterImage && (
+                  <TabsTrigger 
+                    value="before-after"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                  >
+                    Öncesi/Sonrası
+                  </TabsTrigger>
+                )}
+                {videos.length > 0 && (
+                  <TabsTrigger 
+                    value="video"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                  >
+                    Video
+                  </TabsTrigger>
+                )}
+                {models.length > 0 && (
+                  <TabsTrigger 
+                    value="3d-model"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                  >
+                    3D Model
+                  </TabsTrigger>
+                )}
               </TabsList>
               
               <TabsContent value="photos">
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="md:col-span-1 space-y-4">
-                    <h3 className="text-xl font-display">Project Gallery</h3>
+                    <h3 className="text-xl font-display">Proje Galerisi</h3>
                     <p className="text-arch-gray text-sm">
-                      Browse through the images to see different aspects of the {project.title}.
+                      {project.title}'nin farklı açılardan görüntülerini inceleyebilirsiniz.
                     </p>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={prevImage}
-                        className="w-12 h-12 flex items-center justify-center border border-arch-black hover:bg-arch-black hover:text-white transition-colors"
-                      >
-                        <ChevronLeft size={20} />
-                      </button>
-                      <button 
-                        onClick={nextImage}
-                        className="w-12 h-12 flex items-center justify-center border border-arch-black hover:bg-arch-black hover:text-white transition-colors"
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                    </div>
-                    <p className="text-sm">
-                      {currentImageIndex + 1} / {project.images.length}
-                    </p>
+                    {images.length > 1 && (
+                      <>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={prevImage}
+                            className="w-12 h-12 flex items-center justify-center border border-arch-black hover:bg-arch-black hover:text-white transition-colors"
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+                          <button 
+                            onClick={nextImage}
+                            className="w-12 h-12 flex items-center justify-center border border-arch-black hover:bg-arch-black hover:text-white transition-colors"
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                        </div>
+                        <p className="text-sm">
+                          {currentImageIndex + 1} / {images.length}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <div className="md:col-span-3 h-96 md:h-[500px] bg-arch-light-gray">
                     <img 
-                      src={project.images[currentImageIndex]} 
-                      alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                      src={images.length > 0 ? images[currentImageIndex].url : mainImage} 
+                      alt={`${project.title} - Görsel ${currentImageIndex + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
                 </div>
               </TabsContent>
               
-              <TabsContent value="before-after">
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-display">Before</h3>
-                    <div className="h-80 bg-arch-light-gray">
-                      <img 
-                        src={project.beforeImage}
-                        alt={`${project.title} - Before`}
-                        className="w-full h-full object-cover"
-                      />
+              {beforeImage && afterImage && (
+                <TabsContent value="before-after">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-display">Öncesi</h3>
+                      <div className="h-80 bg-arch-light-gray">
+                        <img 
+                          src={beforeImageUrl}
+                          alt={`${project.title} - Öncesi`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-display">Sonrası</h3>
+                      <div className="h-80 bg-arch-light-gray">
+                        <img 
+                          src={afterImageUrl}
+                          alt={`${project.title} - Sonrası`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-display">After</h3>
-                    <div className="h-80 bg-arch-light-gray">
-                      <img 
-                        src={project.afterImage}
-                        alt={`${project.title} - After`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                </TabsContent>
+              )}
+              
+              {videos.length > 0 && (
+                <TabsContent value="video">
+                  <div className="aspect-w-16 aspect-h-9">
+                    <iframe 
+                      src={videoUrl}
+                      frameBorder="0" 
+                      allow="autoplay; fullscreen" 
+                      allowFullScreen
+                      className="w-full h-[500px]"
+                    ></iframe>
                   </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              )}
               
-              <TabsContent value="video">
-                <div className="aspect-w-16 aspect-h-9">
-                  <iframe 
-                    src={project.videoUrl}
-                    frameBorder="0" 
-                    allow="autoplay; fullscreen" 
-                    allowFullScreen
-                    className="w-full h-[500px]"
-                  ></iframe>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="3d-model">
-                <div className="flex items-center justify-center h-[500px] bg-arch-light-gray">
-                  <p className="text-arch-gray">
-                    3D Model Viewer would be implemented here with Three.js integration
-                  </p>
-                </div>
-              </TabsContent>
+              {models.length > 0 && (
+                <TabsContent value="3d-model">
+                  <div className="flex items-center justify-center h-[500px] bg-arch-light-gray">
+                    {/* 3D Model entegrasyonu burada olacak - ilerleyen zamanlarda Potree veya Three.js ile */}
+                    <p className="text-arch-gray">
+                      3D Model görüntüleyici burada Three.js entegrasyonu ile yer alacak
+                    </p>
+                  </div>
+                </TabsContent>
+              )}
             </Tabs>
           </div>
           
           <div className="text-center mb-16">
-            <h2 className="text-xl md:text-2xl font-display mb-8">Similar Projects</h2>
+            <h2 className="text-xl md:text-2xl font-display mb-8">Benzer Projeler</h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[1, 2, 3].map((item) => (
                 <div key={item} className="h-64 bg-arch-light-gray">
                   <img 
                     src={`https://images.unsplash.com/photo-${1600607000000 + item * 100}-4e2a09cf159d?q=80&w=2070`}
-                    alt={`Similar project ${item}`}
+                    alt={`Benzer proje ${item}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
