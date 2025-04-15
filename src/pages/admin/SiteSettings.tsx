@@ -38,6 +38,8 @@ const SiteSettings = () => {
   const handleImageUpload = async (imageKey: string, file: File) => {
     try {
       setSaving(prev => ({ ...prev, [imageKey]: true }));
+      
+      // Görsel yükleme - site-images bucket'ına yükleme yapılıyor
       const imageUrl = await uploadFileToStorage(file, 'site-images', 'site/');
       
       if (!imageUrl) {
@@ -45,6 +47,7 @@ const SiteSettings = () => {
         return;
       }
       
+      // Veritabanı güncellemesi
       const updated = await updateSiteImage(imageKey, imageUrl);
       
       if (updated) {
@@ -54,8 +57,8 @@ const SiteSettings = () => {
         toast.error('Görsel güncellenirken bir hata oluştu');
       }
     } catch (error) {
-      toast.error('Bir hata oluştu');
-      console.error('Upload error:', error);
+      console.error('Görsel yükleme hatası:', error);
+      toast.error('Bir hata oluştu: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata'));
     } finally {
       setSaving(prev => ({ ...prev, [imageKey]: false }));
     }
@@ -74,6 +77,7 @@ const SiteSettings = () => {
       }
     } catch (error) {
       toast.error('Bir hata oluştu');
+      console.error('Başlık güncelleme hatası:', error);
     } finally {
       setSaving(prev => ({ ...prev, [imageKey + '_title']: false }));
     }
@@ -118,67 +122,73 @@ const SiteSettings = () => {
               </div>
             ) : (
               <div className="space-y-8">
-                {siteImages.map((image) => (
-                  <div key={image.id} className="border rounded-lg p-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="font-medium mb-1 capitalize">
-                          {image.image_key.replace(/_/g, ' ')}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4">
-                          {getImageDescription(image.image_key)}
-                        </p>
-                        
-                        <div className="mb-4">
-                          <Label htmlFor={`title-${image.id}`}>Görsel Başlığı</Label>
-                          <div className="flex gap-2">
-                            <Input 
-                              id={`title-${image.id}`} 
-                              defaultValue={image.title || ''} 
-                              className="flex-1"
-                            />
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={(e) => {
-                                const input = document.getElementById(`title-${image.id}`) as HTMLInputElement;
-                                handleTitleUpdate(image.image_key, input.value, image.image_url);
-                              }}
-                              disabled={saving[image.image_key + '_title']}
-                            >
-                              {saving[image.image_key + '_title'] ? (
-                                <span className="flex items-center">
-                                  <span className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent rounded-full"></span>
-                                  Kaydediliyor
-                                </span>
-                              ) : (
-                                <span className="flex items-center">
-                                  <Save size={16} className="mr-1" />
-                                  Kaydet
-                                </span>
-                              )}
-                            </Button>
+                {siteImages.length === 0 ? (
+                  <div className="text-center py-10">
+                    <p className="text-gray-600">Henüz hiç görsel eklenmemiş.</p>
+                  </div>
+                ) : (
+                  siteImages.map((image) => (
+                    <div key={image.id} className="border rounded-lg p-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <h3 className="font-medium mb-1 capitalize">
+                            {image.image_key.replace(/_/g, ' ')}
+                          </h3>
+                          <p className="text-sm text-gray-500 mb-4">
+                            {getImageDescription(image.image_key)}
+                          </p>
+                          
+                          <div className="mb-4">
+                            <Label htmlFor={`title-${image.id}`}>Görsel Başlığı</Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                id={`title-${image.id}`} 
+                                defaultValue={image.title || ''} 
+                                className="flex-1"
+                              />
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  const input = document.getElementById(`title-${image.id}`) as HTMLInputElement;
+                                  handleTitleUpdate(image.image_key, input.value, image.image_url);
+                                }}
+                                disabled={saving[image.image_key + '_title']}
+                              >
+                                {saving[image.image_key + '_title'] ? (
+                                  <span className="flex items-center">
+                                    <span className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent rounded-full"></span>
+                                    Kaydediliyor
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center">
+                                    <Save size={16} className="mr-1" />
+                                    Kaydet
+                                  </span>
+                                )}
+                              </Button>
+                            </div>
                           </div>
+                          
+                          <FileUploadBox
+                            title="Görseli Değiştir"
+                            description="Yeni görsel yüklemek için tıklayın veya sürükleyip bırakın"
+                            onFileSelected={(file) => handleImageUpload(image.image_key, file)}
+                            allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
+                          />
                         </div>
                         
-                        <FileUploadBox
-                          title="Görseli Değiştir"
-                          description="Yeni görsel yüklemek için tıklayın veya sürükleyip bırakın"
-                          onFileSelected={(file) => handleImageUpload(image.image_key, file)}
-                          allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
-                        />
-                      </div>
-                      
-                      <div className="h-64 overflow-hidden border rounded">
-                        <img 
-                          src={image.image_url} 
-                          alt={image.title || image.image_key}
-                          className="w-full h-full object-cover"
-                        />
+                        <div className="h-64 overflow-hidden border rounded">
+                          <img 
+                            src={image.image_url} 
+                            alt={image.title || image.image_key}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             )}
           </div>

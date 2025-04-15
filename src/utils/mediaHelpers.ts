@@ -10,6 +10,23 @@ export const uploadFileToStorage = async (
   folderPath: string = ''
 ): Promise<string | null> => {
   try {
+    // Önce bucket'ın varlığını kontrol et
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(b => b.name === bucketName);
+    
+    if (!bucketExists) {
+      console.log(`${bucketName} bucket'ı mevcut değil, oluşturuluyor...`);
+      try {
+        const { error } = await supabase.storage.createBucket(bucketName, {
+          public: true
+        });
+        if (error) throw error;
+      } catch (bucketError) {
+        console.error('Bucket oluşturma hatası:', bucketError);
+        // Bucket oluşturulamazsa bile devam etmeyi dene
+      }
+    }
+    
     const fileExt = file.name.split('.').pop();
     const filePath = `${folderPath}${uuidv4()}.${fileExt}`;
     
@@ -19,7 +36,8 @@ export const uploadFileToStorage = async (
       throw new Error(`Dosya boyutu 50MB'ı aşamaz (Mevcut boyut: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
     }
     
-    // Dosyayı doğrudan yükle, bucket kontrolü kaldırıldı
+    // Dosyayı yükle ve hataları yakala
+    console.log(`${bucketName} bucket'ına dosya yükleniyor: ${filePath}`);
     const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(filePath, file, {
@@ -32,6 +50,7 @@ export const uploadFileToStorage = async (
       throw error;
     }
     
+    // Public URL al
     const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
     console.log('Dosya başarıyla yüklendi:', publicUrlData.publicUrl);
     

@@ -64,6 +64,7 @@ const FileUploadBox = ({
       setErrorMessage(null);
       console.log(`Dosya yükleme başlatılıyor: ${file.name} (${file.size} bytes)`);
       await onFileSelected(file);
+      toast.success("Dosya başarıyla yüklendi!");
       console.log('Dosya yükleme işlevi tamamlandı');
     } catch (error) {
       console.error("Dosya yükleme hatası:", error);
