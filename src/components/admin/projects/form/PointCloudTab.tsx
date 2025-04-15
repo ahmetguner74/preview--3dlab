@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { Cloud, X, Info, Link } from 'lucide-react';
+import React, { useState } from 'react';
+import { Cloud, X, Info, Link, Code } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import { Project3DModel } from '@/types/project';
@@ -8,6 +7,13 @@ import { upload3DModel } from '@/utils/mediaHelpers';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 interface PointCloudTabProps {
   projectId: string | undefined;
@@ -22,7 +28,8 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
   project3DModels,
   setProject3DModels
 }) => {
-  const [pointCloudUrl, setPointCloudUrl] = React.useState('');
+  const [pointCloudUrl, setPointCloudUrl] = useState('');
+  const [iframeCode, setIframeCode] = useState('');
   
   const handlePointCloudUpload = async (file: File) => {
     if (!projectId && !isEditing) {
@@ -37,7 +44,6 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
         toast.success('Nokta bulutu başarıyla yüklendi');
         console.log('Nokta bulutu URL alındı:', modelUrl);
         
-        // Yeni nokta bulutu listesini güncelle
         const { data, error } = await supabase
           .from('project_3d_models')
           .select('*')
@@ -47,7 +53,6 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
         if (!error && data) {
           console.log('Supabase\'den gelen nokta bulutu verileri:', data);
           
-          // Tip dönüşümünü açıkça yaparak model_type'ın "3d_model" veya "point_cloud" olduğundan emin olalım
           const typedModels = data.map(model => ({
             ...model,
             model_type: model.model_type as "3d_model" | "point_cloud"
@@ -70,26 +75,19 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
     }
   };
 
-  const handleAddPointCloudUrl = async () => {
+  const addPointCloudToDatabase = async (url: string) => {
     if (!projectId && !isEditing) {
       toast.error('Önce projeyi kaydetmelisiniz');
-      return;
-    }
-    
-    if (!pointCloudUrl.trim()) {
-      toast.error('Lütfen geçerli bir URL girin');
-      return;
+      return false;
     }
     
     try {
-      new URL(pointCloudUrl); // URL formatını kontrol et
-      
       const { data, error } = await supabase
         .from('project_3d_models')
         .insert([
           {
             project_id: projectId,
-            model_url: pointCloudUrl.trim(),
+            model_url: url.trim(),
             model_type: 'point_cloud'
           }
         ])
@@ -97,10 +95,8 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
         
       if (error) throw error;
       
-      toast.success('Nokta bulutu linki başarıyla eklendi');
-      setPointCloudUrl('');
+      toast.success('Nokta bulutu başarıyla eklendi');
       
-      // Listeyi güncelle
       const { data: updatedData, error: fetchError } = await supabase
         .from('project_3d_models')
         .select('*')
@@ -118,9 +114,56 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
           ...(typedModels as Project3DModel[])
         ]);
       }
+      
+      return true;
     } catch (error) {
       console.error('Nokta bulutu URL eklenirken hata:', error);
       toast.error('Nokta bulutu URL eklenirken hata oluştu. Lütfen geçerli bir URL girdiğinizden emin olun.');
+      return false;
+    }
+  }
+
+  const handleAddPointCloudUrl = async () => {
+    if (!pointCloudUrl.trim()) {
+      toast.error('Lütfen geçerli bir URL girin');
+      return;
+    }
+    
+    try {
+      new URL(pointCloudUrl); // URL formatını kontrol et
+      
+      const success = await addPointCloudToDatabase(pointCloudUrl);
+      if (success) {
+        setPointCloudUrl('');
+      }
+    } catch (error) {
+      console.error('Nokta bulutu URL eklenirken hata:', error);
+      toast.error('Geçersiz URL formatı. Lütfen geçerli bir URL girdiğinizden emin olun.');
+    }
+  };
+
+  const handleAddIframeCode = async () => {
+    if (!iframeCode.trim()) {
+      toast.error('Lütfen geçerli bir iframe kodu girin');
+      return;
+    }
+    
+    try {
+      const srcMatch = iframeCode.match(/src="([^"]+)"/);
+      if (!srcMatch || !srcMatch[1]) {
+        throw new Error("Geçersiz iframe kodu");
+      }
+      
+      const iframeSrc = srcMatch[1];
+      new URL(iframeSrc); // URL formatını kontrol et
+      
+      const success = await addPointCloudToDatabase(iframeCode);
+      if (success) {
+        setIframeCode('');
+      }
+    } catch (error) {
+      console.error('iframe kodu işlenirken hata:', error);
+      toast.error('Geçersiz iframe kodu. Lütfen geçerli bir iframe kodu girdiğinizden emin olun.');
     }
   };
 
@@ -150,37 +193,56 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
         <p className="text-sm text-gray-500">Projeye ait nokta bulutu verilerini buradan yükleyebilirsiniz.</p>
       </div>
       
-      {/* Potree bilgi kutusu */}
       <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded flex">
         <Info className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
         <div>
           <p className="text-sm text-blue-700">
-            Artık hem dosya yükleme hem de doğrudan hazır Potree URL'leri ekleyebilirsiniz.
-            Örneğin: https://potree.github.io/potree/examples/clipping_volume.html
+            Artık hem dosya yükleme, URL ekleme hem de doğrudan iframe kodu yapıştırarak Agisoft Cloud gibi servislerdeki nokta bulutlarını ekleyebilirsiniz.
           </p>
         </div>
       </div>
       
-      {/* URL Ekleme Kısmı */}
       <div className="mb-6 border border-gray-200 p-4 rounded">
-        <h3 className="text-md font-medium mb-2 flex items-center">
-          <Link className="h-4 w-4 mr-1" /> Potree URL'si Ekle
-        </h3>
-        <div className="flex gap-2">
-          <Input 
-            placeholder="https://potree.github.io/potree/examples/..." 
-            value={pointCloudUrl}
-            onChange={(e) => setPointCloudUrl(e.target.value)}
-            className="flex-1"
-          />
-          <Button onClick={handleAddPointCloudUrl}>Ekle</Button>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Bir potree örnek sayfasının tam URL'sini ekleyin
-        </p>
+        <Tabs defaultValue="url" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="url">URL Ekle</TabsTrigger>
+            <TabsTrigger value="iframe">iframe Kodu</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="url" className="mt-4">
+            <div className="flex gap-2">
+              <Input 
+                placeholder="https://potree.github.io/potree/examples/..." 
+                value={pointCloudUrl}
+                onChange={(e) => setPointCloudUrl(e.target.value)}
+                className="flex-1"
+              />
+              <Button onClick={handleAddPointCloudUrl}>Ekle</Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Potree veya Agisoft Cloud örneğinin tam URL'sini ekleyin
+            </p>
+          </TabsContent>
+          
+          <TabsContent value="iframe" className="mt-4">
+            <div className="space-y-2">
+              <Textarea 
+                placeholder='<iframe src="https://cloud.agisoft.com/embedded/projects/..." ...'
+                value={iframeCode}
+                onChange={(e) => setIframeCode(e.target.value)}
+                rows={4}
+              />
+              <Button onClick={handleAddIframeCode} className="w-full">
+                <Code className="h-4 w-4 mr-2" /> iframe Kodu Ekle
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Agisoft Cloud gibi servislerden aldığınız iframe kodunu buraya yapıştırın
+            </p>
+          </TabsContent>
+        </Tabs>
       </div>
       
-      {/* Dosya Yükleme Kısmı */}
       <FileUploadBox 
         onFileSelected={handlePointCloudUpload}
         title="Nokta Bulutu Dosyası Yükle"
@@ -189,27 +251,45 @@ const PointCloudTab: React.FC<PointCloudTabProps> = ({
         allowedTypes={['laz', 'las', 'xyz', 'pts']}
       />
 
-      {/* Nokta Bulutu Listesi */}
       {pointCloudModels.length > 0 && (
         <div className="mt-6">
           <h3 className="text-md font-medium mb-2">Yüklü Nokta Bulutları</h3>
           <div className="space-y-2">
             {pointCloudModels.map(model => (
               <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                <div className="flex items-center">
-                  {model.model_url.startsWith('http') && !model.model_url.includes('storage.googleapis') ? (
-                    <Link className="h-5 w-5 mr-2 text-blue-500" />
+                <div className="flex items-center overflow-hidden">
+                  {model.model_url.includes('<iframe') ? (
+                    <Code className="h-5 w-5 mr-2 text-purple-500 flex-shrink-0" />
+                  ) : model.model_url.includes('cloud.agisoft.com') ? (
+                    <img 
+                      src="/cloud-agisoft-logo.png" 
+                      alt="Agisoft Cloud" 
+                      className="h-5 w-5 mr-2 flex-shrink-0" 
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                      }}
+                    />
+                  ) : model.model_url.startsWith('http') && !model.model_url.includes('storage.googleapis') ? (
+                    <Link className="h-5 w-5 mr-2 text-blue-500 flex-shrink-0" />
                   ) : (
-                    <Cloud className="h-5 w-5 mr-2 text-gray-500" />
+                    <Cloud className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
                   )}
-                  <a 
-                    href={model.model_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline text-sm truncate max-w-md"
-                  >
-                    {model.model_url.split('/').pop() || model.model_url}
-                  </a>
+                  <div className="truncate">
+                    {model.model_url.includes('<iframe') ? (
+                      <span className="text-sm text-purple-700">Agisoft Cloud iframe</span>
+                    ) : (
+                      <a 
+                        href={model.model_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline text-sm truncate"
+                      >
+                        {model.model_url.includes('cloud.agisoft.com') 
+                          ? 'Agisoft Cloud Projesi' 
+                          : (model.model_url.split('/').pop() || model.model_url)}
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <Button 
                   variant="ghost" 

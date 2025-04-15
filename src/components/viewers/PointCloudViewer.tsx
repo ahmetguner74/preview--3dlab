@@ -14,6 +14,7 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
   const [error, setError] = useState<string | null>(null);
   const [isValidUrl, setIsValidUrl] = useState<boolean>(true);
   const [processedUrl, setProcessedUrl] = useState<string>(pointCloudUrl);
+  const [isAgisoftCloud, setIsAgisoftCloud] = useState<boolean>(false);
 
   // URL doğrulama ve işleme
   useEffect(() => {
@@ -24,18 +25,42 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
     }
 
     try {
-      const url = new URL(pointCloudUrl);
-      
-      // Eğer Agisoft Cloud URL'si ise
-      if (url.hostname === 'cloud.agisoft.com') {
-        // Burada Agisoft Cloud için özel URL işleme yapılabilir
-        // Örneğin: Embed linki oluşturma, iframe boyutlandırma vb.
-        const embeddedUrl = pointCloudUrl.replace('/project/', '/embed/');
-        setProcessedUrl(embeddedUrl);
+      // Doğrudan iframe URL'si olduğunda
+      if (pointCloudUrl.includes('<iframe')) {
+        // iframe src değerini çıkaralım
+        const srcMatch = pointCloudUrl.match(/src="([^"]+)"/);
+        if (srcMatch && srcMatch[1]) {
+          setProcessedUrl(srcMatch[1]);
+          setIsAgisoftCloud(srcMatch[1].includes('cloud.agisoft.com'));
+          setIsValidUrl(true);
+        } else {
+          throw new Error("Geçersiz iframe kodu");
+        }
+      } else {
+        // Normal URL
+        const url = new URL(pointCloudUrl);
+        
+        // Eğer Agisoft Cloud URL'si ise
+        if (url.hostname === 'cloud.agisoft.com') {
+          setIsAgisoftCloud(true);
+          
+          // Eğer zaten embed URL'si değilse
+          if (pointCloudUrl.includes('/embedded/')) {
+            setProcessedUrl(pointCloudUrl);
+          } else {
+            // /project/ ile başlayan URL'leri /embedded/ formatına çevirelim
+            const embeddedUrl = pointCloudUrl.replace('/project/', '/embedded/');
+            setProcessedUrl(embeddedUrl);
+          }
+        } else {
+          setProcessedUrl(pointCloudUrl);
+          setIsAgisoftCloud(false);
+        }
+        
+        setIsValidUrl(true);
       }
-
-      setIsValidUrl(true);
     } catch (e) {
+      console.error("URL işlenirken hata:", e);
       setIsValidUrl(false);
       setError("Geçersiz URL formatı");
     } finally {
@@ -67,6 +92,7 @@ const PointCloudViewer: React.FC<PointCloudViewerProps> = ({ pointCloudUrl }) =>
         url={processedUrl}
         onLoad={handleIframeLoaded}
         onError={handleIframeError}
+        isAgisoftCloud={isAgisoftCloud}
       />
       
       <PointCloudSource url={pointCloudUrl} />
