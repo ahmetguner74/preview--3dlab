@@ -27,7 +27,19 @@ const ProjectPointCloud: React.FC<ProjectPointCloudProps> = ({
                 className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
                 onClick={() => onPointCloudSelect(model.url)}
               >
-                <p className="truncate text-sm">{model.url.split('/').pop()}</p>
+                {/* Agisoft Cloud URL için özel görüntüleme */}
+                {model.url.includes('cloud.agisoft.com') ? (
+                  <div className="flex items-center">
+                    <img 
+                      src="/cloud-agisoft-logo.png" 
+                      alt="Agisoft Cloud" 
+                      className="w-8 h-8 mr-2"
+                    />
+                    <p className="truncate text-sm">Agisoft Bulut Projesi</p>
+                  </div>
+                ) : (
+                  <p className="truncate text-sm">{model.url.split('/').pop()}</p>
+                )}
               </div>
             ))}
           </div>
