@@ -1,19 +1,34 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowDownCircle } from 'lucide-react';
+import { getSiteImage } from '@/utils/siteHelpers';
 
 const Hero = () => {
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeroBackground = async () => {
+      setLoading(true);
+      const imageUrl = await getSiteImage('hero_background');
+      setBackgroundImage(imageUrl);
+      setLoading(false);
+    };
+
+    fetchHeroBackground();
+  }, []);
+
   const scrollToProjects = () => {
     document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <section className="relative h-[90vh] flex items-center overflow-hidden">
-      {/* Hero background - Using a placeholder for now */}
+      {/* Hero background - Şimdi dinamik olarak veritabanından geliyor */}
       <div className="absolute inset-0 bg-arch-black opacity-50 z-10"></div>
       <div 
-        className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2070')] 
-                   bg-cover bg-center"
+        className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center`}
+        style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : {}}
       />
       
       <div className="arch-container relative z-20">

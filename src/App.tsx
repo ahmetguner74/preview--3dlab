@@ -12,6 +12,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import Admin from "./pages/Admin";
 import ProjectList from "./pages/admin/ProjectList";
 import ProjectForm from "./pages/admin/ProjectForm";
+import SiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
           <Route path="/admin/projects/:id/edit" element={<ProjectForm />} />
+          <Route path="/admin/site-settings" element={<SiteSettings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

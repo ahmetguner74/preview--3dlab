@@ -6,7 +6,8 @@ import {
   FileText, 
   MessageSquare, 
   Settings,
-  LayoutGrid
+  LayoutGrid,
+  Image
 } from 'lucide-react';
 
 export const AdminSidebar = () => {
@@ -30,6 +31,12 @@ export const AdminSidebar = () => {
       label: 'Mesajlar', 
       path: '/admin/messages',
       current: location.pathname.includes('/admin/messages')
+    },
+    { 
+      icon: Image, 
+      label: 'Site Görselleri', 
+      path: '/admin/site-settings',
+      current: location.pathname.includes('/admin/site-settings')
     },
     { 
       icon: Settings, 
