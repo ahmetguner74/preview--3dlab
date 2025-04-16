@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -7,7 +6,8 @@ import {
   MessageSquare, 
   Settings,
   LayoutGrid,
-  Image
+  Image,
+  Images
 } from 'lucide-react';
 
 export const AdminSidebar = () => {
@@ -33,10 +33,10 @@ export const AdminSidebar = () => {
       current: location.pathname.includes('/admin/messages')
     },
     { 
-      icon: Image, 
-      label: 'Site Görselleri', 
-      path: '/admin/site-settings',
-      current: location.pathname.includes('/admin/site-settings')
+      icon: Images, 
+      label: 'Kapak Görselleri', 
+      path: '/admin/cover-images',
+      current: location.pathname.includes('/admin/cover-images')
     },
     { 
       icon: Settings, 

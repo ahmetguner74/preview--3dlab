@@ -1,98 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeftCircle, Save } from 'lucide-react';
+import { ArrowLeftCircle } from 'lucide-react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { getAllSiteImages, updateSiteImage } from '@/utils/siteHelpers';
-import FileUploadBox from '@/components/admin/FileUploadBox';
-import { uploadFileToStorage } from '@/utils/mediaHelpers';
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface SiteImage {
-  id: string;
-  image_key: string;
-  image_url: string;
-  title: string | null;
-  description: string | null;
-}
-
 const SiteSettings = () => {
-  const [siteImages, setSiteImages] = useState<SiteImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    fetchSiteImages();
-  }, []);
-
-  const fetchSiteImages = async () => {
-    setLoading(true);
-    const images = await getAllSiteImages();
-    setSiteImages(images as SiteImage[]);
-    setLoading(false);
-  };
-
-  const handleImageUpload = async (imageKey: string, file: File) => {
-    try {
-      setSaving(prev => ({ ...prev, [imageKey]: true }));
-      
-      // Görsel yükleme - site-images bucket'ına yükleme yapılıyor
-      const imageUrl = await uploadFileToStorage(file, 'site-images', 'site/');
-      
-      if (!imageUrl) {
-        toast.error('Görsel yüklenirken bir hata oluştu');
-        return;
-      }
-      
-      // Veritabanı güncellemesi
-      const updated = await updateSiteImage(imageKey, imageUrl);
-      
-      if (updated) {
-        toast.success('Görsel başarıyla güncellendi');
-        await fetchSiteImages();
-      } else {
-        toast.error('Görsel güncellenirken bir hata oluştu');
-      }
-    } catch (error) {
-      console.error('Görsel yükleme hatası:', error);
-      toast.error('Bir hata oluştu: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata'));
-    } finally {
-      setSaving(prev => ({ ...prev, [imageKey]: false }));
-    }
-  };
-
-  const handleTitleUpdate = async (imageKey: string, newTitle: string, imageUrl: string) => {
-    try {
-      setSaving(prev => ({ ...prev, [imageKey + '_title']: true }));
-      const updated = await updateSiteImage(imageKey, imageUrl, newTitle);
-      
-      if (updated) {
-        toast.success('Başlık başarıyla güncellendi');
-        await fetchSiteImages();
-      } else {
-        toast.error('Başlık güncellenirken bir hata oluştu');
-      }
-    } catch (error) {
-      toast.error('Bir hata oluştu');
-      console.error('Başlık güncelleme hatası:', error);
-    } finally {
-      setSaving(prev => ({ ...prev, [imageKey + '_title']: false }));
-    }
-  };
-
-  const getImageDescription = (key: string) => {
-    switch (key) {
-      case 'hero_background':
-        return 'Ana sayfadaki hero bölümünün arka plan görseli. Önerilen boyut: En az 1920x1080px.';
-      case 'about_team':
-        return 'Hakkımızda önizleme bölümündeki ekip görseli. Önerilen boyut: Kare veya dikey format.';
-      default:
-        return 'Site görseli';
-    }
-  };
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -106,89 +23,83 @@ const SiteSettings = () => {
               <ArrowLeftCircle size={20} className="mr-2" />
               <span className="text-sm">Gösterge Paneline Dön</span>
             </Link>
-            <h1 className="text-xl font-medium">Site Görselleri</h1>
+            <h1 className="text-xl font-medium">Site Ayarları</h1>
           </div>
         </header>
         
         {/* Ana İçerik */}
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-6">Site Görsellerini Yönet</h2>
+            <h2 className="text-xl font-semibold mb-6">Genel Site Ayarları</h2>
             
             {loading ? (
               <div className="text-center py-10">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
-                <p className="mt-2 text-gray-600">Görseller yükleniyor...</p>
+                <p className="mt-2 text-gray-600">Veriler yükleniyor...</p>
               </div>
             ) : (
               <div className="space-y-8">
-                {siteImages.length === 0 ? (
-                  <div className="text-center py-10">
-                    <p className="text-gray-600">Henüz hiç görsel eklenmemiş.</p>
-                  </div>
-                ) : (
-                  siteImages.map((image) => (
-                    <div key={image.id} className="border rounded-lg p-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <h3 className="font-medium mb-1 capitalize">
-                            {image.image_key.replace(/_/g, ' ')}
-                          </h3>
-                          <p className="text-sm text-gray-500 mb-4">
-                            {getImageDescription(image.image_key)}
-                          </p>
-                          
-                          <div className="mb-4">
-                            <Label htmlFor={`title-${image.id}`}>Görsel Başlığı</Label>
-                            <div className="flex gap-2">
-                              <Input 
-                                id={`title-${image.id}`} 
-                                defaultValue={image.title || ''} 
-                                className="flex-1"
-                              />
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={(e) => {
-                                  const input = document.getElementById(`title-${image.id}`) as HTMLInputElement;
-                                  handleTitleUpdate(image.image_key, input.value, image.image_url);
-                                }}
-                                disabled={saving[image.image_key + '_title']}
-                              >
-                                {saving[image.image_key + '_title'] ? (
-                                  <span className="flex items-center">
-                                    <span className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent rounded-full"></span>
-                                    Kaydediliyor
-                                  </span>
-                                ) : (
-                                  <span className="flex items-center">
-                                    <Save size={16} className="mr-1" />
-                                    Kaydet
-                                  </span>
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          <FileUploadBox
-                            title="Görseli Değiştir"
-                            description="Yeni görsel yüklemek için tıklayın veya sürükleyip bırakın"
-                            onFileSelected={(file) => handleImageUpload(image.image_key, file)}
-                            allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
-                          />
-                        </div>
-                        
-                        <div className="h-64 overflow-hidden border rounded">
-                          <img 
-                            src={image.image_url} 
-                            alt={image.title || image.image_key}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                <div className="p-6 bg-blue-50 border border-blue-100 rounded-lg">
+                  <p className="text-blue-800">
+                    Kapak görsellerini yönetmek için 
+                    <Link to="/admin/cover-images" className="font-medium underline ml-1">
+                      Kapak Görselleri
+                    </Link> 
+                    sayfasını ziyaret edin.
+                  </p>
+                </div>
+                
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-medium mb-4">İletişim Bilgileri</h3>
+                  <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="email">E-posta Adresi</Label>
+                        <Input id="email" placeholder="info@example.com" />
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">Telefon</Label>
+                        <Input id="phone" placeholder="+90 212 123 4567" />
                       </div>
                     </div>
-                  ))
-                )}
+                    
+                    <div>
+                      <Label htmlFor="address">Adres</Label>
+                      <Input id="address" placeholder="İstanbul, Türkiye" />
+                    </div>
+                    
+                    <Button>Kaydet</Button>
+                  </div>
+                </div>
+                
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-medium mb-4">Sosyal Medya</h3>
+                  <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="instagram">Instagram</Label>
+                        <Input id="instagram" placeholder="@kullaniciadi" />
+                      </div>
+                      <div>
+                        <Label htmlFor="facebook">Facebook</Label>
+                        <Input id="facebook" placeholder="sayfaadi" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="twitter">Twitter</Label>
+                        <Input id="twitter" placeholder="@kullaniciadi" />
+                      </div>
+                      <div>
+                        <Label htmlFor="linkedin">LinkedIn</Label>
+                        <Input id="linkedin" placeholder="/company/sirketadi" />
+                      </div>
+                    </div>
+                    
+                    <Button>Kaydet</Button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
