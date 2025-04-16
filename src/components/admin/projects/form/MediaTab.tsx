@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { ProjectImage, ProjectVideo } from '@/types/project';
-import ThumbnailUploader from './media/ThumbnailUploader';
-import MainImageUploader from './media/MainImageUploader';
-import GalleryUploader from './media/GalleryUploader';
-import VideoUploader from './media/VideoUploader';
-import BeforeAfterUploader from './media/BeforeAfterUploader';
-import { getProjectImages, getProjectVideos } from '@/utils/mediaHelpers';
+import FileUploadBox from '@/components/admin/FileUploadBox';
+import { uploadProjectImage } from '@/utils/mediaHelpers';
+import { Button } from "@/components/ui/button";
+import { Image, Video } from 'lucide-react';
+import { toast } from "sonner";
 
 interface MediaTabProps {
   projectId: string | undefined;
@@ -29,17 +28,22 @@ const MediaTab: React.FC<MediaTabProps> = ({
   thumbnail,
   onThumbnailUpdated
 }) => {
-  const handleImagesUpdated = async () => {
-    if (projectId) {
-      const images = await getProjectImages(projectId);
-      setProjectImages(images as ProjectImage[]);
+  const handleThumbnailUpload = async (file: File) => {
+    if (!projectId && !isEditing) {
+      toast.error('Önce projeyi kaydetmelisiniz');
+      return;
     }
-  };
-
-  const handleVideosUpdated = async () => {
-    if (projectId) {
-      const videos = await getProjectVideos(projectId);
-      setProjectVideos(videos as ProjectVideo[]);
+    
+    try {
+      const imageUrl = await uploadProjectImage(file, projectId!, 'main');
+      
+      if (imageUrl) {
+        onThumbnailUpdated(imageUrl);
+        toast.success('Proje kapak görseli yüklendi');
+      }
+    } catch (error) {
+      console.error('Kapak görseli yükleme hatası:', error);
+      toast.error('Kapak görseli yüklenemedi');
     }
   };
 
@@ -52,40 +56,38 @@ const MediaTab: React.FC<MediaTabProps> = ({
         </div>
       </div>
       
-      <ThumbnailUploader
-        projectId={projectId}
-        isEditing={isEditing}
-        thumbnail={thumbnail}
-        onThumbnailUpdated={onThumbnailUpdated}
-      />
-
-      <MainImageUploader
-        projectId={projectId}
-        isEditing={isEditing}
-        projectImages={projectImages}
-        onImagesUpdated={handleImagesUpdated}
-      />
-
-      <GalleryUploader
-        projectId={projectId}
-        isEditing={isEditing}
-        projectImages={projectImages}
-        onImagesUpdated={handleImagesUpdated}
-      />
-
-      <VideoUploader
-        projectId={projectId}
-        isEditing={isEditing}
-        projectVideos={projectVideos}
-        onVideosUpdated={handleVideosUpdated}
-      />
-
-      <BeforeAfterUploader
-        projectId={projectId}
-        isEditing={isEditing}
-        projectImages={projectImages}
-        onImagesUpdated={handleImagesUpdated}
-      />
+      <div className="border rounded-lg p-6 bg-white mb-6">
+        <h3 className="text-lg font-medium mb-2">Proje Kapak Görseli</h3>
+        <p className="text-sm text-gray-500 mb-4">Bu görsel ana sayfada ve proje listesinde kullanılacaktır.</p>
+        
+        {thumbnail ? (
+          <div className="mb-4 relative">
+            <div className="aspect-video bg-gray-100 rounded overflow-hidden">
+              <img 
+                src={thumbnail} 
+                alt="Kapak görseli" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6 border-2 border-dashed rounded-md p-6 text-center transition-colors border-gray-300">
+            <Image className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Kapak Görseli Yok</h3>
+            <p className="mt-1 text-xs text-gray-500">PNG, JPG, WEBP formatları desteklenir.</p>
+          </div>
+        )}
+        
+        <FileUploadBox 
+          onFileSelected={handleThumbnailUpload}
+          title="Kapak Görseli Yükle"
+          description="PNG, JPG, WEBP formatları desteklenir. Maksimum 5MB."
+          icon={<Image className="mx-auto h-12 w-12 text-gray-400" />}
+          allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
+        />
+      </div>
+      
+      {/* Diğer medya yükleme bileşenleri buraya gelecek */}
     </div>
   );
 };
