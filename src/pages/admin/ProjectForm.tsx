@@ -45,7 +45,8 @@ const ProjectForm = () => {
     area: '',
     architect: '',
     status: 'taslak',
-    visible: false
+    visible: false,
+    thumbnail: ''
   });
 
   useEffect(() => {
@@ -111,6 +112,10 @@ const ProjectForm = () => {
     setProject((prev) => ({ ...prev, [name]: checked }));
   };
 
+  const handleThumbnailUpdate = (thumbnailUrl: string) => {
+    setProject(prev => ({ ...prev, thumbnail: thumbnailUrl }));
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
@@ -147,7 +152,8 @@ const ProjectForm = () => {
             area: project.area,
             architect: project.architect,
             status: project.status,
-            visible: project.visible
+            visible: project.visible,
+            thumbnail: project.thumbnail
           })
           .select();
           
@@ -270,6 +276,8 @@ const ProjectForm = () => {
                 projectVideos={projectVideos}
                 setProjectImages={setProjectImages}
                 setProjectVideos={setProjectVideos}
+                thumbnail={project.thumbnail}
+                onThumbnailUpdated={handleThumbnailUpdate}
               />
             </TabsContent>
             

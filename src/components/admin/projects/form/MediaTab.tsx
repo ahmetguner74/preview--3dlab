@@ -5,6 +5,7 @@ import MainImageUploader from './media/MainImageUploader';
 import GalleryUploader from './media/GalleryUploader';
 import VideoUploader from './media/VideoUploader';
 import BeforeAfterUploader from './media/BeforeAfterUploader';
+import ThumbnailUploader from './media/ThumbnailUploader';
 import { getProjectImages, getProjectVideos } from '@/utils/mediaHelpers';
 
 interface MediaTabProps {
@@ -14,6 +15,8 @@ interface MediaTabProps {
   projectVideos: ProjectVideo[];
   setProjectImages: React.Dispatch<React.SetStateAction<ProjectImage[]>>;
   setProjectVideos: React.Dispatch<React.SetStateAction<ProjectVideo[]>>;
+  thumbnail?: string;
+  onThumbnailUpdated: (thumbnailUrl: string) => void;
 }
 
 const MediaTab: React.FC<MediaTabProps> = ({ 
@@ -22,7 +25,9 @@ const MediaTab: React.FC<MediaTabProps> = ({
   projectImages,
   projectVideos,
   setProjectImages,
-  setProjectVideos
+  setProjectVideos,
+  thumbnail,
+  onThumbnailUpdated
 }) => {
   const handleImagesUpdated = async () => {
     if (projectId) {
@@ -46,6 +51,13 @@ const MediaTab: React.FC<MediaTabProps> = ({
       </div>
       
       <div className="space-y-6">
+        <ThumbnailUploader
+          projectId={projectId}
+          isEditing={isEditing}
+          thumbnail={thumbnail}
+          onThumbnailUpdated={onThumbnailUpdated}
+        />
+
         <MainImageUploader
           projectId={projectId}
           isEditing={isEditing}
