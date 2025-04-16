@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -16,6 +15,7 @@ interface CoverImage {
   image_url: string;
   title: string;
   description: string;
+  updated_at: string;
 }
 
 const CoverImages = () => {
@@ -29,7 +29,6 @@ const CoverImages = () => {
     try {
       setLoading(true);
       
-      // Kapak resimlerini getir
       const { data, error } = await supabase
         .from('site_images')
         .select('*')
@@ -58,7 +57,6 @@ const CoverImages = () => {
 
   const handleFileUpload = async (file: File, imageKey: string) => {
     try {
-      // Önce mevcut görselin ID'sini bulmak için sorgu yap
       const { data: existingImage } = await supabase
         .from('site_images')
         .select('id')
@@ -72,7 +70,6 @@ const CoverImages = () => {
       let title = '';
       let description = '';
       
-      // Her resim için özel başlık ve açıklama
       switch (imageKey) {
         case 'hero_background':
           title = 'Ana Sayfa Arkaplan Görseli';
@@ -89,7 +86,6 @@ const CoverImages = () => {
       }
 
       if (existingImage?.id) {
-        // Varsa güncelle
         const { error } = await supabase
           .from('site_images')
           .update({
@@ -101,7 +97,6 @@ const CoverImages = () => {
         if (error) throw error;
         toast.success('Görsel güncellendi');
       } else {
-        // Yoksa yeni kayıt oluştur
         const { error } = await supabase
           .from('site_images')
           .insert({
@@ -115,7 +110,6 @@ const CoverImages = () => {
         toast.success('Görsel eklendi');
       }
       
-      // Resimleri yeniden yükle
       fetchCoverImages();
     } catch (error) {
       console.error('Görsel yükleme hatası:', error);
@@ -132,7 +126,6 @@ const CoverImages = () => {
     setDialogOpen(true);
   };
 
-  // Kapak görsellerini görüntüleme ve yükleme bileşeni
   const CoverImageSection = ({ 
     imageKey, 
     title, 
@@ -186,7 +179,6 @@ const CoverImages = () => {
       <AdminSidebar />
       
       <div className="flex-1 flex flex-col">
-        {/* Üst Menü */}
         <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4">
           <div className="flex items-center space-x-4">
             <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
@@ -218,7 +210,6 @@ const CoverImages = () => {
           </div>
         </header>
         
-        {/* Ana İçerik */}
         <main className="flex-1 overflow-auto p-6">
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -248,7 +239,6 @@ const CoverImages = () => {
         </main>
       </div>
       
-      {/* Görsel Önizleme Modal */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
