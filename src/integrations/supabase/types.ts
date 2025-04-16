@@ -123,6 +123,7 @@ export type Database = {
           location: string | null
           slug: string
           status: Database["public"]["Enums"]["project_status"] | null
+          thumbnail: string | null
           title: string
           updated_at: string | null
           visible: boolean | null
@@ -139,6 +140,7 @@ export type Database = {
           location?: string | null
           slug: string
           status?: Database["public"]["Enums"]["project_status"] | null
+          thumbnail?: string | null
           title: string
           updated_at?: string | null
           visible?: boolean | null
@@ -155,6 +157,7 @@ export type Database = {
           location?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["project_status"] | null
+          thumbnail?: string | null
           title?: string
           updated_at?: string | null
           visible?: boolean | null
