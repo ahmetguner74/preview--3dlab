@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Project, ProjectStatus } from '@/types/project';
@@ -41,14 +42,12 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
     try {
       setUploading(true);
       
-      // Dosya yükleme işlemi
       const imageUrl = await uploadFileToStorage(file, 'projects');
       
       if (!imageUrl) {
         throw new Error('Görsel yüklenemedi');
       }
       
-      // Projeyi güncelleme
       const { error } = await supabase
         .from('projects')
         .update({ thumbnail: imageUrl })
@@ -58,8 +57,8 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
       
       toast.success('Proje görseli güncellendi');
       
-      // Ana component'e bildir ve dialog'u kapat
-      onUpdateProject({...project, thumbnail: imageUrl} as Project);
+      // Burada thumbnail'ı güncellerken doğru türü kullanıyoruz
+      onUpdateProject({...project, thumbnail: imageUrl});
       setShowThumbnailDialog(false);
     } catch (error) {
       console.error('Görsel yükleme hatası:', error);
@@ -82,7 +81,11 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
               onClick={() => setShowThumbnailDialog(true)}
             >
               {project.thumbnail ? (
-                <img src={project.thumbnail} alt={project.title} className="h-full w-full object-cover" />
+                <img 
+                  src={project.thumbnail} 
+                  alt={project.title} 
+                  className="h-full w-full object-cover" 
+                />
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
                   <Image size={18} className="text-gray-400" />
