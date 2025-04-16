@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { ProjectImage, ProjectVideo, Project3DModel } from '@/types/project';
@@ -123,7 +122,12 @@ export const getProjectImages = async (projectId: string): Promise<ProjectImage[
       .order('sort_order', { ascending: true });
     
     if (error) throw error;
-    return data || [];
+    
+    // Tip güvenliğini sağlamak için explicit casting yapıyoruz
+    return data?.map(item => ({
+      ...item,
+      image_type: item.image_type as 'main' | 'gallery' | 'before' | 'after'
+    })) || [];
   } catch (error) {
     console.error('Görsel getirme hatası:', error);
     return [];
@@ -143,6 +147,61 @@ export const getProjectVideos = async (projectId: string): Promise<ProjectVideo[
     return data || [];
   } catch (error) {
     console.error('Video getirme hatası:', error);
+    return [];
+  }
+};
+
+// 3D model yükleme
+export const upload3DModel = async (
+  file: File, 
+  projectId: string, 
+  modelType: '3d_model' | 'point_cloud'
+): Promise<string | null> => {
+  const modelUrl = await uploadFileToStorage(file, 'models');
+  
+  if (modelUrl) {
+    try {
+      // Veritabanına ekle
+      const { error } = await supabase
+        .from('project_3d_models')
+        .insert({
+          project_id: projectId,
+          model_url: modelUrl,
+          model_type: modelType
+        });
+      
+      if (error) {
+        console.error('Model kaydı hatası:', error);
+        return null;
+      }
+      
+      return modelUrl;
+    } catch (error) {
+      console.error('Model yükleme hatası:', error);
+      return null;
+    }
+  }
+  
+  return null;
+};
+
+// Proje 3D modellerini getir
+export const getProject3DModels = async (projectId: string): Promise<Project3DModel[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('project_3d_models')
+      .select('*')
+      .eq('project_id', projectId);
+    
+    if (error) throw error;
+    
+    // Tip güvenliğini sağlamak için explicit casting yapıyoruz
+    return data?.map(item => ({
+      ...item,
+      model_type: item.model_type as '3d_model' | 'point_cloud'
+    })) || [];
+  } catch (error) {
+    console.error('Model getirme hatası:', error);
     return [];
   }
 };

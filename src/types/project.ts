@@ -1,3 +1,4 @@
+
 export type ProjectStatus = 'taslak' | 'yayinda' | 'arsiv';
 
 export interface Project {

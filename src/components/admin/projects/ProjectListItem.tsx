@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Project, ProjectStatus } from '@/types/project';
@@ -60,7 +59,7 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
       toast.success('Proje görseli güncellendi');
       
       // Ana component'e bildir ve dialog'u kapat
-      onUpdateProject({...project, thumbnail: imageUrl});
+      onUpdateProject({...project, thumbnail: imageUrl} as Project);
       setShowThumbnailDialog(false);
     } catch (error) {
       console.error('Görsel yükleme hatası:', error);
