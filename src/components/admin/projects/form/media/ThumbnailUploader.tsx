@@ -6,7 +6,6 @@ import FileUploadBox from '@/components/admin/FileUploadBox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { uploadFileToStorage } from '@/utils/mediaHelpers';
-import { Project } from '@/types/project';
 import ImagePreviewDialog from '@/components/admin/ImagePreviewDialog';
 
 interface ThumbnailUploaderProps {
@@ -108,8 +107,8 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
       ) : (
         <div className="mb-6 border-2 border-dashed rounded-md p-6 text-center transition-colors border-gray-300">
           <FileImage className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Kapak Görseli Yükle</h3>
-          <p className="mt-1 text-xs text-gray-500">PNG, JPG, WEBP formatları desteklenir. Maksimum 5MB.</p>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Kapak Görseli Yok</h3>
+          <p className="mt-1 text-xs text-gray-500">PNG, JPG, WEBP formatları desteklenir.</p>
         </div>
       )}
       

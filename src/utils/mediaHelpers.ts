@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { ProjectImage, ProjectVideo, Project3DModel } from '@/types/project';
@@ -5,6 +6,8 @@ import { ProjectImage, ProjectVideo, Project3DModel } from '@/types/project';
 // Dosyayı storage'a yükle ve URL döndür
 export const uploadFileToStorage = async (file: File, bucket: string): Promise<string | null> => {
   try {
+    console.log(`Dosya yükleme başlatılıyor: ${file.name}, bucket: ${bucket}`);
+    
     // Benzersiz bir dosya adı oluştur
     const fileExt = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExt}`;
@@ -24,7 +27,10 @@ export const uploadFileToStorage = async (file: File, bucket: string): Promise<s
         upsert: false
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Storage yükleme hatası:', error);
+      throw error;
+    }
 
     // Dosya URL'sini döndür
     const { data: urlData } = supabase
@@ -32,6 +38,7 @@ export const uploadFileToStorage = async (file: File, bucket: string): Promise<s
       .from(bucket)
       .getPublicUrl(data.path);
 
+    console.log('Dosya başarıyla yüklendi:', urlData.publicUrl);
     return urlData.publicUrl;
   } catch (error) {
     console.error('Dosya yükleme hatası:', error);
