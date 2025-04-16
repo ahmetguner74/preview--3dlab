@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { ProjectImage, ProjectVideo } from '@/types/project';
+import ThumbnailUploader from './media/ThumbnailUploader';
 import MainImageUploader from './media/MainImageUploader';
 import GalleryUploader from './media/GalleryUploader';
 import VideoUploader from './media/VideoUploader';
 import BeforeAfterUploader from './media/BeforeAfterUploader';
-import ThumbnailUploader from './media/ThumbnailUploader';
 import { getProjectImages, getProjectVideos } from '@/utils/mediaHelpers';
 
 interface MediaTabProps {
@@ -44,48 +44,48 @@ const MediaTab: React.FC<MediaTabProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-md shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-xl font-medium mb-1">Medya Galerisi</h2>
-        <p className="text-sm text-gray-500">Proje görsellerini ve videolarını buradan yükleyebilirsiniz.</p>
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-md shadow-sm mb-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-medium mb-1">Medya Galerisi</h2>
+          <p className="text-sm text-gray-500">Proje görsellerini ve videolarını buradan yükleyebilirsiniz.</p>
+        </div>
       </div>
       
-      <div className="space-y-6">
-        <ThumbnailUploader
-          projectId={projectId}
-          isEditing={isEditing}
-          thumbnail={thumbnail}
-          onThumbnailUpdated={onThumbnailUpdated}
-        />
+      <ThumbnailUploader
+        projectId={projectId}
+        isEditing={isEditing}
+        thumbnail={thumbnail}
+        onThumbnailUpdated={onThumbnailUpdated}
+      />
 
-        <MainImageUploader
-          projectId={projectId}
-          isEditing={isEditing}
-          projectImages={projectImages}
-          onImagesUpdated={handleImagesUpdated}
-        />
+      <MainImageUploader
+        projectId={projectId}
+        isEditing={isEditing}
+        projectImages={projectImages}
+        onImagesUpdated={handleImagesUpdated}
+      />
 
-        <GalleryUploader
-          projectId={projectId}
-          isEditing={isEditing}
-          projectImages={projectImages}
-          onImagesUpdated={handleImagesUpdated}
-        />
+      <GalleryUploader
+        projectId={projectId}
+        isEditing={isEditing}
+        projectImages={projectImages}
+        onImagesUpdated={handleImagesUpdated}
+      />
 
-        <VideoUploader
-          projectId={projectId}
-          isEditing={isEditing}
-          projectVideos={projectVideos}
-          onVideosUpdated={handleVideosUpdated}
-        />
+      <VideoUploader
+        projectId={projectId}
+        isEditing={isEditing}
+        projectVideos={projectVideos}
+        onVideosUpdated={handleVideosUpdated}
+      />
 
-        <BeforeAfterUploader
-          projectId={projectId}
-          isEditing={isEditing}
-          projectImages={projectImages}
-          onImagesUpdated={handleImagesUpdated}
-        />
-      </div>
+      <BeforeAfterUploader
+        projectId={projectId}
+        isEditing={isEditing}
+        projectImages={projectImages}
+        onImagesUpdated={handleImagesUpdated}
+      />
     </div>
   );
 };

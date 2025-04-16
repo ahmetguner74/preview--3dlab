@@ -1,12 +1,13 @@
 
-import React from 'react';
-import { Image, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Image, X, FileImage } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { uploadFileToStorage } from '@/utils/mediaHelpers';
 import { Project } from '@/types/project';
+import ImagePreviewDialog from '@/components/admin/ImagePreviewDialog';
 
 interface ThumbnailUploaderProps {
   projectId: string | undefined;
@@ -21,6 +22,8 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
   thumbnail,
   onThumbnailUpdated
 }) => {
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   const handleImageUpload = async (file: File) => {
     if (!projectId && !isEditing) {
       toast.error('Önce projeyi kaydetmelisiniz');
@@ -43,7 +46,7 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
         if (error) throw error;
       }
       
-      toast.success('Proje görseli güncellendi');
+      toast.success('Proje kapak görseli güncellendi');
       onThumbnailUpdated(imageUrl);
     } catch (error) {
       console.error('Görsel yükleme hatası:', error);
@@ -70,14 +73,23 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
     }
   };
 
+  const handlePreviewClick = () => {
+    if (thumbnail) {
+      setPreviewOpen(true);
+    }
+  };
+
   return (
-    <div>
-      <h3 className="text-md font-medium mb-2">Proje Kapak Görseli</h3>
-      <p className="text-sm text-gray-500 mb-2">Bu görsel ana sayfada ve proje listesinde kullanılacaktır.</p>
+    <div className="border rounded-lg p-6 bg-white mb-6">
+      <h3 className="text-lg font-medium mb-2">Proje Kapak Görseli</h3>
+      <p className="text-sm text-gray-500 mb-4">Bu görsel ana sayfada ve proje listesinde kullanılacaktır.</p>
       
       {thumbnail ? (
         <div className="mb-4 relative">
-          <div className="aspect-video bg-gray-100 rounded overflow-hidden">
+          <div 
+            className="aspect-video bg-gray-100 rounded overflow-hidden cursor-pointer"
+            onClick={handlePreviewClick}
+          >
             <img 
               src={thumbnail} 
               alt="Kapak görseli" 
@@ -93,7 +105,13 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
             <X size={16} />
           </Button>
         </div>
-      ) : null}
+      ) : (
+        <div className="mb-6 border-2 border-dashed rounded-md p-6 text-center transition-colors border-gray-300">
+          <FileImage className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Kapak Görseli Yükle</h3>
+          <p className="mt-1 text-xs text-gray-500">PNG, JPG, WEBP formatları desteklenir. Maksimum 5MB.</p>
+        </div>
+      )}
       
       <FileUploadBox 
         onFileSelected={handleImageUpload}
@@ -101,6 +119,12 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
         description="PNG, JPG, WEBP formatları desteklenir. Maksimum 5MB."
         icon={<Image className="mx-auto h-12 w-12 text-gray-400" />}
         allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
+      />
+
+      <ImagePreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        imageUrl={thumbnail || null}
       />
     </div>
   );
