@@ -4,17 +4,19 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Project } from '@/types/project';
+import { getSiteImage } from '@/utils/siteHelpers';
 
 const ProjectGrid = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [coverImage, setCoverImage] = useState<string | null>(null);
   
   useEffect(() => {
-    const fetchFeaturedProjects = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Sadece 'yayinda' statüsündeki, görünür olan projeleri getir ve 6 ile sınırla
+        // Fetch projects
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -25,6 +27,10 @@ const ProjectGrid = () => {
           
         if (error) throw error;
         setProjects(data || []);
+        
+        // Fetch cover image
+        const coverImageUrl = await getSiteImage('featured_projects_cover');
+        setCoverImage(coverImageUrl);
       } catch (error) {
         console.error('Projeler yüklenirken hata oluştu:', error);
       } finally {
@@ -32,21 +38,29 @@ const ProjectGrid = () => {
       }
     };
     
-    fetchFeaturedProjects();
+    fetchData();
   }, []);
 
+  // Style for the section with background image
+  const sectionStyle = coverImage ? {
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('${coverImage}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    color: 'white'
+  } : {};
+
   return (
-    <section id="projects" className="py-24">
+    <section id="projects" className="py-24" style={coverImage ? sectionStyle : {}}>
       <div className="arch-container">
         <div className="flex justify-between items-end mb-16">
           <div>
-            <h2 className="text-sm uppercase text-arch-gray tracking-wider mb-2">Çalışmalarımız</h2>
+            <h2 className={`text-sm uppercase tracking-wider mb-2 ${coverImage ? 'text-gray-300' : 'text-arch-gray'}`}>Çalışmalarımız</h2>
             <h3 className="text-2xl md:text-4xl font-display">Öne Çıkan Projeler</h3>
           </div>
           <div className="hidden md:block">
             <Link 
               to="/projects" 
-              className="flex items-center gap-1 text-sm hover:text-arch-gray transition-colors"
+              className={`flex items-center gap-1 text-sm ${coverImage ? 'text-white hover:text-gray-300' : 'hover:text-arch-gray'} transition-colors`}
             >
               Tüm Projeleri Gör <ArrowUpRight size={16} />
             </Link>
@@ -60,7 +74,7 @@ const ProjectGrid = () => {
           </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-arch-gray">Henüz hiç proje eklenmemiş.</p>
+            <p className={coverImage ? 'text-gray-300' : 'text-arch-gray'}>Henüz hiç proje eklenmemiş.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -92,7 +106,7 @@ const ProjectGrid = () => {
         <div className="mt-10 md:hidden flex justify-center">
           <Link 
             to="/projects" 
-            className="flex items-center gap-1 text-sm hover:text-arch-gray transition-colors"
+            className={`flex items-center gap-1 text-sm ${coverImage ? 'text-white hover:text-gray-300' : 'hover:text-arch-gray'} transition-colors`}
           >
             Tüm Projeleri Gör <ArrowUpRight size={16} />
           </Link>
