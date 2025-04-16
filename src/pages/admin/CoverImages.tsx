@@ -1,22 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import FileUploadBox from '@/components/admin/FileUploadBox';
-import { uploadFileToStorage } from '@/utils/mediaHelpers';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
-interface CoverImage {
-  id: string;
-  image_key: string;
-  image_url: string;
-  title: string;
-  description: string;
-  updated_at: string;
-}
+import CoverImageSection from '@/components/admin/CoverImageSection';
+import ImagePreviewDialog from '@/components/admin/ImagePreviewDialog';
+import { fetchCoverImages, uploadCoverImage, getCoverImageByKey, CoverImage } from '@/api/coverImagesApi';
 
 const CoverImages = () => {
   const [loading, setLoading] = useState(true);
@@ -25,17 +16,11 @@ const CoverImages = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const fetchCoverImages = async () => {
+  const loadCoverImages = async () => {
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('site_images')
-        .select('*')
-        .in('image_key', ['hero_background', 'about_team', 'featured_projects_cover']);
-      
-      if (error) throw error;
-      setCoverImages(data || []);
+      const data = await fetchCoverImages();
+      setCoverImages(data);
     } catch (error) {
       console.error('Kapak resimleri yüklenirken hata:', error);
       toast.error('Kapak resimleri yüklenemedi');
@@ -45,133 +30,30 @@ const CoverImages = () => {
   };
 
   useEffect(() => {
-    fetchCoverImages();
+    loadCoverImages();
   }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchCoverImages();
+    await loadCoverImages();
     setRefreshing(false);
     toast.success('Kapak resimleri yenilendi');
   };
 
   const handleFileUpload = async (file: File, imageKey: string) => {
     try {
-      const { data: existingImage } = await supabase
-        .from('site_images')
-        .select('id')
-        .eq('image_key', imageKey)
-        .single();
-
-      const imageUrl = await uploadFileToStorage(file, 'site-images');
-      
-      if (!imageUrl) throw new Error('Görsel yüklenemedi');
-
-      let title = '';
-      let description = '';
-      
-      switch (imageKey) {
-        case 'hero_background':
-          title = 'Ana Sayfa Arkaplan Görseli';
-          description = 'Ana sayfada üst bölümde görünen arkaplan resmi';
-          break;
-        case 'about_team':
-          title = 'Hakkımızda Ekip Görseli';
-          description = 'Ana sayfada hakkımızda bölümünde görünen ekip resmi';
-          break;
-        case 'featured_projects_cover':
-          title = 'Öne Çıkan Projeler Görseli';
-          description = 'Ana sayfada öne çıkan projeler bölümünde görünen kapak resmi';
-          break;
-      }
-
-      if (existingImage?.id) {
-        const { error } = await supabase
-          .from('site_images')
-          .update({
-            image_url: imageUrl,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', existingImage.id);
-        
-        if (error) throw error;
-        toast.success('Görsel güncellendi');
-      } else {
-        const { error } = await supabase
-          .from('site_images')
-          .insert({
-            image_key: imageKey,
-            image_url: imageUrl,
-            title,
-            description,
-          });
-        
-        if (error) throw error;
-        toast.success('Görsel eklendi');
-      }
-      
-      fetchCoverImages();
+      await uploadCoverImage(file, imageKey);
+      toast.success('Görsel başarıyla yüklendi');
+      loadCoverImages();
     } catch (error) {
       console.error('Görsel yükleme hatası:', error);
       toast.error('Görsel yüklenemedi');
     }
   };
 
-  const getCoverImageByKey = (key: string): CoverImage | undefined => {
-    return coverImages.find(image => image.image_key === key);
-  };
-
   const handleImageClick = (url: string) => {
     setSelectedImage(url);
     setDialogOpen(true);
-  };
-
-  const CoverImageSection = ({ 
-    imageKey, 
-    title, 
-    description 
-  }: { 
-    imageKey: string, 
-    title: string, 
-    description: string 
-  }) => {
-    const image = getCoverImageByKey(imageKey);
-    
-    return (
-      <div className="border rounded-lg p-6 bg-white">
-        <h3 className="text-lg font-medium mb-2">{title}</h3>
-        <p className="text-sm text-gray-500 mb-4">{description}</p>
-        
-        {image?.image_url ? (
-          <div className="mb-4">
-            <div 
-              className="aspect-video bg-gray-100 rounded cursor-pointer overflow-hidden mb-2"
-              onClick={() => handleImageClick(image.image_url)}
-            >
-              <img 
-                src={image.image_url} 
-                alt={title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="text-xs text-gray-500">
-              Son güncelleme: {new Date(image.updated_at || '').toLocaleDateString('tr-TR')}
-            </div>
-          </div>
-        ) : (
-          <div className="aspect-video bg-gray-100 rounded flex items-center justify-center mb-4">
-            <p className="text-gray-500">Görsel henüz yüklenmemiş</p>
-          </div>
-        )}
-        
-        <FileUploadBox
-          onFileSelected={(file) => handleFileUpload(file, imageKey)}
-          title="Yeni görsel yükle"
-          description="JPG, PNG veya WebP formatında görsel yükleyebilirsiniz"
-          allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
-        />
-      </div>
-    );
   };
 
   return (
@@ -221,40 +103,41 @@ const CoverImages = () => {
                 imageKey="hero_background"
                 title="Ana Sayfa Arkaplan Görseli"
                 description="Ana sayfada üst bölümde görünen arkaplan resmi"
+                imageUrl={getCoverImageByKey(coverImages, 'hero_background')?.image_url}
+                updatedAt={getCoverImageByKey(coverImages, 'hero_background')?.updated_at}
+                onImageClick={handleImageClick}
+                onFileSelected={handleFileUpload}
               />
               
               <CoverImageSection 
                 imageKey="about_team"
                 title="Hakkımızda Ekip Görseli"
                 description="Ana sayfada hakkımızda bölümünde görünen ekip resmi"
+                imageUrl={getCoverImageByKey(coverImages, 'about_team')?.image_url}
+                updatedAt={getCoverImageByKey(coverImages, 'about_team')?.updated_at}
+                onImageClick={handleImageClick}
+                onFileSelected={handleFileUpload}
               />
               
               <CoverImageSection 
                 imageKey="featured_projects_cover"
                 title="Öne Çıkan Projeler Görseli"
                 description="Ana sayfada öne çıkan projeler bölümünde görünen kapak resmi"
+                imageUrl={getCoverImageByKey(coverImages, 'featured_projects_cover')?.image_url}
+                updatedAt={getCoverImageByKey(coverImages, 'featured_projects_cover')?.updated_at}
+                onImageClick={handleImageClick}
+                onFileSelected={handleFileUpload}
               />
             </div>
           )}
         </main>
       </div>
       
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Görsel Önizleme</DialogTitle>
-          </DialogHeader>
-          {selectedImage && (
-            <div className="w-full">
-              <img 
-                src={selectedImage} 
-                alt="Görsel önizleme" 
-                className="w-full h-auto"
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ImagePreviewDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        imageUrl={selectedImage}
+      />
     </div>
   );
 };
