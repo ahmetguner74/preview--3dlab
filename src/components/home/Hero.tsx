@@ -27,12 +27,8 @@ const Hero = () => {
       
       <div className="arch-container relative z-20">
         <div className="max-w-2xl text-white">
-          <h1 className="text-3xl md:text-5xl font-display font-light mb-6">
-            Creating Spaces That Inspire
-          </h1>
-          <p className="text-lg md:text-xl mb-8 text-white/90">
-            We design architecture that transforms environments and enhances lives through innovative, sustainable solutions.
-          </p>
+          <h1 className="text-3xl md:text-5xl font-display font-light mb-6">3D MODEL ATÖLYESİ</h1>
+          <p className="text-lg md:text-xl mb-8 text-white/90">Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.</p>
           <button onClick={scrollToProjects} className="inline-flex items-center gap-2 border border-white px-6 py-3 text-sm uppercase tracking-wider
                        hover:bg-white hover:text-arch-black transition-all duration-300">
             View Projects <ArrowDownCircle size={18} />
