@@ -2,7 +2,12 @@
 import React, { useState, useCallback } from 'react';
 import { ProjectImage, ProjectVideo } from '@/types/project';
 import FileUploadBox from '@/components/admin/FileUploadBox';
-import { uploadProjectImage, addProjectVideo, getProjectImages, getProjectVideos } from '@/utils/mediaHelpers';
+import { 
+  uploadProjectImage, 
+  addProjectVideo, 
+  getProjectImages, 
+  getProjectVideos 
+} from '@/utils/mediaHelpers';
 import { Button } from "@/components/ui/button";
 import { 
   Image, 
