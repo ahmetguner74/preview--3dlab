@@ -19,6 +19,7 @@ interface ProjectTableProps {
   statusFilter: string;
   onToggleVisibility: (project: Project) => void;
   onDelete: (id: string) => void;
+  onUpdateProject: (project: Project) => void;
 }
 
 export const ProjectTable: React.FC<ProjectTableProps> = ({
@@ -28,7 +29,8 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   categoryFilter,
   statusFilter,
   onToggleVisibility,
-  onDelete
+  onDelete,
+  onUpdateProject
 }) => {
   return (
     <div className="overflow-x-auto">
@@ -64,6 +66,7 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                 project={project}
                 onToggleVisibility={onToggleVisibility}
                 onDelete={onDelete}
+                onUpdateProject={onUpdateProject}
               />
             ))
           )}

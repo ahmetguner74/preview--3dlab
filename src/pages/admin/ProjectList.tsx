@@ -80,6 +80,13 @@ const ProjectList = () => {
       toast.error('Proje silinemedi');
     }
   };
+  
+  // Yeni güncelleme fonksiyonu
+  const updateProject = (updatedProject: Project) => {
+    setProjects(projects.map(p => 
+      p.id === updatedProject.id ? updatedProject : p
+    ));
+  };
 
   // Filtreleme fonksiyonu
   const filteredProjects = projects.filter(project => {
@@ -121,6 +128,7 @@ const ProjectList = () => {
               statusFilter={statusFilter}
               onToggleVisibility={toggleVisibility}
               onDelete={deleteProject}
+              onUpdateProject={updateProject}
             />
           </div>
         </main>

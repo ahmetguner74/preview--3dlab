@@ -1,120 +1,111 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+import { ProjectImage, ProjectVideo, Project3DModel } from '@/types/project';
 
-/**
- * Dosyayı Supabase Storage'a yükleyen fonksiyon
- */
-export const uploadFileToStorage = async (
-  file: File,
-  bucketName: string = 'project-files',
-  folderPath: string = ''
-): Promise<string | null> => {
+// Dosyayı storage'a yükle ve URL döndür
+export const uploadFileToStorage = async (file: File, bucket: string): Promise<string | null> => {
   try {
-    // Önce bucket'ın varlığını kontrol et
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const bucketExists = buckets?.some(b => b.name === bucketName);
-    
-    if (!bucketExists) {
-      console.log(`${bucketName} bucket'ı mevcut değil, oluşturuluyor...`);
-      try {
-        const { error } = await supabase.storage.createBucket(bucketName, {
-          public: true
-        });
-        if (error) throw error;
-      } catch (bucketError) {
-        console.error('Bucket oluşturma hatası:', bucketError);
-        // Bucket oluşturulamazsa bile devam etmeyi dene
-      }
-    }
-    
+    // Benzersiz bir dosya adı oluştur
     const fileExt = file.name.split('.').pop();
-    const filePath = `${folderPath}${uuidv4()}.${fileExt}`;
-    
-    // Büyük dosya kontrolü
-    const MAX_SIZE = 50 * 1024 * 1024; // 50MB limit
-    if (file.size > MAX_SIZE) {
-      throw new Error(`Dosya boyutu 50MB'ı aşamaz (Mevcut boyut: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+    const fileName = `${uuidv4()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    // Dosya boyutu kontrolü (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('Dosya boyutu 5MB\'dan küçük olmalıdır');
     }
     
-    // Dosyayı yükle ve hataları yakala
-    console.log(`${bucketName} bucket'ına dosya yükleniyor: ${filePath}`);
-    const { data, error } = await supabase.storage
-      .from(bucketName)
+    // Supabase storage'a yükle
+    const { data, error } = await supabase
+      .storage
+      .from(bucket)
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: false,
+        upsert: false
       });
-    
-    if (error) {
-      console.error('Dosya yükleme hatası:', error);
-      throw error;
-    }
-    
-    // Public URL al
-    const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-    console.log('Dosya başarıyla yüklendi:', publicUrlData.publicUrl);
-    
-    return publicUrlData.publicUrl;
+
+    if (error) throw error;
+
+    // Dosya URL'sini döndür
+    const { data: urlData } = supabase
+      .storage
+      .from(bucket)
+      .getPublicUrl(data.path);
+
+    return urlData.publicUrl;
   } catch (error) {
     console.error('Dosya yükleme hatası:', error);
     return null;
   }
 };
 
-/**
- * Proje görseli yükleyen fonksiyon
- */
+// Proje görseli yükle
 export const uploadProjectImage = async (
-  file: File,
-  projectId: string,
-  imageType: 'main' | 'gallery' | 'before' | 'after' = 'gallery',
-  sortOrder: number = 0
+  file: File, 
+  projectId: string, 
+  imageType: 'main' | 'gallery' | 'before' | 'after' = 'gallery'
 ): Promise<string | null> => {
-  try {
-    const imageUrl = await uploadFileToStorage(file, 'project-images', `${projectId}/`);
+  const imageUrl = await uploadFileToStorage(file, 'projects');
+  
+  if (imageUrl) {
+    // Yeni sıra numarası belirle
+    const { data: existingImages } = await supabase
+      .from('project_images')
+      .select('sort_order')
+      .eq('project_id', projectId)
+      .eq('image_type', imageType)
+      .order('sort_order', { ascending: false });
     
-    if (!imageUrl) return null;
+    const lastSortOrder = existingImages && existingImages.length > 0 
+      ? existingImages[0].sort_order 
+      : 0;
     
-    // Veritabanına resim bilgisini kaydet
+    // Veritabanına ekle
     const { error } = await supabase
       .from('project_images')
       .insert({
         project_id: projectId,
         image_url: imageUrl,
         image_type: imageType,
-        sort_order: sortOrder
+        sort_order: lastSortOrder + 1
       });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Görsel kaydı hatası:', error);
+      return null;
+    }
     
     return imageUrl;
-  } catch (error) {
-    console.error('Görsel yükleme hatası:', error);
-    return null;
   }
+  
+  return null;
 };
 
-/**
- * Proje videosu ekleyen fonksiyon
- */
-export const addProjectVideo = async (
-  videoUrl: string,
-  projectId: string,
-  thumbnailUrl?: string,
-  sortOrder: number = 0
-): Promise<boolean> => {
+// Proje video linki ekle
+export const addProjectVideo = async (videoUrl: string, projectId: string): Promise<boolean> => {
   try {
+    // Yeni sıra numarası belirle
+    const { data: existingVideos } = await supabase
+      .from('project_videos')
+      .select('sort_order')
+      .eq('project_id', projectId)
+      .order('sort_order', { ascending: false });
+    
+    const lastSortOrder = existingVideos && existingVideos.length > 0 
+      ? existingVideos[0].sort_order 
+      : 0;
+    
+    // Veritabanına ekle
     const { error } = await supabase
       .from('project_videos')
       .insert({
         project_id: projectId,
         video_url: videoUrl,
-        thumbnail_url: thumbnailUrl,
-        sort_order: sortOrder
+        sort_order: lastSortOrder + 1
       });
     
     if (error) throw error;
-    
     return true;
   } catch (error) {
     console.error('Video ekleme hatası:', error);
@@ -122,49 +113,8 @@ export const addProjectVideo = async (
   }
 };
 
-/**
- * 3D model dosyası yükleyen fonksiyon
- */
-export const upload3DModel = async (
-  file: File,
-  projectId: string,
-  modelType: '3d_model' | 'point_cloud' = '3d_model'
-): Promise<string | null> => {
-  try {
-    const modelUrl = await uploadFileToStorage(file, '3d-models', `${projectId}/`);
-    
-    if (!modelUrl) return null;
-    
-    // Veritabanına model bilgisini kaydet
-    const { error } = await supabase
-      .from('project_3d_models')
-      .insert({
-        project_id: projectId,
-        model_url: modelUrl,
-        model_type: modelType
-      });
-    
-    if (error) throw error;
-    
-    return modelUrl;
-  } catch (error) {
-    console.error('3D model yükleme hatası:', error);
-    return null;
-  }
-};
-
-/**
- * Dosya türünü kontrol eden yardımcı fonksiyon
- */
-export const checkFileType = (file: File, allowedTypes: string[]): boolean => {
-  const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
-  return allowedTypes.includes(fileExt);
-};
-
-/**
- * Projeye ait görselleri getiren fonksiyon
- */
-export const getProjectImages = async (projectId: string): Promise<any[]> => {
+// Proje görsellerini getir
+export const getProjectImages = async (projectId: string): Promise<ProjectImage[]> => {
   try {
     const { data, error } = await supabase
       .from('project_images')
@@ -173,7 +123,6 @@ export const getProjectImages = async (projectId: string): Promise<any[]> => {
       .order('sort_order', { ascending: true });
     
     if (error) throw error;
-    
     return data || [];
   } catch (error) {
     console.error('Görsel getirme hatası:', error);
@@ -181,10 +130,8 @@ export const getProjectImages = async (projectId: string): Promise<any[]> => {
   }
 };
 
-/**
- * Projeye ait videoları getiren fonksiyon
- */
-export const getProjectVideos = async (projectId: string): Promise<any[]> => {
+// Proje videolarını getir
+export const getProjectVideos = async (projectId: string): Promise<ProjectVideo[]> => {
   try {
     const { data, error } = await supabase
       .from('project_videos')
@@ -193,7 +140,6 @@ export const getProjectVideos = async (projectId: string): Promise<any[]> => {
       .order('sort_order', { ascending: true });
     
     if (error) throw error;
-    
     return data || [];
   } catch (error) {
     console.error('Video getirme hatası:', error);
@@ -201,21 +147,19 @@ export const getProjectVideos = async (projectId: string): Promise<any[]> => {
   }
 };
 
-/**
- * Projeye ait 3D modelleri getiren fonksiyon
- */
-export const getProject3DModels = async (projectId: string): Promise<any[]> => {
+// Kapak görseli URL'sini getir
+export const getSiteImage = async (imageKey: string): Promise<string | null> => {
   try {
     const { data, error } = await supabase
-      .from('project_3d_models')
-      .select('*')
-      .eq('project_id', projectId);
+      .from('site_images')
+      .select('image_url')
+      .eq('image_key', imageKey)
+      .single();
     
-    if (error) throw error;
-    
-    return data || [];
+    if (error) return null;
+    return data?.image_url || null;
   } catch (error) {
-    console.error('3D model getirme hatası:', error);
-    return [];
+    console.error('Site görseli getirme hatası:', error);
+    return null;
   }
 };
