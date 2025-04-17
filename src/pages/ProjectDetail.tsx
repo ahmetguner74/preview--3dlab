@@ -54,9 +54,12 @@ const ProjectDetail = () => {
   const beforeImageUrl = beforeImage || 'https://images.unsplash.com/photo-1503174971373-b1f69850bded?q=80&w=2013';
   const afterImageUrl = afterImage || mainImage;
   
-  const videoUrl = videos.length > 0 
+  const hasVideos = videos && videos.length > 0;
+  console.log('Videolar:', videos);
+  
+  const videoUrl = hasVideos 
     ? videos[0].url
-    : 'https://player.vimeo.com/video/451913264?autoplay=1&loop=1&muted=1';
+    : '';
 
   const threeDModels = models.filter(model => model.type === '3d_model');
   const pointCloudModels = models.filter(model => model.type === 'point_cloud');
@@ -89,7 +92,7 @@ const ProjectDetail = () => {
                     Öncesi/Sonrası
                   </TabsTrigger>
                 )}
-                {videos.length > 0 && (
+                {hasVideos && (
                   <TabsTrigger 
                     value="video"
                     className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4 whitespace-nowrap"
@@ -134,7 +137,7 @@ const ProjectDetail = () => {
                 </TabsContent>
               )}
               
-              {videos.length > 0 && (
+              {hasVideos && (
                 <TabsContent value="video">
                   <ProjectVideo videoUrl={videoUrl} />
                 </TabsContent>

@@ -68,6 +68,7 @@ export const useProjectData = (slug: string | undefined) => {
         if (videoError) {
           console.error('Videolar yüklenirken hata oluştu:', videoError);
         } else {
+          console.log('Yüklenen video verileri:', videoData);
           setVideos((videoData || []).map(video => ({
             url: video.video_url,
             thumbnail: video.thumbnail_url || undefined

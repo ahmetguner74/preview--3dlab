@@ -23,9 +23,22 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
 }) => {
   const [videoUrl, setVideoUrl] = useState<string>("");
 
+  const validateVideoUrl = (url: string): boolean => {
+    // YouTube ve Vimeo URL formatlarını kontrol et
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/).+/;
+    const vimeoRegex = /^(https?:\/\/)?(www\.)?(vimeo\.com\/).+/;
+    
+    return youtubeRegex.test(url) || vimeoRegex.test(url);
+  };
+
   const handleVideoUrlAdd = async () => {
     if (!videoUrl.trim()) {
       toast.error('Video URL boş olamaz');
+      return;
+    }
+    
+    if (!validateVideoUrl(videoUrl)) {
+      toast.error('Geçerli bir YouTube veya Vimeo URL\'si girin');
       return;
     }
     
