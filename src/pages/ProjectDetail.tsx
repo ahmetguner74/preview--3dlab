@@ -163,7 +163,7 @@ const ProjectDetail = () => {
           </div>
           
           <ProjectDescription project={project} />
-          <ProjectSimilar title={project.title} />
+          <ProjectSimilar title={project.title} projectId={project.id} />
         </div>
       </section>
     </Layout>
