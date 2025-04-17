@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -5,7 +6,6 @@ import Layout from '../components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import ProjectHeader from '@/components/project-detail/ProjectHeader';
-import ProjectMainImage from '@/components/project-detail/ProjectMainImage';
 import ProjectDescription from '@/components/project-detail/ProjectDescription';
 import ProjectGallery from '@/components/project-detail/ProjectGallery';
 import ProjectBeforeAfter from '@/components/project-detail/ProjectBeforeAfter';
