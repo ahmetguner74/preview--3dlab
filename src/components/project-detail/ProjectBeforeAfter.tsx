@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Slider } from "@/components/ui/slider";
 import { MoveHorizontal } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,14 +12,67 @@ interface ProjectBeforeAfterProps {
 
 const ProjectBeforeAfter: React.FC<ProjectBeforeAfterProps> = ({ beforeImageUrl, afterImageUrl, title }) => {
   const [sliderValue, setSliderValue] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
   const handleSliderChange = (value: number[]) => {
     setSliderValue(value[0]);
   };
+  
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  
+  const handleDrag = (clientX: number) => {
+    if (!isDragging || !containerRef.current) return;
+    
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const containerWidth = rect.width;
+    
+    // Sınırları kontrol et
+    let newValue = (x / containerWidth) * 100;
+    newValue = Math.max(0, Math.min(100, newValue));
+    
+    setSliderValue(newValue);
+  };
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    handleDrag(e.clientX);
+  };
+  
+  const handleTouchMove = (e: TouchEvent) => {
+    if (e.touches[0]) {
+      handleDrag(e.touches[0].clientX);
+    }
+  };
+  
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+  
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleDragEnd);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleDragEnd);
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleDragEnd);
+    };
+  }, [isDragging]);
 
   return (
-    <div className="relative h-[600px] overflow-hidden">
+    <div className="relative h-[600px] overflow-hidden" ref={containerRef}>
       {/* Container */}
       <div className="relative w-full h-full">
         {/* Öncesi Görsel */}
@@ -43,17 +96,24 @@ const ProjectBeforeAfter: React.FC<ProjectBeforeAfterProps> = ({ beforeImageUrl,
           />
         </div>
         
-        {/* Dikey Slider */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="relative h-full w-0.5 flex items-center">
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm" />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center pointer-events-auto">
-              <MoveHorizontal className="text-gray-600" size={20} />
-            </div>
-          </div>
+        {/* Dikey Slider Çizgisi */}
+        <div 
+          className="absolute inset-y-0 bg-white/50 backdrop-blur-sm w-0.5"
+          style={{ left: `${sliderValue}%` }}
+        />
+        
+        {/* Sürükleme Kontrolü - Ortadaki Buton */}
+        <div 
+          ref={handleRef}
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center z-10 cursor-grab active:cursor-grabbing"
+          style={{ left: `${sliderValue}%` }}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
+        >
+          <MoveHorizontal className="text-gray-600" size={20} />
         </div>
         
-        {/* Slider Kontrolü */}
+        {/* Yardımcı Slider Kontrolü */}
         <div className={`absolute ${isMobile ? 'bottom-6 px-6' : 'right-6'} w-${isMobile ? 'full' : '32'} ${isMobile ? '' : 'h-full'} pointer-events-none`}>
           <div className={`relative ${isMobile ? '' : 'h-full'} flex ${isMobile ? '' : 'items-center'}`}>
             <Slider
