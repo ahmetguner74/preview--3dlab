@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -7,7 +6,6 @@ import { Project } from '@/types/project';
 import Layout from '../components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Yeni bileşenleri import et
 import ProjectHeader from '@/components/project-detail/ProjectHeader';
 import ProjectMainImage from '@/components/project-detail/ProjectMainImage';
 import ProjectDescription from '@/components/project-detail/ProjectDescription';
@@ -55,7 +53,6 @@ const ProjectDetail = () => {
         
         setProject(projectData);
         
-        // Resim verilerini yükle
         const { data: imageData, error: imageError } = await supabase
           .from('project_images')
           .select('*')
@@ -79,7 +76,6 @@ const ProjectDetail = () => {
           if (afterImg) setAfterImage(afterImg.image_url);
         }
         
-        // Video verilerini yükle
         const { data: videoData, error: videoError } = await supabase
           .from('project_videos')
           .select('*')
@@ -95,7 +91,6 @@ const ProjectDetail = () => {
           })));
         }
         
-        // 3D model verilerini yükle
         const { data: modelData, error: modelError } = await supabase
           .from('project_3d_models')
           .select('*')
@@ -120,7 +115,6 @@ const ProjectDetail = () => {
     fetchProjectDetails();
   }, [slug]);
 
-  // Model seçim işleyicileri
   const handleThreeDModelSelect = (modelUrl: string) => {
     setModels(prev => {
       const newModels = [...prev];
@@ -172,7 +166,6 @@ const ProjectDetail = () => {
     );
   }
 
-  // Veri hazırlama
   const mainImage = images.length > 0 
     ? images[0].url 
     : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
@@ -195,27 +188,23 @@ const ProjectDetail = () => {
 
   return (
     <Layout>
-      <section className="pt-16 md:pt-24">
+      <section>
         <div className="arch-container">
           <ProjectHeader project={project} />
           
-          <ProjectMainImage imageUrl={mainImage} title={project.title} />
-          
-          <ProjectDescription project={project} />
-          
           <div className="mb-16">
-            <Tabs defaultValue="photos">
-              <TabsList className="border-b border-gray-200 w-full justify-start space-x-8 mb-8">
+            <Tabs defaultValue="gallery" className="w-full">
+              <TabsList className="border-b border-gray-200 w-full justify-start space-x-8 mb-8 overflow-x-auto flex-nowrap">
                 <TabsTrigger 
-                  value="photos"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                  value="gallery"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4 whitespace-nowrap"
                 >
                   Galeri
                 </TabsTrigger>
                 {beforeImage && afterImage && (
                   <TabsTrigger 
                     value="before-after"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4 whitespace-nowrap"
                   >
                     Öncesi/Sonrası
                   </TabsTrigger>
@@ -223,7 +212,7 @@ const ProjectDetail = () => {
                 {videos.length > 0 && (
                   <TabsTrigger 
                     value="video"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4 whitespace-nowrap"
                   >
                     Video
                   </TabsTrigger>
@@ -231,7 +220,7 @@ const ProjectDetail = () => {
                 {threeDModels.length > 0 && (
                   <TabsTrigger 
                     value="3d-model"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4 whitespace-nowrap"
                   >
                     3D Model
                   </TabsTrigger>
@@ -239,14 +228,15 @@ const ProjectDetail = () => {
                 {pointCloudModels.length > 0 && (
                   <TabsTrigger 
                     value="point-cloud"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none pb-4 whitespace-nowrap"
                   >
                     Nokta Bulutu
                   </TabsTrigger>
                 )}
               </TabsList>
               
-              <TabsContent value="photos">
+              <TabsContent value="gallery">
+                <ProjectMainImage imageUrl={mainImage} title={project.title} />
                 <ProjectGallery 
                   images={images} 
                   title={project.title}
@@ -292,6 +282,7 @@ const ProjectDetail = () => {
             </Tabs>
           </div>
           
+          <ProjectDescription project={project} />
           <ProjectSimilar title={project.title} />
         </div>
       </section>
