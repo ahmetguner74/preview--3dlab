@@ -19,7 +19,7 @@ const AboutPreview = () => {
         <div className="grid md:grid-cols-2 gap-12">
           <div className="space-y-6">
             <h2 className="text-sm uppercase text-arch-gray tracking-wider">Hakkımızda</h2>
-            <h3 className="text-2xl md:text-4xl font-display">Zaman ve amaçla birlikte gelişen alanlar yaratıyoruz</h3>
+            <h3 className="text-2xl md:text-4xl font-display">Tarihi yapılardan modern komplekslere kadar farklı karmaşıklıktaki nesnelerle çalışıyoruz.</h3>
             <p className="text-arch-gray">Çalışma sonucunda lazer tarama noktaları bulutu, fotogrametrik model, ortofoto planlar ve ölçülü restorasyon çizimleri tarafınıza teslim edilir.</p>
             <div className="pt-4">
               <Link to="/about" className="inline-flex items-center gap-1 border-b border-arch-black pb-1 hover:text-arch-gray hover:border-arch-gray transition-colors">
