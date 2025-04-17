@@ -5,23 +5,31 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface ProjectGalleryProps {
   images: {url: string, type: string}[];
   title: string;
-  mainImage: string;
 }
 
-const ProjectGallery: React.FC<ProjectGalleryProps> = ({ images, title, mainImage }) => {
+const ProjectGallery: React.FC<ProjectGalleryProps> = ({ images, title }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const galleryImages = images.filter(img => img.type === 'gallery');
   
   const nextImage = () => {
     setCurrentImageIndex((prev) => 
-      prev === images.length - 1 ? 0 : prev + 1
+      prev === galleryImages.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => 
-      prev === 0 ? images.length - 1 : prev - 1
+      prev === 0 ? galleryImages.length - 1 : prev - 1
     );
   };
+  
+  if (galleryImages.length === 0) {
+    return (
+      <div className="h-96 bg-arch-light-gray flex items-center justify-center">
+        <p className="text-gray-500">Bu proje için galeri görseli bulunmamaktadır.</p>
+      </div>
+    );
+  }
   
   return (
     <div className="grid md:grid-cols-4 gap-6">
@@ -30,7 +38,7 @@ const ProjectGallery: React.FC<ProjectGalleryProps> = ({ images, title, mainImag
         <p className="text-arch-gray text-sm">
           {title}'nin farklı açılardan görüntülerini inceleyebilirsiniz.
         </p>
-        {images.length > 1 && (
+        {galleryImages.length > 1 && (
           <>
             <div className="flex gap-2">
               <button 
@@ -47,14 +55,14 @@ const ProjectGallery: React.FC<ProjectGalleryProps> = ({ images, title, mainImag
               </button>
             </div>
             <p className="text-sm">
-              {currentImageIndex + 1} / {images.length}
+              {currentImageIndex + 1} / {galleryImages.length}
             </p>
           </>
         )}
       </div>
       <div className="md:col-span-3 h-96 md:h-[500px] bg-arch-light-gray">
         <img 
-          src={images.length > 0 ? images[currentImageIndex].url : mainImage} 
+          src={galleryImages[currentImageIndex].url}
           alt={`${title} - Görsel ${currentImageIndex + 1}`}
           className="w-full h-full object-cover"
         />

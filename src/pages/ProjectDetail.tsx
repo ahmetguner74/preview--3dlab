@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -119,11 +118,9 @@ const ProjectDetail = () => {
               </TabsList>
               
               <TabsContent value="gallery">
-                <ProjectMainImage imageUrl={mainImage} title={project.title} />
                 <ProjectGallery 
                   images={images} 
                   title={project.title}
-                  mainImage={mainImage} 
                 />
               </TabsContent>
               
