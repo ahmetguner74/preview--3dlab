@@ -20,7 +20,7 @@ const Hero = () => {
   };
   return <section className="relative h-[90vh] flex items-center overflow-hidden">
       {/* Hero background - Şimdi dinamik olarak veritabanından geliyor */}
-      <div className="absolute inset-0 bg-arch-black opacity-50 z-10 rounded-3xl bg-slate-900"></div>
+      <div className="absolute inset-0 bg-arch-black opacity-50 z-10 rounded-3xl bg-black"></div>
       <div className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center`} style={backgroundImage ? {
       backgroundImage: `url('${backgroundImage}')`
     } : {}} />
