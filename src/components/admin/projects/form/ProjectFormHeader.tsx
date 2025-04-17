@@ -1,21 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import ProjectPreviewDialog from '@/components/admin/projects/ProjectPreviewDialog';
+import { Project } from '@/types/project';
 
 interface ProjectFormHeaderProps {
   isEditing: boolean;
   saving: boolean;
   onSave: () => void;
+  project: Partial<Project>;
 }
 
 const ProjectFormHeader: React.FC<ProjectFormHeaderProps> = ({ 
   isEditing, 
   saving, 
-  onSave 
+  onSave,
+  project
 }) => {
   const navigate = useNavigate();
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const handlePreview = () => {
+    setPreviewOpen(true);
+  };
 
   return (
     <header className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
@@ -46,6 +55,7 @@ const ProjectFormHeader: React.FC<ProjectFormHeaderProps> = ({
         <Button 
           variant="outline" 
           size="sm"
+          onClick={handlePreview}
         >
           <Eye size={16} className="mr-1" />
           Önizle
@@ -69,6 +79,13 @@ const ProjectFormHeader: React.FC<ProjectFormHeaderProps> = ({
           )}
         </Button>
       </div>
+
+      {/* Proje Önizleme Dialog */}
+      <ProjectPreviewDialog 
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        project={project}
+      />
     </header>
   );
 };

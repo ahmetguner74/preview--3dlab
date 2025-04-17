@@ -59,7 +59,8 @@ const ProjectForm = () => {
       <ProjectFormHeader 
         isEditing={isEditing} 
         saving={saving} 
-        onSave={handleSubmit} 
+        onSave={handleSubmit}
+        project={project}
       />
 
       <div className="flex gap-6">
