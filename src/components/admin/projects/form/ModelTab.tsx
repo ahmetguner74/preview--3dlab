@@ -1,12 +1,21 @@
+
 import React, { useState } from 'react';
-import { Box, X, Link } from 'lucide-react';
+import { Box, X, Link, ExternalLink, Code } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import { Project3DModel } from '@/types/project';
 import { upload3DModel } from '@/utils/mediaHelpers';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Info } from 'lucide-react';
 
 interface ModelTabProps {
   projectId: string | undefined;
@@ -22,6 +31,7 @@ const ModelTab: React.FC<ModelTabProps> = ({
   setProject3DModels
 }) => {
   const [modelUrl, setModelUrl] = useState('');
+  const [embedCode, setEmbedCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleUrlSubmit = async (e: React.FormEvent) => {
@@ -51,12 +61,62 @@ const ModelTab: React.FC<ModelTabProps> = ({
 
       if (error) throw error;
 
-      setProject3DModels(prev => [...prev, data]);
+      // Tip güvenliğini sağlamak için model_type'ı açıkça dönüştürüyoruz
+      const newModel: Project3DModel = {
+        ...data,
+        model_type: data.model_type as "3d_model" | "point_cloud"
+      };
+      
+      setProject3DModels(prev => [...prev, newModel]);
       setModelUrl('');
       toast.success('Model başarıyla eklendi');
     } catch (error) {
       console.error('Model eklenirken hata:', error);
       toast.error('Model eklenirken bir hata oluştu');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEmbedSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!projectId && !isEditing) {
+      toast.error('Önce projeyi kaydetmelisiniz');
+      return;
+    }
+
+    if (!embedCode.includes('<iframe') || !embedCode.includes('sketchfab.com')) {
+      toast.error('Geçerli bir Sketchfab embed kodu giriniz');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('project_3d_models')
+        .insert({
+          project_id: projectId,
+          model_url: embedCode,
+          model_type: '3d_model'
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      // Tip güvenliğini sağlamak için model_type'ı açıkça dönüştürüyoruz
+      const newModel: Project3DModel = {
+        ...data,
+        model_type: data.model_type as "3d_model" | "point_cloud"
+      };
+      
+      setProject3DModels(prev => [...prev, newModel]);
+      setEmbedCode('');
+      toast.success('Sketchfab modeli başarıyla eklendi');
+    } catch (error) {
+      console.error('Sketchfab modeli eklenirken hata:', error);
+      toast.error('Sketchfab modeli eklenirken bir hata oluştu');
     } finally {
       setIsSubmitting(false);
     }
@@ -129,31 +189,64 @@ const ModelTab: React.FC<ModelTabProps> = ({
     <div className="bg-white p-6 rounded-md shadow-sm">
       <div className="mb-6">
         <h2 className="text-xl font-medium mb-1">3D Model</h2>
-        <p className="text-sm text-gray-500">Projeye ait 3D modelleri buradan yükleyebilir veya Fab.com URL'si ekleyebilirsiniz.</p>
+        <p className="text-sm text-gray-500">Projeye ait 3D modelleri buradan yükleyebilir veya harici kaynaklardan ekleyebilirsiniz.</p>
       </div>
 
-      {/* Fab.com URL Form */}
-      <div className="mb-6 p-4 border border-dashed rounded-lg">
-        <h3 className="text-sm font-medium mb-2">Fab.com Model URL'si Ekle</h3>
-        <form onSubmit={handleUrlSubmit} className="flex gap-2">
-          <Input
-            type="url"
-            value={modelUrl}
-            onChange={(e) => setModelUrl(e.target.value)}
-            placeholder="https://fab.com/s/your-model-id"
-            className="flex-1"
-          />
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !modelUrl}
-            className="whitespace-nowrap"
-          >
-            URL Ekle
-          </Button>
-        </form>
-        <p className="text-xs text-gray-500 mt-2">
-          * Sadece Fab.com URL'leri desteklenmektedir
-        </p>
+      <div className="mb-6">
+        <Tabs defaultValue="fab" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="fab">Fab.com URL</TabsTrigger>
+            <TabsTrigger value="sketchfab">Sketchfab Embed</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="fab" className="mt-4 p-4 border border-dashed rounded-lg">
+            <h3 className="text-sm font-medium mb-2">Fab.com Model URL'si Ekle</h3>
+            <form onSubmit={handleUrlSubmit} className="flex gap-2">
+              <Input
+                type="url"
+                value={modelUrl}
+                onChange={(e) => setModelUrl(e.target.value)}
+                placeholder="https://fab.com/s/your-model-id"
+                className="flex-1"
+              />
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || !modelUrl}
+                className="whitespace-nowrap"
+              >
+                URL Ekle
+              </Button>
+            </form>
+            <p className="text-xs text-gray-500 mt-2">
+              * Sadece Fab.com URL'leri desteklenmektedir
+            </p>
+          </TabsContent>
+          
+          <TabsContent value="sketchfab" className="mt-4 p-4 border border-dashed rounded-lg">
+            <h3 className="text-sm font-medium mb-2">Sketchfab Embed Kodu Ekle</h3>
+            <form onSubmit={handleEmbedSubmit}>
+              <Textarea
+                value={embedCode}
+                onChange={(e) => setEmbedCode(e.target.value)}
+                placeholder='<div class="sketchfab-embed-wrapper"><iframe title="Model" src="https://sketchfab.com/models/..."></iframe></div>'
+                className="h-32 mb-2"
+              />
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || !embedCode}
+                className="w-full"
+              >
+                Sketchfab Modeli Ekle
+              </Button>
+            </form>
+            <div className="flex items-center gap-2 bg-blue-50 p-2 rounded mt-2">
+              <Info size={16} className="text-blue-500" />
+              <p className="text-xs text-blue-700">
+                Sketchfab'den "Embed" seçeneğini kullanarak aldığınız kodu buraya yapıştırın.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <div className="mb-6">
@@ -175,8 +268,19 @@ const ModelTab: React.FC<ModelTabProps> = ({
             {threeJSModels.map(model => (
               <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
                 <div className="flex items-center flex-1 min-w-0">
-                  <Box className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
-                  {model.model_url.startsWith('https://fab.com/') ? (
+                  {model.model_url.includes('<iframe') ? (
+                    <Code className="h-5 w-5 mr-2 text-purple-500 flex-shrink-0" />
+                  ) : model.model_url.startsWith('https://fab.com/') ? (
+                    <Box className="h-5 w-5 mr-2 text-blue-500 flex-shrink-0" />
+                  ) : (
+                    <Box className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+                  )}
+                  
+                  {model.model_url.includes('<iframe') ? (
+                    <span className="text-sm truncate text-purple-700">
+                      Sketchfab Modeli
+                    </span>
+                  ) : model.model_url.startsWith('https://fab.com/') ? (
                     <a 
                       href={model.model_url}
                       target="_blank"
@@ -184,7 +288,7 @@ const ModelTab: React.FC<ModelTabProps> = ({
                       className="text-blue-500 hover:underline text-sm truncate flex items-center"
                     >
                       <span className="truncate">{model.model_url}</span>
-                      <Link className="h-4 w-4 ml-1 flex-shrink-0" />
+                      <ExternalLink className="h-4 w-4 ml-1 flex-shrink-0" />
                     </a>
                   ) : (
                     <span className="text-sm truncate">

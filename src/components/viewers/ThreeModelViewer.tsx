@@ -72,12 +72,47 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isError, setIsError] = useState(false);
 
+  // Sketchfab iframe kodunu kontrol et
+  if (modelUrl.includes('<iframe') && modelUrl.includes('sketchfab.com')) {
+    // iframe kodunu güvenli bir şekilde göster
+    return (
+      <div 
+        className="w-full h-full min-h-[400px]" 
+        dangerouslySetInnerHTML={{ __html: modelUrl }}
+      />
+    );
+  }
+
   // Model URL'sinin geçerli bir GLB/GLTF dosyası olup olmadığını kontrol et
   const isValidModelUrl = (): boolean => {
     if (!modelUrl) return false;
     const extension = modelUrl.split('.').pop()?.toLowerCase();
     return extension === 'glb' || extension === 'gltf';
   };
+
+  // Fab.com URL'sini kontrol et
+  if (modelUrl.startsWith('https://fab.com/')) {
+    return (
+      <div className="w-full h-full min-h-[400px] flex items-center justify-center flex-col">
+        <iframe 
+          src={`${modelUrl.replace('https://fab.com/', 'https://embed.fab.com/')}`}
+          className="w-full h-full min-h-[400px] border-0"
+          title="Fab.com 3D Model"
+          allow="fullscreen; xr-spatial-tracking"
+        />
+        <div className="mt-2 text-sm text-center text-gray-500">
+          <a 
+            href={modelUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 hover:underline"
+          >
+            Fab.com'da görüntüle
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full min-h-[400px] relative">
