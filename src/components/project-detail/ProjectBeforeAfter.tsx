@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Slider } from "@/components/ui/slider";
 import { MoveHorizontal } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -16,10 +15,6 @@ const ProjectBeforeAfter: React.FC<ProjectBeforeAfterProps> = ({ beforeImageUrl,
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  
-  const handleSliderChange = (value: number[]) => {
-    setSliderValue(value[0]);
-  };
   
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -111,21 +106,6 @@ const ProjectBeforeAfter: React.FC<ProjectBeforeAfterProps> = ({ beforeImageUrl,
           onTouchStart={handleDragStart}
         >
           <MoveHorizontal className="text-gray-600" size={20} />
-        </div>
-        
-        {/* Yardımcı Slider Kontrolü */}
-        <div className={`absolute ${isMobile ? 'bottom-6 px-6' : 'right-6'} w-${isMobile ? 'full' : '32'} ${isMobile ? '' : 'h-full'} pointer-events-none`}>
-          <div className={`relative ${isMobile ? '' : 'h-full'} flex ${isMobile ? '' : 'items-center'}`}>
-            <Slider
-              value={[sliderValue]}
-              onValueChange={handleSliderChange}
-              min={0}
-              max={100}
-              step={0.1}
-              className={`pointer-events-auto ${isMobile ? 'w-full' : 'h-full'}`}
-              orientation={isMobile ? "horizontal" : "vertical"}
-            />
-          </div>
         </div>
       </div>
     </div>
