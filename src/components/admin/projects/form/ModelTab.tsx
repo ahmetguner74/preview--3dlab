@@ -1,7 +1,7 @@
-
-import React from 'react';
-import { Box, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Box, X, Link } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import { Project3DModel } from '@/types/project';
 import { upload3DModel } from '@/utils/mediaHelpers';
@@ -21,6 +21,47 @@ const ModelTab: React.FC<ModelTabProps> = ({
   project3DModels,
   setProject3DModels
 }) => {
+  const [modelUrl, setModelUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!projectId && !isEditing) {
+      toast.error('Önce projeyi kaydetmelisiniz');
+      return;
+    }
+
+    if (!modelUrl.startsWith('https://fab.com/')) {
+      toast.error('Geçerli bir Fab.com URL\'si giriniz');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('project_3d_models')
+        .insert({
+          project_id: projectId,
+          model_url: modelUrl,
+          model_type: '3d_model'
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      setProject3DModels(prev => [...prev, data]);
+      setModelUrl('');
+      toast.success('Model başarıyla eklendi');
+    } catch (error) {
+      console.error('Model eklenirken hata:', error);
+      toast.error('Model eklenirken bir hata oluştu');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handle3DModelUpload = async (file: File) => {
     if (!projectId && !isEditing) {
       toast.error('Önce projeyi kaydetmelisiniz');
@@ -34,7 +75,6 @@ const ModelTab: React.FC<ModelTabProps> = ({
         toast.success('Model başarıyla yüklendi');
         console.log('Model URL alındı:', modelUrl);
         
-        // Yeni model listesini güncelle
         const { data, error } = await supabase
           .from('project_3d_models')
           .select('*')
@@ -44,7 +84,6 @@ const ModelTab: React.FC<ModelTabProps> = ({
         if (!error && data) {
           console.log('Supabase\'den gelen model verileri:', data);
           
-          // Tip dönüşümünü açıkça yaparak model_type'ın "3d_model" veya "point_cloud" olduğundan emin olalım
           const typedModels = data.map(model => ({
             ...model,
             model_type: model.model_type as "3d_model" | "point_cloud"
@@ -90,16 +129,43 @@ const ModelTab: React.FC<ModelTabProps> = ({
     <div className="bg-white p-6 rounded-md shadow-sm">
       <div className="mb-6">
         <h2 className="text-xl font-medium mb-1">3D Model</h2>
-        <p className="text-sm text-gray-500">Projeye ait 3D modelleri buradan yükleyebilirsiniz.</p>
+        <p className="text-sm text-gray-500">Projeye ait 3D modelleri buradan yükleyebilir veya Fab.com URL'si ekleyebilirsiniz.</p>
       </div>
-      
-      <FileUploadBox 
-        onFileSelected={handle3DModelUpload}
-        title="3D Model Yükle"
-        description="OBJ, GLTF, GLB formatları desteklenir. Modeller Three.js ile görüntülenecektir."
-        icon={<Box className="mx-auto h-12 w-12 text-gray-400" />}
-        allowedTypes={['obj', 'gltf', 'glb']}
-      />
+
+      {/* Fab.com URL Form */}
+      <div className="mb-6 p-4 border border-dashed rounded-lg">
+        <h3 className="text-sm font-medium mb-2">Fab.com Model URL'si Ekle</h3>
+        <form onSubmit={handleUrlSubmit} className="flex gap-2">
+          <Input
+            type="url"
+            value={modelUrl}
+            onChange={(e) => setModelUrl(e.target.value)}
+            placeholder="https://fab.com/s/your-model-id"
+            className="flex-1"
+          />
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !modelUrl}
+            className="whitespace-nowrap"
+          >
+            URL Ekle
+          </Button>
+        </form>
+        <p className="text-xs text-gray-500 mt-2">
+          * Sadece Fab.com URL'leri desteklenmektedir
+        </p>
+      </div>
+
+      <div className="mb-6">
+        <h3 className="text-sm font-medium mb-2">Model Dosyası Yükle</h3>
+        <FileUploadBox 
+          onFileSelected={handle3DModelUpload}
+          title="3D Model Yükle"
+          description="OBJ, GLTF, GLB formatları desteklenir. Modeller Three.js ile görüntülenecektir."
+          icon={<Box className="mx-auto h-12 w-12 text-gray-400" />}
+          allowedTypes={['obj', 'gltf', 'glb']}
+        />
+      </div>
 
       {/* 3D Model Listesi */}
       {threeJSModels.length > 0 && (
@@ -108,16 +174,23 @@ const ModelTab: React.FC<ModelTabProps> = ({
           <div className="space-y-2">
             {threeJSModels.map(model => (
               <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                <div className="flex items-center">
-                  <Box className="h-5 w-5 mr-2 text-gray-500" />
-                  <a 
-                    href={model.model_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline text-sm truncate max-w-md"
-                  >
-                    {model.model_url.split('/').pop()}
-                  </a>
+                <div className="flex items-center flex-1 min-w-0">
+                  <Box className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+                  {model.model_url.startsWith('https://fab.com/') ? (
+                    <a 
+                      href={model.model_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline text-sm truncate flex items-center"
+                    >
+                      <span className="truncate">{model.model_url}</span>
+                      <Link className="h-4 w-4 ml-1 flex-shrink-0" />
+                    </a>
+                  ) : (
+                    <span className="text-sm truncate">
+                      {model.model_url.split('/').pop()}
+                    </span>
+                  )}
                 </div>
                 <Button 
                   variant="ghost" 
