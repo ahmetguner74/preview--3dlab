@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Project, ProjectImage, ProjectVideo as ProjectVideoType, Project3DModel } from '@/types/project';
+import { Project } from '@/types/project';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import ProjectHeader from '@/components/project-detail/ProjectHeader';
@@ -13,6 +13,7 @@ import ProjectPointCloud from '@/components/project-detail/ProjectPointCloud';
 import ProjectThreeDModel from '@/components/project-detail/ProjectThreeDModel';
 import ProjectSimilar from '@/components/project-detail/ProjectSimilar';
 import { supabase } from '@/integrations/supabase/client';
+import { useMediaSelectors } from '@/hooks/useMediaSelectors';
 
 interface ProjectPreviewDialogProps {
   open: boolean;
@@ -30,14 +31,15 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
   const [project3DModels, setProject3DModels] = useState<{ url: string, type: string }[]>([]);
   const [beforeImage, setBeforeImage] = useState<string | null>(null);
   const [afterImage, setAfterImage] = useState<string | null>(null);
+
+  const { handleThreeDModelSelect, handlePointCloudSelect } = useMediaSelectors();
   
-  // Proje medyalarını yükle
   useEffect(() => {
     if (project.id && open) {
-      // Görselleri yükle
+      // Proje medyalarını yükle
       const fetchProjectMedia = async () => {
         try {
-          // Proje görselleri
+          // Görseller
           const { data: images, error: imagesError } = await supabase
             .from('project_images')
             .select('*')
@@ -59,7 +61,7 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
           setBeforeImage(beforeImg);
           setAfterImage(afterImg);
           
-          // Videoları yükle
+          // Videolar
           const { data: videos, error: videosError } = await supabase
             .from('project_videos')
             .select('*')
@@ -72,7 +74,7 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             url: video.video_url
           })) || []);
           
-          // 3D Modelleri yükle
+          // 3D Modeller
           const { data: models, error: modelsError } = await supabase
             .from('project_3d_models')
             .select('*')
@@ -93,27 +95,26 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
       fetchProjectMedia();
     }
   }, [project.id, open]);
-  
-  // 3D modelleri ve nokta bulutu modellerini filtrele
-  const threeDModels = project3DModels.filter(model => model.type === '3d_model');
-  const pointCloudModels = project3DModels.filter(model => model.type === 'point_cloud');
-  
-  // Aktif modelleri belirle
-  const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
-  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : null;
-  
+
   // Video kontrolü
   const hasVideos = projectVideos.length > 0;
   const videoUrl = hasVideos ? projectVideos[0].url : '';
   
   // Before/After kontrolü
   const hasBeforeAfter = beforeImage && afterImage;
+  
+  // 3D modelleri ve nokta bulutu modellerini filtrele
+  const threeDModels = project3DModels.filter(model => model.type === '3d_model');
+  const pointCloudModels = project3DModels.filter(model => model.type === 'point_cloud');
+  
+  const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
+  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] w-full h-[90vh] overflow-auto">
         <DialogHeader className="flex flex-row items-center justify-between sticky top-0 bg-white z-50 pb-4 border-b">
-          <DialogTitle>Proje Önizleme: {project.title || 'İsimsiz Proje'}</DialogTitle>
+          <DialogTitle>Önizleme: {project.title || 'İsimsiz Proje'}</DialogTitle>
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             <ArrowLeft size={16} className="mr-1" />
             Düzenlemeye Dön
@@ -122,12 +123,12 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
         
         <div className="bg-white">
           <ProjectHeader project={project as Project} />
-
+          
           <ProjectDescription project={project as Project} />
           
           {hasBeforeAfter && (
             <ProjectBeforeAfter 
-              beforeImageUrl={beforeImage!} 
+              beforeImageUrl={beforeImage!}
               afterImageUrl={afterImage!}
               title={project.title || 'Proje'}
             />
@@ -148,7 +149,7 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             <ProjectPointCloud
               models={pointCloudModels}
               activePointCloudUrl={activePointCloud!}
-              onPointCloudSelect={() => {}}
+              onPointCloudSelect={handlePointCloudSelect}
             />
           )}
           
@@ -156,7 +157,7 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             <ProjectThreeDModel
               models={threeDModels}
               activeModelUrl={activeThreeDModel}
-              onModelSelect={() => {}}
+              onModelSelect={handleThreeDModelSelect}
             />
           )}
           
