@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Project } from '@/types/project';
@@ -38,10 +37,8 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
   
   useEffect(() => {
     if (project.id && open) {
-      // Proje medyalarını yükle
       const fetchProjectMedia = async () => {
         try {
-          // Görseller
           const { data: images, error: imagesError } = await supabase
             .from('project_images')
             .select('*')
@@ -57,13 +54,11 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
           
           setProjectImages(formattedImages);
           
-          // Before/After görselleri
           const beforeImg = formattedImages.find(img => img.type === 'before')?.url || null;
           const afterImg = formattedImages.find(img => img.type === 'after')?.url || null;
           setBeforeImage(beforeImg);
           setAfterImage(afterImg);
           
-          // Videolar
           const { data: videos, error: videosError } = await supabase
             .from('project_videos')
             .select('*')
@@ -76,7 +71,6 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             url: video.video_url
           })) || []);
           
-          // 3D Modeller
           const { data: models, error: modelsError } = await supabase
             .from('project_3d_models')
             .select('*')
@@ -91,7 +85,6 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
           
           setProject3DModels(formattedModels);
           
-          // İlk 3D ve nokta bulutu modellerini aktif olarak ayarla
           const threeDModels = formattedModels.filter(m => m.type === '3d_model');
           const pointCloudModels = formattedModels.filter(m => m.type === 'point_cloud');
           
@@ -112,18 +105,14 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
     }
   }, [project.id, open]);
 
-  // Video kontrolü
   const hasVideos = projectVideos.length > 0;
   const videoUrl = hasVideos ? projectVideos[0].url : '';
   
-  // Before/After kontrolü
   const hasBeforeAfter = beforeImage && afterImage;
   
-  // 3D modelleri ve nokta bulutu modellerini filtrele
   const threeDModels = project3DModels.filter(model => model.type === '3d_model');
   const pointCloudModels = project3DModels.filter(model => model.type === 'point_cloud');
   
-  // Model seçme fonksiyonları
   const onThreeDModelSelect = (modelUrl: string) => {
     setActiveThreeDModel(modelUrl);
   };
@@ -134,20 +123,40 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] w-full h-[90vh] overflow-auto">
-        <DialogHeader className="flex flex-row items-center justify-between sticky top-0 bg-white z-50 pb-4 border-b">
-          <DialogTitle>Önizleme: {project.title || 'İsimsiz Proje'}</DialogTitle>
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+      <DialogContent className="max-w-[90vw] w-full h-[90vh] overflow-auto p-0">
+        <div className="relative h-[400px] w-full">
+          <img 
+            src={project.thumbnail || 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070'} 
+            alt={project.title} 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onOpenChange(false)}
+            className="absolute top-4 left-4 text-white hover:bg-white/20"
+          >
             <ArrowLeft size={16} className="mr-1" />
             Düzenlemeye Dön
           </Button>
-        </DialogHeader>
-        
-        <div className="bg-white">
-          <ProjectHeader project={project as Project} />
           
+          <div className="absolute bottom-0 left-0 w-full p-8 text-white">
+            <h1 className="text-4xl font-display font-light mb-2">{project.title || 'İsimsiz Proje'}</h1>
+            <div className="flex items-center gap-4">
+              <p>{project.category || 'Kategori Belirtilmemiş'}</p>
+              <span>•</span>
+              <p>{project.location || 'Konum Belirtilmemiş'}</p>
+              <span>•</span>
+              <p>{project.year || 'Yıl Belirtilmemiş'}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
           <ProjectDescription project={project as Project} />
-          
+
           {hasBeforeAfter && (
             <ProjectBeforeAfter 
               beforeImageUrl={beforeImage!}
