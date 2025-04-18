@@ -31,6 +31,8 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
   const [project3DModels, setProject3DModels] = useState<{ url: string, type: string }[]>([]);
   const [beforeImage, setBeforeImage] = useState<string | null>(null);
   const [afterImage, setAfterImage] = useState<string | null>(null);
+  const [activeThreeDModel, setActiveThreeDModel] = useState<string | null>(null);
+  const [activePointCloud, setActivePointCloud] = useState<string | null>(null);
 
   const { handleThreeDModelSelect, handlePointCloudSelect } = useMediaSelectors();
   
@@ -82,10 +84,24 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             
           if (modelsError) throw modelsError;
           
-          setProject3DModels(models?.map(model => ({
+          const formattedModels = models?.map(model => ({
             url: model.model_url,
             type: model.model_type
-          })) || []);
+          })) || [];
+          
+          setProject3DModels(formattedModels);
+          
+          // İlk 3D ve nokta bulutu modellerini aktif olarak ayarla
+          const threeDModels = formattedModels.filter(m => m.type === '3d_model');
+          const pointCloudModels = formattedModels.filter(m => m.type === 'point_cloud');
+          
+          if (threeDModels.length > 0) {
+            setActiveThreeDModel(threeDModels[0].url);
+          }
+          
+          if (pointCloudModels.length > 0) {
+            setActivePointCloud(pointCloudModels[0].url);
+          }
           
         } catch (error) {
           console.error('Proje medyaları yüklenirken hata:', error);
@@ -107,8 +123,14 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
   const threeDModels = project3DModels.filter(model => model.type === '3d_model');
   const pointCloudModels = project3DModels.filter(model => model.type === 'point_cloud');
   
-  const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
-  const activePointCloud = pointCloudModels.length > 0 ? pointCloudModels[0].url : null;
+  // Model seçme fonksiyonları
+  const onThreeDModelSelect = (modelUrl: string) => {
+    setActiveThreeDModel(modelUrl);
+  };
+  
+  const onPointCloudSelect = (modelUrl: string) => {
+    setActivePointCloud(modelUrl);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -149,7 +171,7 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             <ProjectPointCloud
               models={pointCloudModels}
               activePointCloudUrl={activePointCloud!}
-              onPointCloudSelect={handlePointCloudSelect}
+              onPointCloudSelect={onPointCloudSelect}
             />
           )}
           
@@ -157,7 +179,7 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
             <ProjectThreeDModel
               models={threeDModels}
               activeModelUrl={activeThreeDModel}
-              onModelSelect={handleThreeDModelSelect}
+              onModelSelect={onThreeDModelSelect}
             />
           )}
           
