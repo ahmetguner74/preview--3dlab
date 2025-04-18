@@ -10,6 +10,7 @@ interface FileUploadBoxProps {
   description?: string;
   allowedTypes?: string[];
   icon?: React.ReactNode;
+  maxSizeMB?: number;
 }
 
 const FileUploadBox = ({
@@ -17,7 +18,8 @@ const FileUploadBox = ({
   title,
   description,
   allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'obj', 'gltf', 'glb', 'las', 'laz', 'xyz', 'pts'],
-  icon
+  icon,
+  maxSizeMB = 5
 }: FileUploadBoxProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -39,21 +41,32 @@ const FileUploadBox = ({
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      await processFile(file);
+      await validateAndProcessFile(file);
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      await processFile(file);
+      await validateAndProcessFile(file);
     }
   };
 
-  const processFile = async (file: File) => {
+  const validateAndProcessFile = async (file: File) => {
     const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+    
+    // Dosya türü kontrolü
     if (allowedTypes && !allowedTypes.includes(fileExt)) {
       const errorMsg = `Geçersiz dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`;
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
+      return;
+    }
+
+    // Dosya boyutu kontrolü (MB cinsinden)
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > maxSizeMB) {
+      const errorMsg = `Dosya boyutu ${maxSizeMB}MB'dan küçük olmalıdır. Seçilen dosya: ${fileSizeMB.toFixed(2)}MB`;
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
       return;
