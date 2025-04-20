@@ -1,11 +1,9 @@
-
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
 const resources = {
   tr: {
     translation: {
-      // Sabit arayüz metinleri 
       "Projects": "Projeler",
       "About": "Hakkımızda",
       "Contact": "İletişim",
@@ -21,7 +19,16 @@ const resources = {
       "Oops! Page not found": "Oops! Sayfa bulunamadı",
       "Next": "İleri",
       "Previous": "Geri",
-      // ... diğer metinler (gerektikçe eklenecek)
+      "Messages": "Mesajlar",
+      "Settings": "Ayarlar",
+      "Coming Soon!": "Çok Yakında!",
+      "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
+        "Bu sayfa çok yakında iletişim formundan gelen mesajları gösterecek. Buradan tüm site mesajlarını görüntüleyebilir, yanıtlayabilir ve yönetebilirsiniz.",
+      "No messages have been received yet.": "Henüz mesaj gelmedi.",
+      "Return to Dashboard": "Gösterge Paneline Dön",
+      "Site general settings, user roles, and application preferences will be managed here in the next versions. Today, you can adjust contact information from 'Site Ayarları' in the sidebar.":
+        "Sitenin genel ayarları, kullanıcı rolleri ve uygulama tercihleri bir sonraki sürümlerde burada yönetilecek. Bugün için yan menüdeki 'Site Ayarları' bölümünden iletişim bilgilerini ayarlayabilirsiniz.",
+      "Nothing to edit here right now.": "Şu anda burada düzenlenecek bir şey yok.",
     },
   },
   en: {
@@ -41,7 +48,16 @@ const resources = {
       "Oops! Page not found": "Oops! Page not found",
       "Next": "Next",
       "Previous": "Previous",
-      // ... diğer metinler (gerektikçe eklenecek)
+      "Messages": "Messages",
+      "Settings": "Settings",
+      "Coming Soon!": "Coming Soon!",
+      "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
+        "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.",
+      "No messages have been received yet.": "No messages have been received yet.",
+      "Return to Dashboard": "Return to Dashboard",
+      "Site general settings, user roles, and application preferences will be managed here in upcoming versions. For now, you can adjust contact information from 'Site Ayarları' in the sidebar.":
+        "Site general settings, user roles, and application preferences will be managed here in upcoming versions. For now, you can adjust contact information from 'Site Ayarları' in the sidebar.",
+      "Nothing to edit here right now.": "Nothing to edit here right now.",
     },
   },
 };

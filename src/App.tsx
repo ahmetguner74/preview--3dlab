@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,8 @@ import ProjectList from "./pages/admin/ProjectList";
 import ProjectForm from "./pages/admin/ProjectForm";
 import SiteSettings from "./pages/admin/SiteSettings";
 import CoverImages from "./pages/admin/CoverImages";
+import Messages from "./pages/admin/Messages";
+import SettingsPage from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 import "./i18n";
 
@@ -37,6 +38,8 @@ const App = () => (
           <Route path="/admin/projects/:id/edit" element={<ProjectForm />} />
           <Route path="/admin/site-settings" element={<SiteSettings />} />
           <Route path="/admin/cover-images" element={<CoverImages />} />
+          <Route path="/admin/messages" element={<Messages />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
