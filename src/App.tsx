@@ -15,6 +15,7 @@ import ProjectForm from "./pages/admin/ProjectForm";
 import SiteSettings from "./pages/admin/SiteSettings";
 import CoverImages from "./pages/admin/CoverImages";
 import NotFound from "./pages/NotFound";
+import "./i18n";
 
 const queryClient = new QueryClient();
 

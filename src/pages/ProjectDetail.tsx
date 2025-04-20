@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -14,18 +13,20 @@ import ProjectPointCloud from '@/components/project-detail/ProjectPointCloud';
 import ProjectSimilar from '@/components/project-detail/ProjectSimilar';
 import { useProjectData } from '@/hooks/useProjectData';
 import { useMediaSelectors } from '@/hooks/useMediaSelectors';
+import { useTranslation } from 'react-i18next';
 
 const ProjectDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { project, loading, images, videos, models, beforeImage, afterImage } = useProjectData(slug);
   const { handleThreeDModelSelect, handlePointCloudSelect } = useMediaSelectors();
+  const { t } = useTranslation();
 
   if (loading) {
     return (
       <Layout>
         <div className="arch-container py-24 text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em]"></div>
-          <p className="mt-2">Yükleniyor...</p>
+          <p className="mt-2">{t("Loading") || "Yükleniyor..."}</p>
         </div>
       </Layout>
     );
@@ -35,10 +36,10 @@ const ProjectDetail = () => {
     return (
       <Layout>
         <div className="arch-container py-24">
-          <h1 className="text-2xl">Proje bulunamadı</h1>
+          <h1 className="text-2xl">{t("Page not found")}</h1>
           <Link to="/projects" className="inline-flex items-center mt-4 text-arch-black hover:underline">
             <ArrowLeft size={18} className="mr-2" />
-            Projelere dön
+            {t("Projects")}
           </Link>
         </div>
       </Layout>
@@ -69,7 +70,6 @@ const ProjectDetail = () => {
     <Layout>
       <section>
         <div className="arch-container max-w-5xl px-2 sm:px-4 mx-auto"> 
-          {/* Kapak görseli + Proje başlığı */}
           <div className="relative h-[300px] md:h-[400px] mb-12 rounded-lg overflow-hidden">
             <img
               src={project.thumbnail || mainImage}
@@ -80,29 +80,26 @@ const ProjectDetail = () => {
             <div className="absolute bottom-0 left-0 p-8">
               <h1 className="text-4xl font-display font-light text-white">{project.title}</h1>
               <div className="flex items-center gap-4 text-white text-lg">
-                <span>{project.category || 'Kategori Belirtilmemiş'}</span>
+                <span>{project.category || t("Category not set")}</span>
                 <span>•</span>
-                <span>{project.location || 'Konum Belirtilmemiş'}</span>
+                <span>{project.location || t("Location not set")}</span>
                 <span>•</span>
-                <span>{project.year || 'Yıl Belirtilmemiş'}</span>
+                <span>{project.year || t("Year not set")}</span>
               </div>
             </div>
           </div>
 
-          {/* Proje Açıklama Bölümü */}
           <ProjectHeader project={project} />
           <ProjectDescription project={project} />
 
-          {/* Galeri */}
           <div className="mb-16">
-            <h2 className="text-2xl font-display mb-6">Galeri</h2>
+            <h2 className="text-2xl font-display mb-6">{t("Gallery")}</h2>
             <ProjectGallery images={images} title={project.title} />
           </div>
 
-          {/* Öncesi / Sonrası */}
           {beforeImage && afterImage && (
             <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">Öncesi / Sonrası</h2>
+              <h2 className="text-2xl font-display mb-6">{t("Before / After")}</h2>
               <ProjectBeforeAfter
                 beforeImageUrl={beforeImageUrl}
                 afterImageUrl={afterImageUrl}
@@ -111,18 +108,16 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          {/* Video */}
           {hasVideos && (
             <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">Video</h2>
+              <h2 className="text-2xl font-display mb-6">{t("Video")}</h2>
               <ProjectVideo videoUrl={videoUrl} />
             </div>
           )}
 
-          {/* 3D Model */}
           {threeDModels.length > 0 && (
             <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">3D Model</h2>
+              <h2 className="text-2xl font-display mb-6">{t("3D Model")}</h2>
               <ProjectThreeDModel
                 models={threeDModels}
                 activeModelUrl={activeThreeDModel}
@@ -131,10 +126,9 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          {/* Nokta Bulutu */}
           {pointCloudModels.length > 0 && (
             <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">Nokta Bulutu</h2>
+              <h2 className="text-2xl font-display mb-6">{t("Point Cloud")}</h2>
               <ProjectPointCloud
                 models={pointCloudModels}
                 activePointCloudUrl={activePointCloud}
@@ -143,7 +137,6 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          {/* Benzer Projeler */}
           <ProjectSimilar title={project.title} projectId={project.id} />
         </div>
       </section>

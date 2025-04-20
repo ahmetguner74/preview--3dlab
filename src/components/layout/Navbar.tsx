@@ -1,7 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Menu, X, Settings } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 const Navbar = () => {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -20,13 +24,13 @@ const Navbar = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const navItems = [{
     path: '/',
-    label: 'Projects'
+    label: t('Projects')
   }, {
     path: '/about',
-    label: 'About'
+    label: t('About')
   }, {
     path: '/contact',
-    label: 'Contact'
+    label: t('Contact')
   }];
   return <header className={`fixed w-full z-30 transition-all duration-300 ${scrolled ? 'py-3 bg-white shadow-sm' : 'py-5 bg-transparent'}`}>
       <div className="arch-container flex justify-between items-center">
@@ -44,8 +48,9 @@ const Navbar = () => {
 
           {/* Admin Button */}
           <Link to="/admin" className="hidden md:flex items-center gap-2 bg-arch-black text-white px-4 py-2 rounded-md text-sm hover:bg-arch-gray transition-colors">
-            <Settings size={16} /> Admin
+            <Settings size={16} /> {t("Admin")}
           </Link>
+          <LanguageSwitcher />
         </div>
 
         {/* Mobile Navigation Toggle */}
@@ -75,8 +80,9 @@ const Navbar = () => {
                   {item.label}
                 </NavLink>)}
               <Link to="/admin" onClick={toggleMenu} className="text-2xl uppercase tracking-wider hover:text-arch-gray transition-colors">
-                Admin
+                {t("Admin")}
               </Link>
+              <LanguageSwitcher />
             </div>
           </div>}
       </div>

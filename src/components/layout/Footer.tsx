@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const { t } = useTranslation();
   
   return (
     <footer className="py-12 bg-arch-light-gray">
@@ -17,16 +19,16 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-medium mb-4">Navigation</h3>
+            <h3 className="text-lg font-medium mb-4">{t("Projects")}</h3>
             <ul className="space-y-2">
               <li>
-                <NavLink to="/" className="text-sm hover:text-arch-gray transition-colors">Projects</NavLink>
+                <NavLink to="/" className="text-sm hover:text-arch-gray transition-colors">{t("Projects")}</NavLink>
               </li>
               <li>
-                <NavLink to="/about" className="text-sm hover:text-arch-gray transition-colors">About</NavLink>
+                <NavLink to="/about" className="text-sm hover:text-arch-gray transition-colors">{t("About")}</NavLink>
               </li>
               <li>
-                <NavLink to="/contact" className="text-sm hover:text-arch-gray transition-colors">Contact</NavLink>
+                <NavLink to="/contact" className="text-sm hover:text-arch-gray transition-colors">{t("Contact")}</NavLink>
               </li>
             </ul>
           </div>
