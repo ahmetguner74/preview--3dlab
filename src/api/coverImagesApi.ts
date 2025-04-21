@@ -12,14 +12,14 @@ export interface CoverImage {
 
 export const fetchCoverImages = async (): Promise<CoverImage[]> => {
   try {
-    const imageKeys = ['hero_background', 'about_team', 'featured_projects_cover'];
+    const imageKeys = ['hero_background', 'about_team', 'featured_projects_cover', 'hero_youtube_video'];
     const images: CoverImage[] = [];
 
     for (const key of imageKeys) {
       const url = await getSiteImage(key);
       if (url) {
         images.push({
-          id: key, // ID yerine key kullanıyoruz
+          id: key,
           image_key: key,
           image_url: url,
           title: getTitleForKey(key),
@@ -44,7 +44,6 @@ export const getCoverImageByKey = (images: CoverImage[], key: string): CoverImag
   return images.find(image => image.image_key === key);
 };
 
-// Yardımcı fonksiyonlar
 function getTitleForKey(key: string): string {
   switch (key) {
     case 'hero_background':
@@ -53,6 +52,8 @@ function getTitleForKey(key: string): string {
       return 'Hakkımızda Ekip Görseli';
     case 'featured_projects_cover':
       return 'Öne Çıkan Projeler Görseli';
+    case 'hero_youtube_video':
+      return 'Ana Sayfa YouTube Video Linki';
     default:
       return 'Site Görseli';
   }
@@ -66,6 +67,8 @@ function getDescriptionForKey(key: string): string {
       return 'Ana sayfada hakkımızda bölümünde görünen ekip resmi';
     case 'featured_projects_cover':
       return 'Ana sayfada öne çıkan projeler bölümünde görünen kapak resmi';
+    case 'hero_youtube_video':
+      return 'Ana sayfanın üstündeki YouTube videosunun embed kodu veya linki (iframe src değeri)';
     default:
       return 'Site görseli';
   }

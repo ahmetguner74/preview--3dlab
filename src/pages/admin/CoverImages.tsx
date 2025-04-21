@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -98,7 +97,7 @@ const CoverImages = () => {
               <Loader2 size={36} className="animate-spin text-arch-black" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <CoverImageSection 
                 imageKey="hero_background"
                 title="Ana Sayfa Arkaplan Görseli"
@@ -125,6 +124,16 @@ const CoverImages = () => {
                 description="Ana sayfada öne çıkan projeler bölümünde görünen kapak resmi"
                 imageUrl={getCoverImageByKey(coverImages, 'featured_projects_cover')?.image_url}
                 updatedAt={getCoverImageByKey(coverImages, 'featured_projects_cover')?.updated_at}
+                onImageClick={handleImageClick}
+                onFileSelected={handleFileUpload}
+              />
+
+              <CoverImageSection
+                imageKey="hero_youtube_video"
+                title="Ana Sayfa YouTube Video Linki"
+                description="Ana sayfanın üstündeki YouTube videosunun embed kodu veya linki (ör: https://www.youtube.com/embed/... )"
+                imageUrl={getCoverImageByKey(coverImages, 'hero_youtube_video')?.image_url}
+                updatedAt={getCoverImageByKey(coverImages, 'hero_youtube_video')?.updated_at}
                 onImageClick={handleImageClick}
                 onFileSelected={handleFileUpload}
               />

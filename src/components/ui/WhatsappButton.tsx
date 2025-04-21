@@ -1,13 +1,11 @@
 
 import React from "react";
-import { icons } from "lucide-react";
+import { ArrowRight } from "lucide-react"; // icons.whatsapp desteği yok
 
 const WhatsappButton = () => {
   // Direkt telefon numarası kullanılacak.
   const phone = "+905313553274";
-  const WhatsappIcon = icons.whatsapp;
 
-  // İkon bulunamazsa bile hata vermesin
   return (
     <a
       href={`https://wa.me/${phone.replace(/^\+/, "")}`}
@@ -17,11 +15,10 @@ const WhatsappButton = () => {
       style={{ marginBottom: 72 }} // Chat ile üst üste binmesin diye
       title="WhatsApp ile iletişim"
     >
-      {WhatsappIcon ? <WhatsappIcon size={24} className="text-white" /> : null}
+      <ArrowRight size={24} className="text-white" />
       <span className="hidden sm:block text-white font-bold">WhatsApp</span>
     </a>
   );
 };
 
 export default WhatsappButton;
-
