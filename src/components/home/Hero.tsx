@@ -4,8 +4,7 @@ import { ArrowDownCircle, Youtube } from 'lucide-react';
 import { getSiteImage } from '@/utils/siteHelpers';
 import { useTranslation } from 'react-i18next';
 
-// YÖNETİLEBİLİR yapı için aşağıdaki varsayılanları kullanıyoruz.
-// Supabase ile veri yönetimi/düzenleme eklenince bu {heroData} obje olarak değiştirilecek ve panelden değişebilecek!
+// Panelden yönetim için bu yapı Supabase entegrasyonu ile tekrar düzenlenecek!
 const DEFAULT_HERO = {
   title: {
     tr: "3D DİJİTALLEŞTİRME ATÖLYESİ",
@@ -23,7 +22,6 @@ const Hero = () => {
   const { t, i18n } = useTranslation();
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  // Panelden veri alınca değişecek sabit veri
   const heroData = DEFAULT_HERO;
   const lang = i18n.language === "en" ? "en" : "tr";
 
@@ -42,15 +40,15 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
+    <section className="relative min-h-[80vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
       {/* Arkaplan */}
       <div className="absolute inset-0 bg-arch-black opacity-40 z-10 rounded-3xl" />
       <div className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center rounded-3xl`} style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : {}} />
       {/* İçerik */}
       <div className="arch-container relative z-20 w-full">
-        <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 md:gap-12 min-h-[40vh] justify-between">
+        <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 md:gap-16 min-h-[52vh] justify-between px-2 md:px-0">
           {/* Sol Blok: Yazı Alanı */}
-          <div className="flex flex-col justify-center flex-1 max-w-2xl text-left text-white drop-shadow-2xl bg-black/40 md:bg-transparent rounded-3xl md:rounded-none p-6 md:p-0">
+          <div className="flex flex-col justify-center flex-1 max-w-2xl text-left text-white drop-shadow-2xl bg-black/40 md:bg-transparent rounded-3xl md:rounded-none p-6 md:p-0 min-w-[320px]">
             <h1 className="text-4xl md:text-6xl font-display mb-6 font-extrabold text-cyan-300">{heroData.title[lang]}</h1>
             <p className="text-lg md:text-xl mb-8 font-medium text-cyan-200">{heroData.subtitle[lang]}</p>
             <div className="flex gap-4 mb-6 flex-wrap">
@@ -66,7 +64,7 @@ const Hero = () => {
             </div>
           </div>
           {/* Sağ Blok: Gömülü YouTube Video */}
-          <div className="flex-1 max-w-xl flex items-center justify-center">
+          <div className="flex-1 max-w-xl flex items-center justify-center min-w-[320px]">
             <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in">
               <iframe
                 src={heroData.videoUrl}
@@ -75,6 +73,7 @@ const Hero = () => {
                 allowFullScreen
                 className="w-full h-full"
                 frameBorder={0}
+                style={{ minHeight: 280 }}
               />
             </div>
           </div>
@@ -85,4 +84,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

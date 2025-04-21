@@ -1,11 +1,10 @@
 
 import React from "react";
-import { icons } from "lucide-react";
+import { Whatsapp } from "lucide-react";
 
 const WhatsappButton = () => {
   // Direkt telefon numarası kullanılacak.
   const phone = "+905313553274";
-  const Whatsapp = icons["whatsapp"]; // Lucide'den iconu bu şekilde alıyoruz
 
   return (
     <a
@@ -21,5 +20,5 @@ const WhatsappButton = () => {
     </a>
   );
 };
-export default WhatsappButton;
 
+export default WhatsappButton;
