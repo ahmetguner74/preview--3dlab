@@ -1,9 +1,11 @@
+
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
 const resources = {
   tr: {
     translation: {
+      // --- NAV, HERO, BUTONS ---
       "Projects": "Projeler",
       "About": "Hakkımızda",
       "Contact": "İletişim",
@@ -14,21 +16,38 @@ const resources = {
       "Gallery": "Galeri",
       "Before / After": "Öncesi / Sonrası",
       "View Projects": "Projeleri Gör",
-      "Return to Home": "Ana Sayfa'ya Dön",
-      "Page not found": "Sayfa Bulunamadı",
-      "Oops! Page not found": "Oops! Sayfa bulunamadı",
-      "Next": "İleri",
-      "Previous": "Geri",
+      "viewProjects": "Projeleri Gör",
+      "youtubeWatch": "YouTube'da İzle",
+      "youtubeInfo": "Bu bölümde, projelerimizin veya teknolojimizin tanıtım videosu otomatik olarak oynatılır.",
+      // HERO
+      "heroTitle": "3D DİJİTALLEŞTİRME ATÖLYESİ",
+      "heroSubtitle": "Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.",
+      // Chat / Widget
+      "chatTitle": "Bize Mesaj Bırakın",
+      "chatInputName": "Adınız",
+      "chatInputMessage": "Mesajınız...",
+      "chatSend": "Gönder",
+      "chatDisclaimer": "Bıraktığınız mesaj yönetici panelinde görülebilir.",
+      "chatButtonOpen": "Mesaj bırakın",
+      // Admin / Messages / Settings
       "Messages": "Mesajlar",
+      "messages": "Mesajlar",
       "Settings": "Ayarlar",
+      "settings": "Ayarlar",
       "Coming Soon!": "Çok Yakında!",
+      "Return to Dashboard": "Gösterge Paneline Dön",
+      "returnDashboard": "Gösterge Paneline Dön",
+      "No messages have been received yet.": "Henüz mesaj gelmedi.",
+      "noMessagesYet": "Henüz mesaj gelmedi.",
       "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
         "Bu sayfa çok yakında iletişim formundan gelen mesajları gösterecek. Buradan tüm site mesajlarını görüntüleyebilir, yanıtlayabilir ve yönetebilirsiniz.",
-      "No messages have been received yet.": "Henüz mesaj gelmedi.",
-      "Return to Dashboard": "Gösterge Paneline Dön",
-      "Site general settings, user roles, and application preferences will be managed here in the next versions. Today, you can adjust contact information from 'Site Ayarları' in the sidebar.":
-        "Sitenin genel ayarları, kullanıcı rolleri ve uygulama tercihleri bir sonraki sürümlerde burada yönetilecek. Bugün için yan menüdeki 'Site Ayarları' bölümünden iletişim bilgilerini ayarlayabilirsiniz.",
-      "Nothing to edit here right now.": "Şu anda burada düzenlenecek bir şey yok.",
+      "adminMessageInfo": "Ziyaretçilerden gelen son mesajlar aşağıda listelenir. Cevaplamak için e-posta ile iletişime geçebilirsiniz.",
+      // Ayarlar
+      "generalSettings": "Genel Ayarlar",
+      "siteLanguage": "Site Dili",
+      "languageChangeInfo": "Dil değişimi şimdilik demo amaçlı devredışı bırakıldı.",
+      "adminDemoSettings": "Demo Yönetici Ayarı",
+      "adminSettingsInfo": "Daha fazla detay ve özelleştirme çok yakında burada olacak.",
     },
   },
   en: {
@@ -43,21 +62,34 @@ const resources = {
       "Gallery": "Gallery",
       "Before / After": "Before / After",
       "View Projects": "View Projects",
-      "Return to Home": "Return to Home",
-      "Page not found": "Page not found",
-      "Oops! Page not found": "Oops! Page not found",
-      "Next": "Next",
-      "Previous": "Previous",
+      "viewProjects": "View Projects",
+      "youtubeWatch": "Watch on YouTube",
+      "youtubeInfo": "A promo or feature video of our technology or project is played here automatically.",
+      "heroTitle": "3D DIGITIZATION WORKSHOP",
+      "heroSubtitle": "We digitize your data with a professional approach.",
+      "chatTitle": "Leave Us a Message",
+      "chatInputName": "Your Name",
+      "chatInputMessage": "Your message...",
+      "chatSend": "Send",
+      "chatDisclaimer": "Your message can be viewed by site admin.",
+      "chatButtonOpen": "Leave a message",
       "Messages": "Messages",
+      "messages": "Messages",
       "Settings": "Settings",
+      "settings": "Settings",
       "Coming Soon!": "Coming Soon!",
+      "Return to Dashboard": "Return to Dashboard",
+      "returnDashboard": "Return to Dashboard",
+      "No messages have been received yet.": "No messages have been received yet.",
+      "noMessagesYet": "No messages have been received yet.",
       "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
         "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.",
-      "No messages have been received yet.": "No messages have been received yet.",
-      "Return to Dashboard": "Return to Dashboard",
-      "Site general settings, user roles, and application preferences will be managed here in upcoming versions. For now, you can adjust contact information from 'Site Ayarları' in the sidebar.":
-        "Site general settings, user roles, and application preferences will be managed here in upcoming versions. For now, you can adjust contact information from 'Site Ayarları' in the sidebar.",
-      "Nothing to edit here right now.": "Nothing to edit here right now.",
+      "adminMessageInfo": "Recent messages from site visitors appear below. You can reply by contacting via email.",
+      "generalSettings": "General Settings",
+      "siteLanguage": "Site Language",
+      "languageChangeInfo": "Language change is currently disabled for demo purposes.",
+      "adminDemoSettings": "Demo Admin Setting",
+      "adminSettingsInfo": "More settings and customization will be available here soon.",
     },
   },
 };
