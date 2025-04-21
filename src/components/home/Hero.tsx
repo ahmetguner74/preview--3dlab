@@ -18,7 +18,7 @@ const Hero = () => {
       behavior: 'smooth'
     });
   };
-  return <section className="relative h-[90vh] flex items-center overflow-hidden">
+  return <section className="relative h-[90vh] flex items-center overflow">
       {/* Hero background - Şimdi dinamik olarak veritabanından geliyor */}
       <div className="absolute inset-0 bg-arch-black opacity-50 z-10 rounded-3xl bg-black"></div>
       <div className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center`} style={backgroundImage ? {
@@ -29,7 +29,7 @@ const Hero = () => {
         <div className="max-w-2xl text-white">
           <h1 className="text-3xl font-display mb-6 font-extrabold text-cyan-300 md:text-6xl">3D DİJİTALLEŞTİRME ATÖLYESİ</h1>
           <p className="text-lg md:text-xl mb-8 font-medium text-cyan-200">Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.</p>
-          <button onClick={scrollToProjects} className="inline-flex items-center gap-2 border border-white px-6 py-3 text-sm uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-sky-600 hover:bg-sky-500">
+          <button onClick={scrollToProjects} className="inline-flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-sky-600 hover:bg-sky-500 font-normal text-base">
             View Projects <ArrowDownCircle size={18} />
           </button>
         </div>
