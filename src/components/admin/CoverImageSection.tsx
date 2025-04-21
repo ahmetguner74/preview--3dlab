@@ -37,6 +37,9 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
             onBlur={e => onYoutubeLinkChange?.(e.target.value, imageKey)}
             className="w-full border rounded px-3 py-2"
           />
+          <p className="text-xs text-gray-500 mt-2">
+            Not: Doğrudan YouTube URL'si yerine <strong>embed URL</strong> kullanın (örn: https://www.youtube.com/embed/VIDEO_ID)
+          </p>
           {updatedAt && (
             <div className="text-xs text-gray-500 mt-1">
               Son güncelleme: {new Date(updatedAt).toLocaleDateString('tr-TR')}

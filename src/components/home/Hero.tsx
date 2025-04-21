@@ -20,7 +20,7 @@ const DEFAULT_HERO = {
 const Hero = () => {
   const { t, i18n } = useTranslation();
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string>('https://www.youtube.com/embed/CkN5vxecNXI?autoplay=1&mute=1&loop=1&controls=0');
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const heroData = DEFAULT_HERO;
   const lang = i18n.language === "en" ? "en" : "tr";
@@ -47,11 +47,17 @@ const Hero = () => {
 
   // Video embed src'ine parametreleri ekle (autoplay, mute, loop, controls)
   const finalVideoUrl = React.useMemo(() => {
-    if (!videoUrl) return '';
-    // Eğer url parametresi yoksa veya uygun şekilde eklenmemişse otomatik olarak ekle
-    if (videoUrl.includes('autoplay=1')) return videoUrl;
+    if (!videoUrl) return null;
+    
+    // URL'nin geçerli olduğundan emin olalım
+    if (!videoUrl.includes('youtube.com/embed/')) {
+      console.error('Geçersiz YouTube embed URL\'si:', videoUrl);
+      return null;
+    }
+    
+    // Parametreleri ekleyelim
     const joinChar = videoUrl.includes('?') ? '&' : '?';
-    return `${videoUrl}${joinChar}autoplay=1&mute=1&loop=1&controls=0`;
+    return `${videoUrl}${joinChar}autoplay=1&mute=1&loop=1&playlist=${videoUrl.split('/').pop()}&controls=0`;
   }, [videoUrl]);
 
   return <section className="relative min-h-[80vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
@@ -79,18 +85,25 @@ const Hero = () => {
             <span className="text-xs text-white/90">{t("youtubeInfo")}</span>
           </div>
         </div>
+        
         {/* Sağ Blok: Gömülü YouTube Video */}
         <div className="flex-1 max-w-xl flex items-center justify-center min-w-[320px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in">
-            <iframe
-              src={finalVideoUrl}
-              title="Hero Video"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              className="w-full h-full"
-              frameBorder={0}
-              style={{ minHeight: 280 }}
-            />
+            {finalVideoUrl ? (
+              <iframe
+                src={finalVideoUrl}
+                title="Hero Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+                frameBorder="0"
+                style={{ minHeight: 280 }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                Video yüklenemedi
+              </div>
+            )}
           </div>
         </div>
       </div>
