@@ -49,15 +49,41 @@ const Hero = () => {
   const finalVideoUrl = React.useMemo(() => {
     if (!videoUrl) return null;
     
+    // Eğer link YouTube embed formatında değilse ve farklı formatları destekle
+    let processedUrl = videoUrl;
+    
+    // Normal YouTube watch formatını embed formatına dönüştür
+    if (processedUrl.includes('youtube.com/watch?v=')) {
+      const videoId = processedUrl.split('v=')[1]?.split('&')[0];
+      if (videoId) {
+        processedUrl = `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    
+    // youtu.be formatındaki linkleri embed formatına dönüştür
+    if (processedUrl.includes('youtu.be/')) {
+      const videoId = processedUrl.split('youtu.be/')[1]?.split('?')[0];
+      if (videoId) {
+        processedUrl = `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    
     // URL'nin geçerli olduğundan emin olalım
-    if (!videoUrl.includes('youtube.com/embed/')) {
+    if (!processedUrl.includes('youtube.com/embed/')) {
       console.error('Geçersiz YouTube embed URL\'si:', videoUrl);
       return null;
     }
     
-    // Parametreleri ekleyelim
-    const joinChar = videoUrl.includes('?') ? '&' : '?';
-    return `${videoUrl}${joinChar}autoplay=1&mute=1&loop=1&playlist=${videoUrl.split('/').pop()}&controls=0`;
+    // Video ID'sini çıkar (parametreleri eklemek için)
+    const videoId = processedUrl.split('/embed/')[1]?.split('?')[0];
+    if (!videoId) {
+      console.error('Video ID çıkarılamadı:', processedUrl);
+      return null;
+    }
+    
+    // Tüm parametreleri temizle ve yeniden ekle
+    const baseUrl = `https://www.youtube.com/embed/${videoId}`;
+    return `${baseUrl}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
   }, [videoUrl]);
 
   return <section className="relative min-h-[80vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">

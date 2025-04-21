@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import FileUploadBox from '@/components/admin/FileUploadBox';
 
 interface CoverImageSectionProps {
@@ -23,6 +23,51 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
   onFileSelected,
   onYoutubeLinkChange
 }) => {
+  const [inputValue, setInputValue] = useState(imageUrl || '');
+  
+  // YouTube linki için kullanıcı girişini işleme
+  const handleYoutubeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+  
+  // YouTube linki kaydetme işlevi
+  const handleYoutubeLinkSave = () => {
+    if (!onYoutubeLinkChange) return;
+    
+    // Link boş ise işlemi durdur
+    if (!inputValue.trim()) {
+      return;
+    }
+    
+    let processedLink = inputValue.trim();
+    
+    // Eğer iframe kodu girilmişse, src değerini çıkart
+    if (processedLink.includes('<iframe') && processedLink.includes('src="')) {
+      const srcMatch = processedLink.match(/src="([^"]+)"/);
+      if (srcMatch && srcMatch[1]) {
+        processedLink = srcMatch[1];
+      }
+    }
+    
+    // Normal YouTube watch link formatını embed formatına dönüştür
+    if (processedLink.includes('youtube.com/watch?v=')) {
+      const videoId = processedLink.split('v=')[1]?.split('&')[0];
+      if (videoId) {
+        processedLink = `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    
+    // youtu.be formatındaki linkleri embed formatına dönüştür
+    if (processedLink.includes('youtu.be/')) {
+      const videoId = processedLink.split('youtu.be/')[1]?.split('?')[0];
+      if (videoId) {
+        processedLink = `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    
+    onYoutubeLinkChange(processedLink, imageKey);
+  };
+
   // hero_youtube_video için sadece metin kutusu göster
   if (imageKey === 'hero_youtube_video') {
     return (
@@ -32,13 +77,20 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
         <div className="mb-4">
           <input
             type="text"
-            placeholder="YouTube embed linki (örn: https://www.youtube.com/embed/CkN5vxecNXI)"
-            defaultValue={imageUrl || ''}
-            onBlur={e => onYoutubeLinkChange?.(e.target.value, imageKey)}
-            className="w-full border rounded px-3 py-2"
+            placeholder="YouTube linki veya iframe kodu"
+            value={inputValue}
+            onChange={handleYoutubeInputChange}
+            className="w-full border rounded px-3 py-2 mb-2"
           />
+          <button
+            onClick={handleYoutubeLinkSave}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          >
+            Kaydet
+          </button>
           <p className="text-xs text-gray-500 mt-2">
-            Not: Doğrudan YouTube URL'si yerine <strong>embed URL</strong> kullanın (örn: https://www.youtube.com/embed/VIDEO_ID)
+            YouTube normal video linki (<strong>youtube.com/watch?v=VIDEO_ID</strong>), embed linki 
+            (<strong>youtube.com/embed/VIDEO_ID</strong>) veya iframe kodu girebilirsiniz.
           </p>
           {updatedAt && (
             <div className="text-xs text-gray-500 mt-1">

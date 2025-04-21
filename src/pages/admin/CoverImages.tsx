@@ -55,7 +55,7 @@ const CoverImages = () => {
   // hero_youtube_video için embed linkini direkt güncelle
   const handleYoutubeLinkChange = async (link: string, imageKey: string) => {
     if (!link || !link.startsWith("https://")) {
-      toast.error("Lütfen geçerli bir YouTube embed linki girin.");
+      toast.error("Lütfen geçerli bir YouTube linki girin.");
       return;
     }
     try {
@@ -168,7 +168,7 @@ const CoverImages = () => {
               <CoverImageSection
                 imageKey="hero_youtube_video"
                 title="Ana Sayfa YouTube Video Linki"
-                description="Ana sayfanın üstündeki YouTube videosunun embed kodu veya linki (ör: https://www.youtube.com/embed/... )"
+                description="Ana sayfanın üstündeki YouTube videosu için YouTube linki veya iframe kodu"
                 imageUrl={getCoverImageByKey(coverImages, 'hero_youtube_video')?.image_url}
                 updatedAt={getCoverImageByKey(coverImages, 'hero_youtube_video')?.updated_at}
                 onImageClick={handleImageClick}
