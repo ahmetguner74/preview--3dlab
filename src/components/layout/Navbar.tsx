@@ -33,7 +33,7 @@ const Navbar = () => {
     path: '/contact',
     label: t('Contact')
   }];
-  return <header className="bg-neutral-50">
+  return <header className="bg-neutral-50 py-[15px]">
       <div className="arch-container flex justify-between items-center">
         <NavLink to="/" className="text-xl md:text-2xl font-display font-bold relative">
           <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-blue-500 text-4xl">3D</span>
