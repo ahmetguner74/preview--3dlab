@@ -45,6 +45,15 @@ const Hero = () => {
     });
   };
 
+  // Video embed src'ine parametreleri ekle (autoplay, mute, loop, controls)
+  const finalVideoUrl = React.useMemo(() => {
+    if (!videoUrl) return '';
+    // Eğer url parametresi yoksa veya uygun şekilde eklenmemişse otomatik olarak ekle
+    if (videoUrl.includes('autoplay=1')) return videoUrl;
+    const joinChar = videoUrl.includes('?') ? '&' : '?';
+    return `${videoUrl}${joinChar}autoplay=1&mute=1&loop=1&controls=0`;
+  }, [videoUrl]);
+
   return <section className="relative min-h-[80vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
     {/* Arkaplan */}
     <div className="absolute inset-0 bg-arch-black opacity-40 z-10 rounded-3xl" />
@@ -74,7 +83,7 @@ const Hero = () => {
         <div className="flex-1 max-w-xl flex items-center justify-center min-w-[320px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in">
             <iframe
-              src={`${videoUrl}${videoUrl.includes('autoplay=1') ? '' : '?autoplay=1&mute=1&loop=1&controls=0'}`}
+              src={finalVideoUrl}
               title="Hero Video"
               allow="autoplay; encrypted-media"
               allowFullScreen

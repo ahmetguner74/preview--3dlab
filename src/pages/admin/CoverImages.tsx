@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import CoverImageSection from '@/components/admin/CoverImageSection';
 import ImagePreviewDialog from '@/components/admin/ImagePreviewDialog';
 import { fetchCoverImages, uploadCoverImage, getCoverImageByKey, CoverImage } from '@/api/coverImagesApi';
+import { supabase } from '@/integrations/supabase/client';
 
 const CoverImages = () => {
   const [loading, setLoading] = useState(true);
@@ -47,6 +49,41 @@ const CoverImages = () => {
     } catch (error) {
       console.error('Görsel yükleme hatası:', error);
       toast.error('Görsel yüklenemedi');
+    }
+  };
+
+  // hero_youtube_video için embed linkini direkt güncelle
+  const handleYoutubeLinkChange = async (link: string, imageKey: string) => {
+    if (!link || !link.startsWith("https://")) {
+      toast.error("Lütfen geçerli bir YouTube embed linki girin.");
+      return;
+    }
+    try {
+      // Mevcut kayıt var mı kontrol et
+      const { data: existing, error: selError } = await supabase
+        .from('site_images')
+        .select('id')
+        .eq('image_key', imageKey)
+        .maybeSingle();
+      if (selError) throw selError;
+      if (existing?.id) {
+        // Güncelle
+        const { error } = await supabase
+          .from('site_images')
+          .update({ image_url: link, updated_at: new Date().toISOString() })
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        // Ekle
+        const { error } = await supabase
+          .from('site_images')
+          .insert({ image_key: imageKey, image_url: link });
+        if (error) throw error;
+      }
+      toast.success("YouTube video linki kaydedildi");
+      loadCoverImages();
+    } catch (err) {
+      toast.error("YouTube video linki kaydedilemedi");
     }
   };
 
@@ -136,6 +173,7 @@ const CoverImages = () => {
                 updatedAt={getCoverImageByKey(coverImages, 'hero_youtube_video')?.updated_at}
                 onImageClick={handleImageClick}
                 onFileSelected={handleFileUpload}
+                onYoutubeLinkChange={handleYoutubeLinkChange}
               />
             </div>
           )}
