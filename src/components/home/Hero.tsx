@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowDownCircle } from 'lucide-react';
 import { getSiteImage } from '@/utils/siteHelpers';
@@ -16,29 +15,26 @@ const DEFAULT_HERO = {
   },
   youtubeChannel: "https://www.youtube.com/channel/UCrSguWcA9nJyuqCdENnXeZA"
 };
-
 const Hero = () => {
-  const { t, i18n } = useTranslation();
+  const {
+    t,
+    i18n
+  } = useTranslation();
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const heroData = DEFAULT_HERO;
   const lang = i18n.language === "en" ? "en" : "tr";
-
   useEffect(() => {
     const fetchHeroData = async () => {
       setLoading(true);
-      const [imageUrl, videoLink] = await Promise.all([
-        getSiteImage('hero_background'),
-        getSiteImage('hero_youtube_video'),
-      ]);
+      const [imageUrl, videoLink] = await Promise.all([getSiteImage('hero_background'), getSiteImage('hero_youtube_video')]);
       setBackgroundImage(imageUrl);
       if (videoLink) setVideoUrl(videoLink);
       setLoading(false);
     };
     fetchHeroData();
   }, []);
-
   const scrollToProjects = () => {
     document.getElementById('projects')?.scrollIntoView({
       behavior: 'smooth'
@@ -48,10 +44,10 @@ const Hero = () => {
   // Video embed src'ine parametreleri ekle (autoplay, mute, loop, controls)
   const finalVideoUrl = React.useMemo(() => {
     if (!videoUrl) return null;
-    
+
     // Eğer link YouTube embed formatında değilse ve farklı formatları destekle
     let processedUrl = videoUrl;
-    
+
     // Normal YouTube watch formatını embed formatına dönüştür
     if (processedUrl.includes('youtube.com/watch?v=')) {
       const videoId = processedUrl.split('v=')[1]?.split('&')[0];
@@ -59,7 +55,7 @@ const Hero = () => {
         processedUrl = `https://www.youtube.com/embed/${videoId}`;
       }
     }
-    
+
     // youtu.be formatındaki linkleri embed formatına dönüştür
     if (processedUrl.includes('youtu.be/')) {
       const videoId = processedUrl.split('youtu.be/')[1]?.split('?')[0];
@@ -67,25 +63,24 @@ const Hero = () => {
         processedUrl = `https://www.youtube.com/embed/${videoId}`;
       }
     }
-    
+
     // URL'nin geçerli olduğundan emin olalım
     if (!processedUrl.includes('youtube.com/embed/')) {
       console.error('Geçersiz YouTube embed URL\'si:', videoUrl);
       return null;
     }
-    
+
     // Video ID'sini çıkar (parametreleri eklemek için)
     const videoId = processedUrl.split('/embed/')[1]?.split('?')[0];
     if (!videoId) {
       console.error('Video ID çıkarılamadı:', processedUrl);
       return null;
     }
-    
+
     // Tüm parametreleri temizle ve yeniden ekle
     const baseUrl = `https://www.youtube.com/embed/${videoId}`;
     return `${baseUrl}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
   }, [videoUrl]);
-
   return <section className="relative min-h-[80vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
     {/* Arkaplan */}
     <div className="absolute inset-0 bg-arch-black opacity-40 z-10 rounded-3xl" />
@@ -103,9 +98,7 @@ const Hero = () => {
             <button onClick={scrollToProjects} className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-300 hover:bg-yellow-200 font-bold text-base text-black rounded shadow-sm animate-fade-in">
               {t("viewProjects")} <ArrowDownCircle size={18} />
             </button>
-            <a href={heroData.youtubeChannel} rel="noopener noreferrer" target="_blank" className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded uppercase hover:bg-gray-800 transition-colors font-bold text-base animate-fade-in">
-              Youtube
-            </a>
+            
           </div>
           <div className="mt-2">
             <span className="text-xs text-white/90">{t("youtubeInfo")}</span>
@@ -115,26 +108,15 @@ const Hero = () => {
         {/* Sağ Blok: Gömülü YouTube Video */}
         <div className="flex-1 max-w-xl flex items-center justify-center min-w-[320px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in">
-            {finalVideoUrl ? (
-              <iframe
-                src={finalVideoUrl}
-                title="Hero Video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-                frameBorder="0"
-                style={{ minHeight: 280 }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
+            {finalVideoUrl ? <iframe src={finalVideoUrl} title="Hero Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" frameBorder="0" style={{
+              minHeight: 280
+            }} /> : <div className="w-full h-full flex items-center justify-center text-gray-400">
                 Video yüklenemedi
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </div>
     </div>
   </section>;
 };
-
 export default Hero;
