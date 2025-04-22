@@ -85,7 +85,7 @@ const Hero = () => {
   }, [videoUrl]);
   return <section className="relative min-h-[85vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
       {/* Arkaplan */}
-      <div className="absolute inset-0 bg-arch-black opacity-75 z-5 rounded-3xl bg-transparent" />
+      <div className="absolute inset-0 bg-arch-black opacity-75 z-5 rounded-3xl bg-black" />
       <div style={backgroundImage ? {
       backgroundImage: `url('${backgroundImage}')`
     } : {}} className="" />
