@@ -85,10 +85,10 @@ const Hero = () => {
   }, [videoUrl]);
   return <section className="relative min-h-[85vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
       {/* Arkaplan */}
-      <div className="absolute inset-0 bg-arch-black opacity-75 z-5 rounded-3xl bg-black" />
-      <div style={backgroundImage ? {
+      <div className="absolute inset-0 bg-arch-black opacity-75 z-5 rounded-3xl" />
+      <div className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center rounded-3xl`} style={backgroundImage ? {
       backgroundImage: `url('${backgroundImage}')`
-    } : {}} className="" />
+    } : {}} />
       
       {/* İçerik */}
       <div className="arch-container relative z-20 w-full">
