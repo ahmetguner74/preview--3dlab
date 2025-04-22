@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowDownCircle } from 'lucide-react';
 import { getSiteImage } from '@/utils/siteHelpers';
@@ -17,30 +16,27 @@ const DEFAULT_HERO = {
   },
   youtubeChannel: "https://www.youtube.com/channel/UCrSguWcA9nJyuqCdENnXeZA"
 };
-
 const Hero = () => {
-  const { t, i18n } = useTranslation();
+  const {
+    t,
+    i18n
+  } = useTranslation();
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
   const heroData = DEFAULT_HERO;
   const lang = i18n.language === "en" ? "en" : "tr";
-  
   useEffect(() => {
     const fetchHeroData = async () => {
       setLoading(true);
-      const [imageUrl, videoLink] = await Promise.all([
-        getSiteImage('hero_background'),
-        getSiteImage('hero_youtube_video')
-      ]);
+      const [imageUrl, videoLink] = await Promise.all([getSiteImage('hero_background'), getSiteImage('hero_youtube_video')]);
       setBackgroundImage(imageUrl);
       if (videoLink) setVideoUrl(videoLink);
       setLoading(false);
     };
     fetchHeroData();
   }, []);
-  
   const scrollToProjects = () => {
     document.getElementById('projects')?.scrollIntoView({
       behavior: 'smooth'
@@ -87,15 +83,12 @@ const Hero = () => {
     const baseUrl = `https://www.youtube.com/embed/${videoId}`;
     return `${baseUrl}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
   }, [videoUrl]);
-  
-  return (
-    <section className="relative min-h-[85vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
+  return <section className="relative min-h-[85vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
       {/* Arkaplan */}
-      <div className="absolute inset-0 bg-arch-black opacity-40 z-10 rounded-3xl" />
-      <div 
-        className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center rounded-3xl`}
-        style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : {}}
-      />
+      <div className="absolute inset-0 bg-arch-black opacity-75 z-5 rounded-3xl" />
+      <div className={`absolute inset-0 ${loading ? 'animate-pulse bg-gray-300' : ''} bg-cover bg-center rounded-3xl`} style={backgroundImage ? {
+      backgroundImage: `url('${backgroundImage}')`
+    } : {}} />
       
       {/* İçerik */}
       <div className="arch-container relative z-20 w-full">
@@ -105,10 +98,7 @@ const Hero = () => {
             <h1 className="text-4xl font-display mb-6 font-extrabold text-yellow-300 md:text-5xl text-left">{heroData.title[lang]}</h1>
             <p className="text-lg mb-8 font-medium text-yellow-200 md:text-xl">{heroData.subtitle[lang]}</p>
             <div className="flex gap-4 mb-6 flex-wrap">
-              <button 
-                onClick={scrollToProjects} 
-                className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-300 hover:bg-yellow-200 font-bold text-base text-black rounded shadow-sm animate-fade-in"
-              >
+              <button onClick={scrollToProjects} className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-300 hover:bg-yellow-200 font-bold text-base text-black rounded shadow-sm animate-fade-in">
                 {t("viewProjects")} <ArrowDownCircle size={18} />
               </button>
             </div>
@@ -120,26 +110,13 @@ const Hero = () => {
           {/* Sağ Blok: Gömülü YouTube Video */}
           <div className="flex-1 flex items-center justify-center min-w-[340px] md:max-w-2xl">
             <div className={`w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in ${isMobile ? 'h-64' : 'h-80'}`}>
-              {finalVideoUrl ? (
-                <iframe 
-                  src={finalVideoUrl} 
-                  title="Hero Video" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen 
-                  className="w-full h-full" 
-                  frameBorder="0"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
+              {finalVideoUrl ? <iframe src={finalVideoUrl} title="Hero Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" frameBorder="0" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">
                   Video yüklenemedi
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
