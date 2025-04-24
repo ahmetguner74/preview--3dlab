@@ -1,5 +1,4 @@
-
-import { uploadSiteImage, getSiteImage } from '@/utils/siteImages';
+import { uploadSiteImage } from '@/utils/siteImages';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CoverImage {
@@ -9,7 +8,7 @@ export interface CoverImage {
   title: string;
   description: string;
   updated_at: string;
-  settings?: {
+  settings: {
     opacity: string;
     height: string;
     position: string;

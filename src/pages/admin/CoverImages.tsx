@@ -1,13 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { Button } from '@/components/ui/button';
-import CoverImageSection from '@/components/admin/CoverImageSection';
+import AdminHeader from '@/components/admin/header/AdminHeader';
+import CoverImageGrid from '@/components/admin/cover-images/CoverImageGrid';
 import ImagePreviewDialog from '@/components/admin/ImagePreviewDialog';
-import { fetchCoverImages, uploadCoverImage, getCoverImageByKey, CoverImage } from '@/api/coverImagesApi';
+import { fetchCoverImages, uploadCoverImage, CoverImage } from '@/api/coverImagesApi';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const CoverImages = () => {
@@ -54,7 +52,6 @@ const CoverImages = () => {
 
   const handleSettingsChange = async (settings: any, imageKey: string) => {
     try {
-      // maybeSingle kullanarak olası null durumunu kontrol et
       const { data: existingImage, error: selError } = await supabase
         .from('site_images')
         .select('id')
@@ -75,21 +72,6 @@ const CoverImages = () => {
         if (error) throw error;
         toast.success('Ayarlar başarıyla güncellendi');
         loadCoverImages();
-      } else {
-        // Görsel yoksa, varsayılan değerlerle oluştur
-        const { error } = await supabase
-          .from('site_images')
-          .insert({
-            image_key: imageKey,
-            image_url: '',
-            title: imageKey,
-            settings,
-            updated_at: new Date().toISOString()
-          });
-          
-        if (error) throw error;
-        toast.success('Ayarlar başarıyla oluşturuldu');
-        loadCoverImages();
       }
     } catch (err) {
       console.error('Ayarlar güncellenirken hata:', err);
@@ -108,12 +90,15 @@ const CoverImages = () => {
         .select('id')
         .eq('image_key', imageKey)
         .maybeSingle();
+      
       if (selError) throw selError;
+      
       if (existing?.id) {
         const { error } = await supabase
           .from('site_images')
           .update({ image_url: link, updated_at: new Date().toISOString() })
           .eq('id', existing.id);
+        
         if (error) throw error;
       } else {
         const { error } = await supabase
@@ -129,8 +114,10 @@ const CoverImages = () => {
               blend_mode: 'normal'
             }
           });
+          
         if (error) throw error;
       }
+      
       toast.success("YouTube video linki kaydedildi");
       loadCoverImages();
     } catch (err) {
@@ -139,104 +126,29 @@ const CoverImages = () => {
     }
   };
 
-  const handleImageClick = (url: string) => {
-    setSelectedImage(url);
-    setDialogOpen(true);
-  };
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
       
       <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
-              <ArrowLeftCircle size={20} className="mr-2" />
-              <span className="text-sm">Siteye Dön</span>
-            </Link>
-            <h1 className="text-xl font-medium">Kapak Görselleri</h1>
-          </div>
-          
-          <div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh} 
-              disabled={refreshing}
-              className="mr-4"
-            >
-              {refreshing ? (
-                <Loader2 size={16} className="animate-spin mr-2" />
-              ) : (
-                <RefreshCw size={16} className="mr-2" />
-              )}
-              Yenile
-            </Button>
-            <button className="flex items-center text-gray-600 hover:text-arch-black">
-              <span className="text-sm mr-2">Çıkış Yap</span>
-              <LogOut size={18} />
-            </button>
-          </div>
-        </header>
+        <AdminHeader 
+          title="Kapak Görselleri"
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+        />
         
         <main className="flex-1 overflow-auto p-6">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 size={36} className="animate-spin text-arch-black" />
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              <CoverImageSection 
-                imageKey="hero_background"
-                title="Ana Sayfa Arkaplan Görseli"
-                description="Ana sayfada üst bölümde görünen arkaplan resmi"
-                imageUrl={getCoverImageByKey(coverImages, 'hero_background')?.image_url}
-                updatedAt={getCoverImageByKey(coverImages, 'hero_background')?.updated_at}
-                settings={getCoverImageByKey(coverImages, 'hero_background')?.settings}
-                onImageClick={handleImageClick}
-                onFileSelected={handleFileUpload}
-                onSettingsChange={handleSettingsChange}
-              />
-              
-              <CoverImageSection 
-                imageKey="about_team"
-                title="Hakkımızda Ekip Görseli"
-                description="Ana sayfada hakkımızda bölümünde görünen ekip resmi"
-                imageUrl={getCoverImageByKey(coverImages, 'about_team')?.image_url}
-                updatedAt={getCoverImageByKey(coverImages, 'about_team')?.updated_at}
-                settings={getCoverImageByKey(coverImages, 'about_team')?.settings}
-                onImageClick={handleImageClick}
-                onFileSelected={handleFileUpload}
-                onSettingsChange={handleSettingsChange}
-              />
-              
-              <CoverImageSection 
-                imageKey="featured_projects_cover"
-                title="Öne Çıkan Projeler Görseli"
-                description="Ana sayfada öne çıkan projeler bölümünde görünen kapak resmi"
-                imageUrl={getCoverImageByKey(coverImages, 'featured_projects_cover')?.image_url}
-                updatedAt={getCoverImageByKey(coverImages, 'featured_projects_cover')?.updated_at}
-                settings={getCoverImageByKey(coverImages, 'featured_projects_cover')?.settings}
-                onImageClick={handleImageClick}
-                onFileSelected={handleFileUpload}
-                onSettingsChange={handleSettingsChange}
-              />
-
-              <CoverImageSection
-                imageKey="hero_youtube_video"
-                title="Ana Sayfa YouTube Video Linki"
-                description="Ana sayfanın üstündeki YouTube videosu için YouTube linki veya iframe kodu"
-                imageUrl={getCoverImageByKey(coverImages, 'hero_youtube_video')?.image_url}
-                updatedAt={getCoverImageByKey(coverImages, 'hero_youtube_video')?.updated_at}
-                settings={getCoverImageByKey(coverImages, 'hero_youtube_video')?.settings}
-                onImageClick={handleImageClick}
-                onFileSelected={handleFileUpload}
-                onYoutubeLinkChange={handleYoutubeLinkChange}
-                onSettingsChange={handleSettingsChange}
-              />
-            </div>
-          )}
+          <CoverImageGrid
+            loading={loading}
+            coverImages={coverImages}
+            onImageClick={(url) => {
+              setSelectedImage(url);
+              setDialogOpen(true);
+            }}
+            onFileSelected={handleFileUpload}
+            onYoutubeLinkChange={handleYoutubeLinkChange}
+            onSettingsChange={handleSettingsChange}
+          />
         </main>
       </div>
       
