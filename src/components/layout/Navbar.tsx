@@ -1,144 +1,70 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Settings } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 import LanguageSwitcher from './LanguageSwitcher';
-import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
   const { t } = useTranslation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  
+  const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 0);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  
-  const navItems = [
-    { path: '/', label: t('Projects') },
-    { path: '/about', label: t('About') },
-    { path: '/contact', label: t('Contact') }
-  ];
-  
+
   return (
-    <header 
-      className={`py-[15px] transition-all duration-300 fixed top-0 left-0 w-full z-50 ${
-        scrolled 
-          ? 'bg-neutral-50/90 backdrop-blur-sm shadow-sm' 
-          : 'bg-neutral-50'
-      }`}
-    >
-      <div className="arch-container flex justify-between items-center">
-        <NavLink to="/" className="text-xl md:text-2xl font-display font-bold relative">
-          <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-blue-500 text-4xl">3D</span>
-        </NavLink>
-        
-        {/* Desktop Navigation */}
-        <div className="flex items-center space-x-4">
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map(item => (
-              <NavLink 
-                key={item.label} 
-                to={item.path} 
-                className={({isActive}) => `
-                  relative font-medium text-base transition-colors duration-300
-                  hover:text-yellow-500 
-                  after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full 
-                  after:origin-center after:transform after:scale-x-0 after:bg-yellow-400
-                  after:transition-transform after:duration-300 hover:after:scale-x-100
-                  ${isActive ? 'text-yellow-500 after:scale-x-100' : ''}
-                `}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          {/* Admin Button */}
-          <Link 
-            to="/admin" 
-            className="hidden md:flex items-center gap-2 bg-arch-black text-white px-4 py-2 rounded-md text-sm hover:bg-yellow-500 hover:text-arch-black transition-colors duration-300"
-          >
-            <Settings size={16} /> {t("Admin")}
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+    }`}>
+      <div className="arch-container">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          {/* Logo */}
+          <Link to="/" className={`font-display text-lg md:text-xl font-bold ${
+            isScrolled ? 'text-arch-black' : 'text-white'
+          }`}>
+            ACHITECT
           </Link>
-          <LanguageSwitcher />
-        </div>
 
-        {/* Mobile Navigation Toggle */}
-        <div className="flex items-center space-x-2">
-          <Link to="/admin" className="md:hidden text-arch-black hover:text-yellow-400 transition-colors">
-            <Settings size={24} />
-          </Link>
-          <button 
-            className="md:hidden text-arch-black hover:text-yellow-400 transition-colors" 
-            onClick={toggleMenu} 
-            aria-label="Toggle menu"
-          >
-            <Menu size={24} />
-          </button>
-        </div>
-        
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <div className="fixed inset-0 bg-white z-50 flex flex-col animate-fade-in">
-            <div className="arch-container pt-5 pb-10 flex justify-between">
-              <NavLink to="/" className="text-xl md:text-2xl font-display font-bold">
-                <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">3D</span>
-              </NavLink>
-              <button 
-                onClick={toggleMenu} 
-                className="hover:text-yellow-400 transition-colors" 
-                aria-label="Close menu"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className="flex-1 flex flex-col justify-center items-center space-y-8">
-              {navItems.map(item => (
-                <NavLink 
-                  key={item.label} 
-                  to={item.path} 
-                  onClick={toggleMenu} 
-                  className={({isActive}) => `
-                    text-2xl uppercase tracking-wider transition-colors
-                    relative after:absolute after:bottom-0 after:left-0 
-                    after:w-full after:h-0.5 
-                    hover:text-yellow-400 
-                    ${isActive 
-                      ? 'font-medium text-yellow-400 after:scale-x-100 after:bg-yellow-400' 
-                      : 'font-normal hover:after:scale-x-100 after:scale-x-0 after:bg-yellow-400 after:transition-transform after:duration-300'
-                    }
-                  `}
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-              <Link 
-                to="/admin" 
-                onClick={toggleMenu} 
-                className="text-2xl uppercase tracking-wider hover:text-yellow-400 transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-yellow-400 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
-              >
-                {t("Admin")}
-              </Link>
-              <LanguageSwitcher />
-            </div>
+          {/* Ana Menü */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/projects" className={`${
+              isScrolled ? 'text-arch-black hover:text-arch-gray' : 'text-white hover:text-gray-300'
+            } transition-colors`}>
+              {t("projects")}
+            </Link>
+            <Link to="/about" className={`${
+              isScrolled ? 'text-arch-black hover:text-arch-gray' : 'text-white hover:text-gray-300'
+            } transition-colors`}>
+              {t("about")}
+            </Link>
+            <Link to="/contact" className={`${
+              isScrolled ? 'text-arch-black hover:text-arch-gray' : 'text-white hover:text-gray-300'
+            } transition-colors`}>
+              {t("contact")}
+            </Link>
           </div>
-        )}
+
+          {/* Dil Seçici ve Admin */}
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <Link to="/admin">
+              <Button variant="outline" size="sm" className={`${
+                isScrolled ? 'border-arch-black text-arch-black' : 'border-white text-white'
+              }`}>
+                Admin
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
-    </header>
+    </nav>
   );
 };
 
