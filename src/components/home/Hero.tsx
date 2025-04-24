@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowDownCircle } from 'lucide-react';
 import { getSiteImage } from '@/utils/siteHelpers';
@@ -87,15 +88,15 @@ const Hero = () => {
   }, [videoUrl]);
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center bg-white md:bg-transparent py-10 md:py-0">
+    <section className="relative min-h-[85vh] flex items-center justify-center bg-black md:bg-transparent py-10 md:py-0 mt-16">
       {backgroundImage && (
         <>
           <div 
-            className="absolute inset-0 bg-arch-black z-5 rounded-3xl"
+            className="absolute inset-0 bg-arch-black z-5"
             style={{ opacity: opacity }}
           />
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat rounded-3xl"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ 
               backgroundImage: `url('${backgroundImage}')`,
               opacity: 1
@@ -107,7 +108,7 @@ const Hero = () => {
       <div className="arch-container relative z-20 w-full">
         <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 md:gap-16 min-h-[60vh] justify-between px-2 md:px-0">
           <div className="flex flex-col justify-center flex-1 max-w-xl text-left text-white drop-shadow-2xl bg-black/40 md:bg-transparent rounded-3xl md:rounded-none p-6 md:p-0 min-w-[320px]">
-            <h1 className="text-4xl font-display mb-6 font-extrabold text-yellow-300 md:text-5xl text-left">
+            <h1 className="text-4xl font-display mb-6 font-extrabold text-yellow-400 md:text-5xl text-left">
               {heroData.title[lang]}
             </h1>
             <p className="text-lg mb-8 font-medium text-yellow-200 md:text-xl">
@@ -116,7 +117,7 @@ const Hero = () => {
             <div className="flex gap-4 mb-6 flex-wrap">
               <button 
                 onClick={scrollToProjects} 
-                className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-300 hover:bg-yellow-200 font-bold text-base text-black rounded shadow-sm animate-fade-in"
+                className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-400 hover:bg-yellow-300 font-bold text-base text-black rounded shadow-sm animate-fade-in"
               >
                 {t("viewProjects")} <ArrowDownCircle size={18} />
               </button>
@@ -127,7 +128,7 @@ const Hero = () => {
           </div>
           
           <div className="flex-1 flex items-center justify-center min-w-[340px] md:max-w-2xl">
-            <div className={`w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in ${isMobile ? 'h-64' : 'min-h-[400px]'}`}>
+            <div className={`w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in ${isMobile ? 'h-64' : 'min-h-[450px]'}`}>
               {finalVideoUrl ? (
                 <iframe 
                   src={finalVideoUrl} 

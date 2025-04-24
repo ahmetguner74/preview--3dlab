@@ -1,4 +1,3 @@
-
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -6,11 +5,11 @@ const resources = {
   tr: {
     translation: {
       // --- NAV, HERO, BUTONS ---
-      "Projects": "Projeler",
-      "About": "Hakkımızda",
-      "Contact": "İletişim",
-      "Admin": "Yönetim",
-      "Video": "Video",
+      "projects": "Projeler",
+      "about": "Hakkımızda",
+      "contact": "İletişim",
+      "admin": "Yönetim",
+      "video": "Video",
       "3D Model": "3D Model",
       "Point Cloud": "Nokta Bulutu",
       "Gallery": "Galeri",

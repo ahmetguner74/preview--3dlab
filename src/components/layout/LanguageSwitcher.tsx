@@ -9,12 +9,12 @@ const LanguageSwitcher: React.FC = () => {
   };
   
   return (
-    <div className="flex items-center gap-2 ml-4">
+    <div className="flex items-center gap-2">
       <button
         className={`px-2 py-1 rounded transition-all duration-300 ${
           i18n.language === "tr" 
-            ? "font-bold bg-yellow-400 text-arch-black" 
-            : "hover:bg-yellow-400/20"
+            ? "font-bold bg-yellow-400 text-black" 
+            : "text-white hover:bg-yellow-400/20"
         }`}
         onClick={() => changeLang("tr")}
       >
@@ -23,8 +23,8 @@ const LanguageSwitcher: React.FC = () => {
       <button
         className={`px-2 py-1 rounded transition-all duration-300 ${
           i18n.language === "en" 
-            ? "font-bold bg-yellow-400 text-arch-black" 
-            : "hover:bg-yellow-400/20"
+            ? "font-bold bg-yellow-400 text-black" 
+            : "text-white hover:bg-yellow-400/20"
         }`}
         onClick={() => changeLang("en")}
       >
