@@ -7,7 +7,7 @@ export const getSiteImage = async (imageKey: string): Promise<string | null> => 
   try {
     const { data, error } = await supabase
       .from('site_images')
-      .select('image_url')
+      .select('image_url, settings')
       .eq('image_key', imageKey)
       .single();
     
@@ -24,7 +24,7 @@ export const uploadSiteImage = async (file: File, imageKey: string): Promise<voi
   // Önce mevcut görselin ID'sini bulmak için sorgu yap
   const { data: existingImage } = await supabase
     .from('site_images')
-    .select('id')
+    .select('id, settings')
     .eq('image_key', imageKey)
     .single();
 
@@ -50,12 +50,22 @@ export const uploadSiteImage = async (file: File, imageKey: string): Promise<voi
       break;
   }
 
+  // Varsayılan ayarlar
+  const defaultSettings = {
+    opacity: '0.7',
+    height: '100vh',
+    position: 'center',
+    overlay_color: 'rgba(0, 0, 0, 0.5)',
+    blend_mode: 'normal'
+  };
+
   if (existingImage?.id) {
     const { error } = await supabase
       .from('site_images')
       .update({
         image_url: imageUrl,
         updated_at: new Date().toISOString(),
+        settings: existingImage.settings || defaultSettings
       })
       .eq('id', existingImage.id);
     
@@ -68,6 +78,7 @@ export const uploadSiteImage = async (file: File, imageKey: string): Promise<voi
         image_url: imageUrl,
         title,
         description,
+        settings: defaultSettings
       });
     
     if (error) throw error;

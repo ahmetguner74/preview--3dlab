@@ -8,6 +8,13 @@ export interface CoverImage {
   title: string;
   description: string;
   updated_at: string;
+  settings?: {
+    opacity: string;
+    height: string;
+    position: string;
+    overlay_color: string;
+    blend_mode: string;
+  };
 }
 
 export const fetchCoverImages = async (): Promise<CoverImage[]> => {
@@ -25,6 +32,13 @@ export const fetchCoverImages = async (): Promise<CoverImage[]> => {
           title: getTitleForKey(key),
           description: getDescriptionForKey(key),
           updated_at: new Date().toISOString(),
+          settings: {
+            opacity: '0.7',
+            height: '100vh',
+            position: 'center',
+            overlay_color: 'rgba(0, 0, 0, 0.5)',
+            blend_mode: 'normal'
+          }
         });
       }
     }
