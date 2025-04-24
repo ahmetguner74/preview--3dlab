@@ -1,5 +1,6 @@
 
 import { uploadSiteImage, getSiteImage } from '@/utils/siteImages';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CoverImage {
   id: string;
@@ -19,35 +20,45 @@ export interface CoverImage {
 
 export const fetchCoverImages = async (): Promise<CoverImage[]> => {
   try {
-    const imageKeys = ['hero_background', 'about_team', 'featured_projects_cover', 'hero_youtube_video'];
-    const images: CoverImage[] = [];
+    // Doğrudan Supabase'den tam verileri çekerek sorunu çözelim
+    const { data, error } = await supabase
+      .from('site_images')
+      .select('*')
+      .in('image_key', ['hero_background', 'about_team', 'featured_projects_cover', 'hero_youtube_video']);
+    
+    if (error) throw error;
 
-    for (const key of imageKeys) {
-      const url = await getSiteImage(key);
-      if (url) {
-        images.push({
-          id: key,
-          image_key: key,
-          image_url: url,
-          title: getTitleForKey(key),
-          description: getDescriptionForKey(key),
-          updated_at: new Date().toISOString(),
-          settings: {
-            opacity: '0.7',
-            height: '100vh',
-            position: 'center',
-            overlay_color: 'rgba(0, 0, 0, 0.5)',
-            blend_mode: 'normal'
-          }
-        });
-      }
+    // Veri yoksa veya boş bir array dönerse
+    if (!data || data.length === 0) {
+      return createDefaultCoverImages();
     }
 
-    return images;
+    return data as CoverImage[];
   } catch (error) {
     console.error('Kapak görselleri getirilemedi:', error);
-    return [];
+    // Hata durumunda yine varsayılan verileri döndür
+    return createDefaultCoverImages();
   }
+};
+
+// Varsayılan kapak görselleri oluşturan yardımcı fonksiyon
+const createDefaultCoverImages = (): CoverImage[] => {
+  const imageKeys = ['hero_background', 'about_team', 'featured_projects_cover', 'hero_youtube_video'];
+  return imageKeys.map(key => ({
+    id: key,
+    image_key: key,
+    image_url: '',
+    title: getTitleForKey(key),
+    description: getDescriptionForKey(key),
+    updated_at: new Date().toISOString(),
+    settings: {
+      opacity: '0.7',
+      height: '100vh',
+      position: 'center',
+      overlay_color: 'rgba(0, 0, 0, 0.5)',
+      blend_mode: 'normal'
+    }
+  }));
 };
 
 export const uploadCoverImage = async (file: File, imageKey: string): Promise<void> => {

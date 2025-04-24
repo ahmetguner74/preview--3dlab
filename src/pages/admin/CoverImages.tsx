@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -53,17 +54,43 @@ const CoverImages = () => {
 
   const handleSettingsChange = async (settings: any, imageKey: string) => {
     try {
-      const { error } = await supabase
+      // maybeSingle kullanarak olası null durumunu kontrol et
+      const { data: existingImage, error: selError } = await supabase
         .from('site_images')
-        .update({ 
-          settings,
-          updated_at: new Date().toISOString() 
-        })
-        .eq('image_key', imageKey);
+        .select('id')
+        .eq('image_key', imageKey)
+        .maybeSingle();
+      
+      if (selError) throw selError;
+      
+      if (existingImage?.id) {
+        const { error } = await supabase
+          .from('site_images')
+          .update({ 
+            settings,
+            updated_at: new Date().toISOString() 
+          })
+          .eq('image_key', imageKey);
 
-      if (error) throw error;
-      toast.success('Ayarlar başarıyla güncellendi');
-      loadCoverImages();
+        if (error) throw error;
+        toast.success('Ayarlar başarıyla güncellendi');
+        loadCoverImages();
+      } else {
+        // Görsel yoksa, varsayılan değerlerle oluştur
+        const { error } = await supabase
+          .from('site_images')
+          .insert({
+            image_key: imageKey,
+            image_url: '',
+            title: imageKey,
+            settings,
+            updated_at: new Date().toISOString()
+          });
+          
+        if (error) throw error;
+        toast.success('Ayarlar başarıyla oluşturuldu');
+        loadCoverImages();
+      }
     } catch (err) {
       console.error('Ayarlar güncellenirken hata:', err);
       toast.error('Ayarlar güncellenemedi');
@@ -91,12 +118,23 @@ const CoverImages = () => {
       } else {
         const { error } = await supabase
           .from('site_images')
-          .insert({ image_key: imageKey, image_url: link });
+          .insert({ 
+            image_key: imageKey, 
+            image_url: link,
+            settings: {
+              opacity: '1',
+              height: '100vh',
+              position: 'center',
+              overlay_color: 'rgba(0, 0, 0, 0)',
+              blend_mode: 'normal'
+            }
+          });
         if (error) throw error;
       }
       toast.success("YouTube video linki kaydedildi");
       loadCoverImages();
     } catch (err) {
+      console.error('YouTube bağlantısı kaydedilemedi:', err);
       toast.error("YouTube video linki kaydedilemedi");
     }
   };
