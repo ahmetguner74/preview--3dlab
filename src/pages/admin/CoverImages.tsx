@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -52,14 +51,31 @@ const CoverImages = () => {
     }
   };
 
-  // hero_youtube_video için embed linkini direkt güncelle
+  const handleSettingsChange = async (settings: any, imageKey: string) => {
+    try {
+      const { error } = await supabase
+        .from('site_images')
+        .update({ 
+          settings,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('image_key', imageKey);
+
+      if (error) throw error;
+      toast.success('Ayarlar başarıyla güncellendi');
+      loadCoverImages();
+    } catch (err) {
+      console.error('Ayarlar güncellenirken hata:', err);
+      toast.error('Ayarlar güncellenemedi');
+    }
+  };
+
   const handleYoutubeLinkChange = async (link: string, imageKey: string) => {
     if (!link || !link.startsWith("https://")) {
       toast.error("Lütfen geçerli bir YouTube linki girin.");
       return;
     }
     try {
-      // Mevcut kayıt var mı kontrol et
       const { data: existing, error: selError } = await supabase
         .from('site_images')
         .select('id')
@@ -67,14 +83,12 @@ const CoverImages = () => {
         .maybeSingle();
       if (selError) throw selError;
       if (existing?.id) {
-        // Güncelle
         const { error } = await supabase
           .from('site_images')
           .update({ image_url: link, updated_at: new Date().toISOString() })
           .eq('id', existing.id);
         if (error) throw error;
       } else {
-        // Ekle
         const { error } = await supabase
           .from('site_images')
           .insert({ image_key: imageKey, image_url: link });
@@ -134,15 +148,17 @@ const CoverImages = () => {
               <Loader2 size={36} className="animate-spin text-arch-black" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <CoverImageSection 
                 imageKey="hero_background"
                 title="Ana Sayfa Arkaplan Görseli"
                 description="Ana sayfada üst bölümde görünen arkaplan resmi"
                 imageUrl={getCoverImageByKey(coverImages, 'hero_background')?.image_url}
                 updatedAt={getCoverImageByKey(coverImages, 'hero_background')?.updated_at}
+                settings={getCoverImageByKey(coverImages, 'hero_background')?.settings}
                 onImageClick={handleImageClick}
                 onFileSelected={handleFileUpload}
+                onSettingsChange={handleSettingsChange}
               />
               
               <CoverImageSection 
@@ -151,8 +167,10 @@ const CoverImages = () => {
                 description="Ana sayfada hakkımızda bölümünde görünen ekip resmi"
                 imageUrl={getCoverImageByKey(coverImages, 'about_team')?.image_url}
                 updatedAt={getCoverImageByKey(coverImages, 'about_team')?.updated_at}
+                settings={getCoverImageByKey(coverImages, 'about_team')?.settings}
                 onImageClick={handleImageClick}
                 onFileSelected={handleFileUpload}
+                onSettingsChange={handleSettingsChange}
               />
               
               <CoverImageSection 
@@ -161,8 +179,10 @@ const CoverImages = () => {
                 description="Ana sayfada öne çıkan projeler bölümünde görünen kapak resmi"
                 imageUrl={getCoverImageByKey(coverImages, 'featured_projects_cover')?.image_url}
                 updatedAt={getCoverImageByKey(coverImages, 'featured_projects_cover')?.updated_at}
+                settings={getCoverImageByKey(coverImages, 'featured_projects_cover')?.settings}
                 onImageClick={handleImageClick}
                 onFileSelected={handleFileUpload}
+                onSettingsChange={handleSettingsChange}
               />
 
               <CoverImageSection
@@ -171,9 +191,11 @@ const CoverImages = () => {
                 description="Ana sayfanın üstündeki YouTube videosu için YouTube linki veya iframe kodu"
                 imageUrl={getCoverImageByKey(coverImages, 'hero_youtube_video')?.image_url}
                 updatedAt={getCoverImageByKey(coverImages, 'hero_youtube_video')?.updated_at}
+                settings={getCoverImageByKey(coverImages, 'hero_youtube_video')?.settings}
                 onImageClick={handleImageClick}
                 onFileSelected={handleFileUpload}
                 onYoutubeLinkChange={handleYoutubeLinkChange}
+                onSettingsChange={handleSettingsChange}
               />
             </div>
           )}

@@ -196,6 +196,7 @@ export type Database = {
           id: string
           image_key: string
           image_url: string
+          settings: Json
           title: string | null
           updated_at: string
         }
@@ -205,6 +206,7 @@ export type Database = {
           id?: string
           image_key: string
           image_url: string
+          settings?: Json
           title?: string | null
           updated_at?: string
         }
@@ -214,6 +216,7 @@ export type Database = {
           id?: string
           image_key?: string
           image_url?: string
+          settings?: Json
           title?: string | null
           updated_at?: string
         }
