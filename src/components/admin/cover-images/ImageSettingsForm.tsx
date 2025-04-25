@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FormLabel } from '@/components/ui/form';
+import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
 
 interface ImageSettingsFormProps {
   settings: {
@@ -14,19 +15,23 @@ interface ImageSettingsFormProps {
     overlay_color: string;
     blend_mode: string;
   };
-  onSettingsChange: (field: string, value: any) => void;
   showSettings: boolean;
   onToggleSettings: () => void;
+  onSettingsChange: (field: string, value: any) => void;
 }
 
 const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
   settings,
-  onSettingsChange,
   showSettings,
-  onToggleSettings
+  onToggleSettings,
+  onSettingsChange
 }) => {
-  return (
-    <>
+  const form = useForm({
+    defaultValues: settings
+  });
+
+  if (!showSettings) {
+    return (
       <Button
         variant="ghost"
         size="sm"
@@ -35,21 +40,43 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
         <Settings className="h-4 w-4 mr-2" />
         Görünüm Ayarları
       </Button>
+    );
+  }
 
-      {showSettings && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
-          <div className="space-y-2">
-            <FormLabel>Opaklık</FormLabel>
-            <Slider
-              defaultValue={[Number(settings.opacity) * 100]}
-              max={100}
-              step={1}
-              onValueChange={([value]) => onSettingsChange('opacity', (value / 100).toString())}
-            />
-          </div>
+  return (
+    <div className="w-full">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onToggleSettings}
+        className="mb-4"
+      >
+        <Settings className="h-4 w-4 mr-2" />
+        Ayarları Gizle
+      </Button>
+
+      <Form {...form}>
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="opacity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Opaklık</FormLabel>
+                <div className="pt-2">
+                  <Slider
+                    defaultValue={[Number(settings.opacity) * 100]}
+                    max={100}
+                    step={1}
+                    onValueChange={([value]) => onSettingsChange('opacity', (value / 100).toString())}
+                  />
+                </div>
+              </FormItem>
+            )}
+          />
 
           <div className="space-y-2">
-            <FormLabel>Yükseklik</FormLabel>
+            <label className="text-sm font-medium">Yükseklik</label>
             <Select 
               defaultValue={settings.height}
               onValueChange={(value) => onSettingsChange('height', value)}
@@ -67,7 +94,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <FormLabel>Pozisyon</FormLabel>
+            <label className="text-sm font-medium">Pozisyon</label>
             <Select 
               defaultValue={settings.position}
               onValueChange={(value) => onSettingsChange('position', value)}
@@ -84,7 +111,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <FormLabel>Karartma Rengi</FormLabel>
+            <label className="text-sm font-medium">Karartma Rengi</label>
             <Select 
               defaultValue={settings.overlay_color}
               onValueChange={(value) => onSettingsChange('overlay_color', value)}
@@ -102,7 +129,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <FormLabel>Karışım Modu</FormLabel>
+            <label className="text-sm font-medium">Karışım Modu</label>
             <Select 
               defaultValue={settings.blend_mode}
               onValueChange={(value) => onSettingsChange('blend_mode', value)}
@@ -119,8 +146,8 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             </Select>
           </div>
         </div>
-      )}
-    </>
+      </Form>
+    </div>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
@@ -41,16 +42,35 @@ const FormField = <
 
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
-  const itemContext = React.useContext(FormItemContext)
-  const { getFieldState, formState } = useFormContext()
-
-  const fieldState = getFieldState(fieldContext.name, formState)
-
+  
+  // FormFieldContext değeri olmadığında hata fırlatıyoruz
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
   }
 
-  const { id } = itemContext
+  const itemContext = React.useContext(FormItemContext)
+
+  // useFormContext'in olmadığı durumları kontrol edelim
+  const formContext = useFormContext();
+
+  // Form context yoksa veya gerekli metotlar yoksa, basit bir varsayılan değer döndürelim
+  if (!formContext) {
+    return {
+      id: itemContext?.id,
+      name: fieldContext.name,
+      formItemId: itemContext?.id ? `${itemContext.id}-form-item` : undefined,
+      formDescriptionId: itemContext?.id ? `${itemContext.id}-form-item-description` : undefined,
+      formMessageId: itemContext?.id ? `${itemContext.id}-form-item-message` : undefined,
+      error: undefined
+    }
+  }
+
+  const { getFieldState, formState } = formContext;
+  
+  // itemContext olmayabilir, kontrol edelim
+  const { id } = itemContext || { id: fieldContext.name }
+  
+  const fieldState = getFieldState(fieldContext.name, formState)
 
   return {
     id,
@@ -66,9 +86,7 @@ type FormItemContextValue = {
   id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue
-)
+const FormItemContext = React.createContext<FormItemContextValue | undefined>(undefined)
 
 const FormItem = React.forwardRef<
   HTMLDivElement,
@@ -88,7 +106,8 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField()
+  // useFormField kısmen bağımsız olarak çalışabilir hale getirildi
+  const { error, formItemId } = useFormField();
 
   return (
     <Label
