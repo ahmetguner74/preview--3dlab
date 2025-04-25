@@ -31,7 +31,6 @@ export const addSceneRecord = async (scene: any) => {
         fov: scene.initialFov || 90
       },
       tour_id: scene.tourId || '00000000-0000-0000-0000-000000000000', // Geçici bir ID
-      hotspots: scene.hotspots || []
     }]);
 
   if (error) throw error;
@@ -70,32 +69,36 @@ export const updateScene = async (id: string, updates: any) => {
 
 export const addHotspot = async (panoramaId: string, hotspot: any) => {
   try {
-    // Önce mevcut panoramayı al
-    const { data: panoramaData, error: fetchError } = await supabase
-      .from('tour_panoramas')
-      .select('*')
-      .eq('id', panoramaId)
-      .single();
+    // Doğrudan tour_hotspots tablosuna ekle
+    const { data, error } = await supabase
+      .from('tour_hotspots')
+      .insert([{
+        panorama_id: panoramaId,
+        title: hotspot.title || 'Hotspot',
+        position: { 
+          yaw: hotspot.position?.yaw || 0,
+          pitch: hotspot.position?.pitch || 0
+        },
+        hotspot_type: hotspot.type || 'info',
+        target_panorama_id: hotspot.targetPanoramaId || null,
+        description: hotspot.description || null,
+        custom_data: hotspot.customData || null
+      }]);
       
-    if (fetchError) throw fetchError;
-    
-    // Mevcut hotspotları al veya boş bir dizi oluştur
-    const currentHotspots = panoramaData.hotspots || [];
-    
-    // Yeni hotspot'u ekle
-    const updatedHotspots = [...currentHotspots, hotspot];
-    
-    // Panoramayı güncelle
-    const { data, error: updateError } = await supabase
-      .from('tour_panoramas')
-      .update({ hotspots: updatedHotspots })
-      .eq('id', panoramaId);
-      
-    if (updateError) throw updateError;
-    
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error("Hotspot eklenirken hata:", error);
     throw error;
   }
+};
+
+export const fetchHotspotsForPanorama = async (panoramaId: string) => {
+  const { data, error } = await supabase
+    .from('tour_hotspots')
+    .select('*')
+    .eq('panorama_id', panoramaId);
+    
+  if (error) throw error;
+  return data;
 };

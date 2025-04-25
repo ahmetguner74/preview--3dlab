@@ -1,5 +1,6 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { fetchHotspotsForPanorama } from "./SupabaseService";
 import { toast } from "sonner";
 
 // Marzipano türlerini tanımlama
@@ -11,6 +12,7 @@ declare global {
 
 interface PanoramaViewerProps {
   sceneData: {
+    id: string;
     image_url: string;
     title: string;
     initial_view?: {
@@ -18,13 +20,13 @@ interface PanoramaViewerProps {
       pitch: number;
       fov: number;
     };
-    hotspots?: any[];
   } | null;
 }
 
 const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const viewerInstanceRef = useRef<any>(null);
+  const [hotspots, setHotspots] = useState<any[]>([]);
 
   useEffect(() => {
     if (!window.Marzipano) {
@@ -32,6 +34,19 @@ const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
       return;
     }
     
+    // Eğer sahne varsa, hotspotları getir
+    if (sceneData?.id) {
+      fetchHotspotsForPanorama(sceneData.id)
+        .then(data => {
+          setHotspots(data);
+        })
+        .catch(error => {
+          console.error("Hotspot verileri alınamadı:", error);
+        });
+    }
+  }, [sceneData]);
+
+  useEffect(() => {
     // Eğer yeni bir sahne yükleniyorsa
     if (viewerRef.current && sceneData) {
       // Önceki viewer'ı temizle
@@ -79,15 +94,21 @@ const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
         viewerInstanceRef.current = viewer;
 
         // Hotspot'ları ekle (eğer varsa)
-        if (sceneData.hotspots && sceneData.hotspots.length > 0) {
-          sceneData.hotspots.forEach(hotspot => {
+        if (hotspots && hotspots.length > 0) {
+          hotspots.forEach(hotspot => {
             const element = document.createElement('div');
             element.className = 'hotspot';
-            element.innerHTML = hotspot.text || '';
+            element.style.width = '30px';
+            element.style.height = '30px';
+            element.style.borderRadius = '50%';
+            element.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+            element.style.border = '2px solid white';
+            element.style.cursor = 'pointer';
+            element.title = hotspot.title || '';
             
             scene.hotspotContainer().createHotspot(element, {
-              yaw: hotspot.yaw * Math.PI / 180,
-              pitch: hotspot.pitch * Math.PI / 180
+              yaw: hotspot.position?.yaw * Math.PI / 180,
+              pitch: hotspot.position?.pitch * Math.PI / 180
             });
           });
         }
@@ -104,7 +125,7 @@ const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
         viewerInstanceRef.current = null;
       }
     };
-  }, [sceneData]);
+  }, [sceneData, hotspots]);
 
   if (!sceneData) {
     return (
