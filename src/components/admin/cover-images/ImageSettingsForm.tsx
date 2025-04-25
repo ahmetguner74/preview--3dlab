@@ -58,101 +58,108 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
         </Button>
       </div>
 
-      <Form {...form}>
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="opacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Opaklık</FormLabel>
-                <div className="pt-2">
-                  <Slider
-                    defaultValue={[Number(settings.opacity) * 100]}
-                    max={100}
-                    step={1}
-                    onValueChange={([value]) => onSettingsChange('opacity', (value / 100).toString())}
-                  />
-                </div>
-              </FormItem>
-            )}
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Form {...form}>
+          <div className="space-y-4 bg-white p-4 rounded-lg border">
+            <h3 className="font-medium text-sm text-gray-700 mb-4">Görsel Ayarları</h3>
 
-          <div className="space-y-2">
-            <FormLabel>Yükseklik</FormLabel>
-            <Select 
-              defaultValue={settings.height}
-              onValueChange={(value) => onSettingsChange('height', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="50vh">Yarı Ekran</SelectItem>
-                <SelectItem value="75vh">3/4 Ekran</SelectItem>
-                <SelectItem value="100vh">Tam Ekran</SelectItem>
-                <SelectItem value="120vh">Geniş Ekran</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormField
+              control={form.control}
+              name="opacity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Opaklık</FormLabel>
+                  <div className="pt-2">
+                    <Slider
+                      defaultValue={[Number(settings.opacity) * 100]}
+                      max={100}
+                      step={1}
+                      onValueChange={([value]) => onSettingsChange('opacity', (value / 100).toString())}
+                    />
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-2">
+              <FormLabel>Yükseklik</FormLabel>
+              <Select 
+                defaultValue={settings.height}
+                onValueChange={(value) => onSettingsChange('height', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="50vh">Yarı Ekran</SelectItem>
+                  <SelectItem value="75vh">3/4 Ekran</SelectItem>
+                  <SelectItem value="100vh">Tam Ekran</SelectItem>
+                  <SelectItem value="120vh">Geniş Ekran</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <FormLabel>Pozisyon</FormLabel>
+              <Select 
+                defaultValue={settings.position}
+                onValueChange={(value) => onSettingsChange('position', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top">Üst</SelectItem>
+                  <SelectItem value="center">Orta</SelectItem>
+                  <SelectItem value="bottom">Alt</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <FormLabel>Karartma Rengi</FormLabel>
+              <Select 
+                defaultValue={settings.overlay_color}
+                onValueChange={(value) => onSettingsChange('overlay_color', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rgba(0, 0, 0, 0.3)">Hafif Karartma</SelectItem>
+                  <SelectItem value="rgba(0, 0, 0, 0.5)">Orta Karartma</SelectItem>
+                  <SelectItem value="rgba(0, 0, 0, 0.7)">Koyu Karartma</SelectItem>
+                  <SelectItem value="rgba(0, 0, 0, 0)">Karartma Yok</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <FormLabel>Karışım Modu</FormLabel>
+              <Select 
+                defaultValue={settings.blend_mode}
+                onValueChange={(value) => onSettingsChange('blend_mode', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="multiply">Multiply</SelectItem>
+                  <SelectItem value="screen">Screen</SelectItem>
+                  <SelectItem value="overlay">Overlay</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+        </Form>
 
-          <div className="space-y-2">
-            <FormLabel>Pozisyon</FormLabel>
-            <Select 
-              defaultValue={settings.position}
-              onValueChange={(value) => onSettingsChange('position', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="top">Üst</SelectItem>
-                <SelectItem value="center">Orta</SelectItem>
-                <SelectItem value="bottom">Alt</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <FormLabel>Karartma Rengi</FormLabel>
-            <Select 
-              defaultValue={settings.overlay_color}
-              onValueChange={(value) => onSettingsChange('overlay_color', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rgba(0, 0, 0, 0.3)">Hafif Karartma</SelectItem>
-                <SelectItem value="rgba(0, 0, 0, 0.5)">Orta Karartma</SelectItem>
-                <SelectItem value="rgba(0, 0, 0, 0.7)">Koyu Karartma</SelectItem>
-                <SelectItem value="rgba(0, 0, 0, 0)">Karartma Yok</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <FormLabel>Karışım Modu</FormLabel>
-            <Select 
-              defaultValue={settings.blend_mode}
-              onValueChange={(value) => onSettingsChange('blend_mode', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="multiply">Multiply</SelectItem>
-                <SelectItem value="screen">Screen</SelectItem>
-                <SelectItem value="overlay">Overlay</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {previewUrl && (
-            <div className="mt-6 border rounded-lg overflow-hidden">
+        {previewUrl && (
+          <div className="bg-white p-4 rounded-lg border">
+            <h3 className="font-medium text-sm text-gray-700 mb-4">Canlı Önizleme</h3>
+            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
               <div 
-                className="aspect-video bg-gray-100 cursor-pointer overflow-hidden"
+                className="w-full h-full"
                 style={{
                   backgroundImage: `url(${previewUrl})`,
                   backgroundSize: 'cover',
@@ -167,9 +174,12 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
                 />
               </div>
             </div>
-          )}
-        </div>
-      </Form>
+            <p className="text-xs text-gray-500 mt-2">
+              Bu önizleme, web sitenizde görselin nasıl görüneceğini temsil eder
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
