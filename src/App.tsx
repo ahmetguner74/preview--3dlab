@@ -20,6 +20,7 @@ import VirtualTours from "./pages/VirtualTours";
 import VirtualTourDetail from "./pages/VirtualTourDetail";
 import VirtualTourList from "./pages/admin/VirtualTourList";
 import VirtualTourForm from "./pages/admin/VirtualTourForm";
+import PanoramaAdmin from "./pages/admin/PanoramaAdmin";
 import "./i18n";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/admin/virtual-tours" element={<VirtualTourList />} />
           <Route path="/admin/virtual-tours/new" element={<VirtualTourForm />} />
           <Route path="/admin/virtual-tours/:id/edit" element={<VirtualTourForm />} />
+          <Route path="/admin/panorama" element={<PanoramaAdmin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

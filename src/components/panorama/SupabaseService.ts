@@ -67,3 +67,35 @@ export const updateScene = async (id: string, updates: any) => {
   if (error) throw error;
   return data;
 };
+
+export const addHotspot = async (panoramaId: string, hotspot: any) => {
+  try {
+    // Önce mevcut panoramayı al
+    const { data: panoramaData, error: fetchError } = await supabase
+      .from('tour_panoramas')
+      .select('*')
+      .eq('id', panoramaId)
+      .single();
+      
+    if (fetchError) throw fetchError;
+    
+    // Mevcut hotspotları al veya boş bir dizi oluştur
+    const currentHotspots = panoramaData.hotspots || [];
+    
+    // Yeni hotspot'u ekle
+    const updatedHotspots = [...currentHotspots, hotspot];
+    
+    // Panoramayı güncelle
+    const { data, error: updateError } = await supabase
+      .from('tour_panoramas')
+      .update({ hotspots: updatedHotspots })
+      .eq('id', panoramaId);
+      
+    if (updateError) throw updateError;
+    
+    return data;
+  } catch (error) {
+    console.error("Hotspot eklenirken hata:", error);
+    throw error;
+  }
+};
