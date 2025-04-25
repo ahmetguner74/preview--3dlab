@@ -37,10 +37,15 @@ const VirtualTourDetail = () => {
 
       // Veriyi doğru formata dönüştür
       const formattedPanoramas: Panorama[] = panoramas?.map(p => {
+        // JSON verisini düzgün şekilde parse et
+        let initialViewData = typeof p.initial_view === 'string' 
+          ? JSON.parse(p.initial_view)
+          : p.initial_view;
+
         const initialView: InitialView = {
-          yaw: p.initial_view?.yaw || 0,
-          pitch: p.initial_view?.pitch || 0,
-          fov: p.initial_view?.fov || 90
+          yaw: initialViewData?.yaw || 0,
+          pitch: initialViewData?.pitch || 0,
+          fov: initialViewData?.fov || 90
         };
 
         return {
@@ -50,9 +55,14 @@ const VirtualTourDetail = () => {
           initial_view: initialView,
           sort_order: p.sort_order,
           hotspots: p.hotspots?.map(h => {
+            // JSON verisini düzgün şekilde parse et
+            let positionData = typeof h.position === 'string'
+              ? JSON.parse(h.position)
+              : h.position;
+
             const position: Position = {
-              yaw: h.position?.yaw || 0,
-              pitch: h.position?.pitch || 0
+              yaw: positionData?.yaw || 0,
+              pitch: positionData?.pitch || 0
             };
 
             return {
@@ -101,17 +111,23 @@ const VirtualTourDetail = () => {
   return (
     <Layout>
       <div className="arch-container py-6">
-        <h1 className="text-3xl font-bold mb-6">{tourData.title}</h1>
-        {tourData.description && (
+        <h1 className="text-3xl font-bold mb-6">{tourData?.title}</h1>
+        {tourData?.description && (
           <p className="text-gray-600 mb-6">{tourData.description}</p>
         )}
       </div>
 
       <div className="w-full max-w-[1920px] mx-auto px-4">
-        <VirtualTourViewer 
-          panoramas={tourData.panoramas}
-          initialPanorama={tourData.panoramas[0]}
-        />
+        {tourData?.panoramas?.length ? (
+          <VirtualTourViewer 
+            panoramas={tourData.panoramas}
+            initialPanorama={tourData.panoramas[0]}
+          />
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Bu turda henüz panorama bulunmuyor.</p>
+          </div>
+        )}
       </div>
     </Layout>
   );
