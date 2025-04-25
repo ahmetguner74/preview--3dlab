@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -5,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import TourBasicForm, { TourFormValues } from '@/components/virtual-tour/form/TourBasicForm';
 import PanoramaManagement from '@/components/virtual-tour/form/PanoramaManagement';
+import { TourStatus } from '@/types/virtual-tour';
 
 const VirtualTourForm = () => {
   const { id } = useParams();
@@ -18,7 +20,14 @@ const VirtualTourForm = () => {
     if (id) {
       fetchTourData().then(data => {
         if (data) {
-          setFormData(data);
+          // Database'den gelen verileri TourFormValues formatına dönüştür
+          setFormData({
+            title: data.title,
+            description: data.description || '',
+            slug: data.slug,
+            status: data.status as TourStatus, // Type assertion ile TourStatus tipine dönüştür
+            visible: data.visible
+          });
         }
       });
       fetchPanoramas();

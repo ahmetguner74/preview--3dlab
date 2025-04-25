@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import PanoramaEditor from '@/components/virtual-tour/PanoramaEditor';
 import PanoramaList from './PanoramaList';
-import PanoramaUploader from '@/components/virtual-tour/PanoramaUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -28,17 +28,6 @@ const PanoramaManagement: React.FC<PanoramaManagementProps> = ({
         </Button>
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-md font-medium mb-3">Panorama Yükle</h3>
-        <PanoramaUploader 
-          tourId={tourId}
-          onComplete={() => {
-            onPanoramaAdded();
-            toast.success('Panoramalar başarıyla yüklendi');
-          }}
-        />
-      </div>
-
       <PanoramaList 
         panoramas={panoramas}
         onRefresh={onPanoramaAdded}
@@ -49,13 +38,14 @@ const PanoramaManagement: React.FC<PanoramaManagementProps> = ({
           tourId={tourId}
           onSave={async (data) => {
             try {
+              // Supabase için initial_view verisini JSON formatına dönüştürelim
               const { error } = await supabase
                 .from('tour_panoramas')
                 .insert({
                   tour_id: tourId,
                   title: data.title,
                   image_url: data.image_url,
-                  initial_view: data.initial_view,
+                  initial_view: data.initial_view as any, // JSON uyumsuzluğu için type assertion
                   sort_order: panoramas.length
                 });
 
