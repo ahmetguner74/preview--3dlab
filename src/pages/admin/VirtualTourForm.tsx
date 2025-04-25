@@ -19,11 +19,12 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { TourStatus } from '@/types/virtual-tour';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Başlık zorunludur'),
   description: z.string().optional(),
-  status: z.enum(['taslak', 'yayinda', 'arsiv']),
+  status: z.enum(['taslak', 'yayinda', 'arsiv'] as const),
   slug: z.string().min(1, 'URL zorunludur'),
   visible: z.boolean(),
 });
@@ -62,7 +63,15 @@ const VirtualTourForm = () => {
 
       if (error) throw error;
       if (data) {
-        form.reset(data);
+        // Veriyi form değerlerine dönüştür
+        const formData: FormValues = {
+          title: data.title,
+          description: data.description || '',
+          status: data.status as TourStatus,
+          slug: data.slug,
+          visible: data.visible
+        };
+        form.reset(formData);
       }
     } catch (error) {
       console.error('Tur verisi yüklenirken hata:', error);

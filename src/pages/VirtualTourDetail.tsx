@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import VirtualTourViewer from '@/components/virtual-tour/VirtualTourViewer';
+import { Panorama, InitialView } from '@/types/virtual-tour';
 
 const VirtualTourDetail = () => {
   const { slug } = useParams();
@@ -12,7 +13,6 @@ const VirtualTourDetail = () => {
   const { data: tourData, isLoading } = useQuery({
     queryKey: ['virtual-tour', slug],
     queryFn: async () => {
-      // Tur bilgilerini çek
       const { data: tour, error: tourError } = await supabase
         .from('virtual_tours')
         .select('*')
@@ -24,7 +24,6 @@ const VirtualTourDetail = () => {
       if (tourError) throw tourError;
       if (!tour) throw new Error('Tur bulunamadı');
 
-      // Panorama görsellerini çek
       const { data: panoramas, error: panoramaError } = await supabase
         .from('tour_panoramas')
         .select(`
@@ -36,9 +35,27 @@ const VirtualTourDetail = () => {
 
       if (panoramaError) throw panoramaError;
 
+      // Veriyi doğru formata dönüştür
+      const formattedPanoramas: Panorama[] = panoramas?.map(p => ({
+        id: p.id,
+        title: p.title,
+        image_url: p.image_url,
+        initial_view: p.initial_view as InitialView,
+        sort_order: p.sort_order,
+        hotspots: p.hotspots?.map(h => ({
+          id: h.id,
+          title: h.title,
+          description: h.description,
+          position: h.position,
+          target_panorama_id: h.target_panorama_id,
+          hotspot_type: h.hotspot_type,
+          custom_data: h.custom_data
+        }))
+      })) || [];
+
       return {
         ...tour,
-        panoramas: panoramas || []
+        panoramas: formattedPanoramas
       };
     }
   });
