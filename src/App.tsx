@@ -16,11 +16,6 @@ import CoverImages from "./pages/admin/CoverImages";
 import Messages from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
-import VirtualTours from "./pages/VirtualTours";
-import VirtualTourDetail from "./pages/VirtualTourDetail";
-import VirtualTourList from "./pages/admin/VirtualTourList";
-import VirtualTourForm from "./pages/admin/VirtualTourForm";
-import PanoramaAdmin from "./pages/admin/PanoramaAdmin";
 import "./i18n";
 
 const queryClient = new QueryClient();
@@ -37,8 +32,6 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
-          <Route path="/virtual-tours" element={<VirtualTours />} />
-          <Route path="/virtual-tours/:slug" element={<VirtualTourDetail />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
@@ -47,10 +40,7 @@ const App = () => (
           <Route path="/admin/cover-images" element={<CoverImages />} />
           <Route path="/admin/messages" element={<Messages />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
-          <Route path="/admin/virtual-tours" element={<VirtualTourList />} />
-          <Route path="/admin/virtual-tours/new" element={<VirtualTourForm />} />
-          <Route path="/admin/virtual-tours/:id/edit" element={<VirtualTourForm />} />
-          <Route path="/admin/panorama" element={<PanoramaAdmin />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

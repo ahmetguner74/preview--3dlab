@@ -44,12 +44,6 @@ export const AdminSidebar = () => {
       path: '/admin/settings',
       current: location.pathname.includes('/admin/settings')
     },
-    { 
-      icon: Image, 
-      label: 'Sanal Turlar', 
-      path: '/admin/virtual-tours',
-      current: location.pathname.includes('/admin/virtual-tours')
-    },
   ];
 
   return (
