@@ -11,11 +11,13 @@ declare global {
 
 interface PanoramaViewerProps {
   sceneData: {
-    imageUrl: string;
-    name: string;
-    initialYaw?: number;
-    initialPitch?: number;
-    initialFov?: number;
+    image_url: string;
+    title: string;
+    initial_view?: {
+      yaw: number;
+      pitch: number;
+      fov: number;
+    };
     hotspots?: any[];
   } | null;
 }
@@ -43,7 +45,7 @@ const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
         const viewer = new window.Marzipano.Viewer(viewerRef.current);
         
         // 360° görsel için kaynak oluşturma
-        const source = window.Marzipano.ImageUrlSource.fromUrl(sceneData.imageUrl);
+        const source = window.Marzipano.ImageUrlSource.fromUrl(sceneData.image_url);
         
         // Panorama geometrisi tanımla (ekvirect - equirectangular)
         const geometry = new window.Marzipano.EquirectGeometry([{ width: 4000 }]);
@@ -53,10 +55,13 @@ const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
           1024, // max pixel width
           100 * Math.PI / 180 // max yaw/pitch angle in radians (100 degrees)
         );
+        
+        const initialView = sceneData.initial_view || { yaw: 0, pitch: 0, fov: 1.5708 };
+        
         const view = new window.Marzipano.RectilinearView({
-          yaw: (sceneData.initialYaw || 0) * Math.PI / 180,
-          pitch: (sceneData.initialPitch || 0) * Math.PI / 180,
-          fov: sceneData.initialFov || 1.5708 // yaklaşık 90 derece
+          yaw: (initialView.yaw || 0) * Math.PI / 180,
+          pitch: (initialView.pitch || 0) * Math.PI / 180,
+          fov: initialView.fov || 1.5708 // yaklaşık 90 derece
         }, limiter);
         
         // Sahneyi oluştur ve ekle
@@ -118,7 +123,7 @@ const PanoramaViewer = ({ sceneData }: PanoramaViewerProps) => {
         {/* Marzipano viewer buraya eklenecek */}
       </div>
       <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-md text-sm">
-        {sceneData.name}
+        {sceneData.title}
       </div>
     </div>
   );

@@ -15,6 +15,11 @@ const PanoramaUploader = ({ onUploadComplete }: PanoramaUploaderProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [sceneName, setSceneName] = useState("");
+  const [initialView, setInitialView] = useState({
+    yaw: 0,
+    pitch: 0,
+    fov: 90
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -38,10 +43,9 @@ const PanoramaUploader = ({ onUploadComplete }: PanoramaUploaderProps) => {
       await addSceneRecord({
         name: sceneName,
         imageUrl: uploadResult.publicUrl,
-        initialYaw: 0,
-        initialPitch: 0,
-        initialFov: 1.5708,
-        hotspots: [],
+        initialYaw: initialView.yaw,
+        initialPitch: initialView.pitch,
+        initialFov: initialView.fov,
       });
 
       toast.success("Panorama başarıyla yüklendi!");
@@ -49,6 +53,7 @@ const PanoramaUploader = ({ onUploadComplete }: PanoramaUploaderProps) => {
       // Form temizle
       setFile(null);
       setSceneName("");
+      setInitialView({ yaw: 0, pitch: 0, fov: 90 });
       
       // Yükleme tamamlandığında callback fonksiyonu çağır
       onUploadComplete();
@@ -86,6 +91,36 @@ const PanoramaUploader = ({ onUploadComplete }: PanoramaUploaderProps) => {
         {file && (
           <p className="text-xs text-gray-500 mt-1">{file.name} ({Math.round(file.size / 1024)} KB)</p>
         )}
+      </div>
+      
+      <div className="grid grid-cols-3 gap-2">
+        <div>
+          <Label htmlFor="yaw">Başlangıç Yaw</Label>
+          <Input
+            id="yaw"
+            type="number"
+            value={initialView.yaw}
+            onChange={(e) => setInitialView({...initialView, yaw: Number(e.target.value)})}
+          />
+        </div>
+        <div>
+          <Label htmlFor="pitch">Başlangıç Pitch</Label>
+          <Input
+            id="pitch"
+            type="number"
+            value={initialView.pitch}
+            onChange={(e) => setInitialView({...initialView, pitch: Number(e.target.value)})}
+          />
+        </div>
+        <div>
+          <Label htmlFor="fov">Başlangıç FOV</Label>
+          <Input
+            id="fov"
+            type="number"
+            value={initialView.fov}
+            onChange={(e) => setInitialView({...initialView, fov: Number(e.target.value)})}
+          />
+        </div>
       </div>
 
       <Button 

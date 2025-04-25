@@ -30,7 +30,8 @@ export const addSceneRecord = async (scene: any) => {
         pitch: scene.initialPitch || 0,
         fov: scene.initialFov || 90
       },
-      tour_id: scene.tourId || '00000000-0000-0000-0000-000000000000' // Geçici bir ID
+      tour_id: scene.tourId || '00000000-0000-0000-0000-000000000000', // Geçici bir ID
+      hotspots: scene.hotspots || []
     }]);
 
   if (error) throw error;
