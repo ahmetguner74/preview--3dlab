@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from './LanguageSwitcher';
+
 const Navbar = () => {
   const {
     t
@@ -32,6 +33,9 @@ const Navbar = () => {
             <Link to="/projects" className={`${isScrolled ? 'text-white hover:text-yellow-300' : 'text-white hover:text-yellow-300'} transition-colors`}>
               {t("projects")}
             </Link>
+            <Link to="/virtual-tours" className={`${isScrolled ? 'text-white hover:text-yellow-300' : 'text-white hover:text-yellow-300'} transition-colors`}>
+              {t("virtual_tours")}
+            </Link>
             <Link to="/about" className={`${isScrolled ? 'text-white hover:text-yellow-300' : 'text-white hover:text-yellow-300'} transition-colors`}>
               {t("about")}
             </Link>
@@ -53,4 +57,5 @@ const Navbar = () => {
       </div>
     </nav>;
 };
+
 export default Navbar;

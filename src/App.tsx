@@ -16,6 +16,7 @@ import CoverImages from "./pages/admin/CoverImages";
 import Messages from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
+import VirtualTours from "./pages/VirtualTours";
 import "./i18n";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
+          <Route path="/virtual-tours" element={<VirtualTours />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
@@ -40,7 +42,6 @@ const App = () => (
           <Route path="/admin/cover-images" element={<CoverImages />} />
           <Route path="/admin/messages" element={<Messages />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
