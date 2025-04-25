@@ -18,13 +18,15 @@ interface ImageSettingsFormProps {
   showSettings: boolean;
   onToggleSettings: () => void;
   onSettingsChange: (field: string, value: any) => void;
+  previewUrl?: string | null;
 }
 
 const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
   settings,
   showSettings,
   onToggleSettings,
-  onSettingsChange
+  onSettingsChange,
+  previewUrl
 }) => {
   const form = useForm({
     defaultValues: settings
@@ -44,16 +46,17 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
   }
 
   return (
-    <div className="w-full">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggleSettings}
-        className="mb-4"
-      >
-        <Settings className="h-4 w-4 mr-2" />
-        Ayarları Gizle
-      </Button>
+    <div className="w-full space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleSettings}
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Ayarları Gizle
+        </Button>
+      </div>
 
       <Form {...form}>
         <div className="space-y-4">
@@ -76,7 +79,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           />
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Yükseklik</label>
+            <FormLabel>Yükseklik</FormLabel>
             <Select 
               defaultValue={settings.height}
               onValueChange={(value) => onSettingsChange('height', value)}
@@ -94,7 +97,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Pozisyon</label>
+            <FormLabel>Pozisyon</FormLabel>
             <Select 
               defaultValue={settings.position}
               onValueChange={(value) => onSettingsChange('position', value)}
@@ -111,7 +114,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Karartma Rengi</label>
+            <FormLabel>Karartma Rengi</FormLabel>
             <Select 
               defaultValue={settings.overlay_color}
               onValueChange={(value) => onSettingsChange('overlay_color', value)}
@@ -129,7 +132,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Karışım Modu</label>
+            <FormLabel>Karışım Modu</FormLabel>
             <Select 
               defaultValue={settings.blend_mode}
               onValueChange={(value) => onSettingsChange('blend_mode', value)}
@@ -145,6 +148,26 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
               </SelectContent>
             </Select>
           </div>
+
+          {previewUrl && (
+            <div className="mt-6 border rounded-lg overflow-hidden">
+              <div 
+                className="aspect-video bg-gray-100 cursor-pointer overflow-hidden"
+                style={{
+                  backgroundImage: `url(${previewUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: settings.position,
+                  opacity: Number(settings.opacity),
+                  mixBlendMode: settings.blend_mode as any
+                }}
+              >
+                <div 
+                  className="w-full h-full" 
+                  style={{ backgroundColor: settings.overlay_color }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </Form>
     </div>

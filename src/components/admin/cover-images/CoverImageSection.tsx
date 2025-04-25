@@ -73,27 +73,33 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
           <h3 className="text-lg font-medium">{title}</h3>
           <p className="text-sm text-gray-500">{description}</p>
         </div>
+      </div>
+
+      <div className="space-y-6">
         <ImageSettingsForm
           settings={settings}
           onSettingsChange={handleSettingsChange}
           showSettings={showSettings}
           onToggleSettings={() => setShowSettings(!showSettings)}
+          previewUrl={imageUrl}
+        />
+        
+        {!showSettings && (
+          <ImageDisplay
+            imageUrl={imageUrl}
+            settings={settings}
+            onClick={() => imageUrl && onImageClick(imageUrl)}
+            updatedAt={updatedAt}
+          />
+        )}
+        
+        <FileUploadBox
+          onFileSelected={(file) => onFileSelected(file, imageKey)}
+          title="Yeni görsel yükle"
+          description="JPG, PNG veya WebP formatında görsel yükleyebilirsiniz"
+          allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
         />
       </div>
-
-      <ImageDisplay
-        imageUrl={imageUrl}
-        settings={settings}
-        onClick={() => imageUrl && onImageClick(imageUrl)}
-        updatedAt={updatedAt}
-      />
-      
-      <FileUploadBox
-        onFileSelected={(file) => onFileSelected(file, imageKey)}
-        title="Yeni görsel yükle"
-        description="JPG, PNG veya WebP formatında görsel yükleyebilirsiniz"
-        allowedTypes={['jpg', 'jpeg', 'png', 'webp']}
-      />
     </div>
   );
 };
