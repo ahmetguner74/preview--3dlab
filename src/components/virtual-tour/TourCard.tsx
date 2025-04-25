@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { ImageIcon } from 'lucide-react';
 
 interface TourCardProps {
   id: string;
@@ -18,8 +19,8 @@ const TourCard: React.FC<TourCardProps> = ({
   slug
 }) => {
   return (
-    <Link to={`/virtual-tours/${slug}`}>
-      <Card className="overflow-hidden transition-all hover:shadow-lg">
+    <Link to={`/virtual-tours/${slug}`} className="block">
+      <Card className="overflow-hidden h-full transition-all hover:shadow-lg">
         <div className="aspect-[16/9] overflow-hidden bg-gray-100">
           {thumbnail ? (
             <img
@@ -29,7 +30,7 @@ const TourCard: React.FC<TourCardProps> = ({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <span className="text-gray-400">Önizleme yok</span>
+              <ImageIcon className="w-12 h-12 text-gray-400" />
             </div>
           )}
         </div>
