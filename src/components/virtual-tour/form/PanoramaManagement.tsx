@@ -1,9 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import PanoramaEditor from '@/components/virtual-tour/PanoramaEditor';
 import PanoramaList from './PanoramaList';
 import PanoramaUploader from '@/components/virtual-tour/PanoramaUploader';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PanoramaManagementProps {
   tourId: string;

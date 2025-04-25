@@ -1,10 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
-import { TourStatus } from '@/types/virtual-tour';
 import TourBasicForm, { TourFormValues } from '@/components/virtual-tour/form/TourBasicForm';
 import PanoramaManagement from '@/components/virtual-tour/form/PanoramaManagement';
 
@@ -14,10 +12,15 @@ const VirtualTourForm = () => {
   const [loading, setLoading] = useState(false);
   const [refreshPanoramas, setRefreshPanoramas] = useState(0);
   const [panoramas, setPanoramas] = useState<any[]>([]);
+  const [formData, setFormData] = useState<TourFormValues | null>(null);
 
   useEffect(() => {
     if (id) {
-      fetchTourData();
+      fetchTourData().then(data => {
+        if (data) {
+          setFormData(data);
+        }
+      });
       fetchPanoramas();
     }
   }, [id, refreshPanoramas]);
