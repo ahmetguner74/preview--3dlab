@@ -1,19 +1,37 @@
+
 import React from "react";
 import { useTranslation } from "react-i18next";
+
 const LanguageSwitcher: React.FC = () => {
-  const {
-    i18n
-  } = useTranslation();
+  const { i18n } = useTranslation();
   const changeLang = (lng: string) => {
     i18n.changeLanguage(lng);
   };
-  return <div className="flex items-center gap-2">
-      <button onClick={() => changeLang("tr")} className="bg-red-600 hover:bg-red-500">
+  
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        className={`px-2 py-1 rounded transition-all duration-300 ${
+          i18n.language === "tr" 
+            ? "font-bold bg-yellow-400 text-black" 
+            : "text-white hover:bg-yellow-400/20"
+        }`}
+        onClick={() => changeLang("tr")}
+      >
         TR
       </button>
-      <button onClick={() => changeLang("en")} className="bg-blue-500 hover:bg-blue-400">
+      <button
+        className={`px-2 py-1 rounded transition-all duration-300 ${
+          i18n.language === "en" 
+            ? "font-bold bg-yellow-400 text-black" 
+            : "text-white hover:bg-yellow-400/20"
+        }`}
+        onClick={() => changeLang("en")}
+      >
         EN
       </button>
-    </div>;
+    </div>
+  );
 };
+
 export default LanguageSwitcher;
