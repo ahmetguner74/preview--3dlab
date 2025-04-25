@@ -21,8 +21,17 @@ export const uploadPanoramaImage = async (file: File) => {
 
 export const addSceneRecord = async (scene: any) => {
   const { data, error } = await supabase
-    .from('panorama_scenes')
-    .insert([scene]);
+    .from('tour_panoramas')
+    .insert([{
+      title: scene.name,
+      image_url: scene.imageUrl,
+      initial_view: {
+        yaw: scene.initialYaw || 0,
+        pitch: scene.initialPitch || 0,
+        fov: scene.initialFov || 90
+      },
+      tour_id: scene.tourId || '00000000-0000-0000-0000-000000000000' // Geçici bir ID
+    }]);
 
   if (error) throw error;
   return data;
@@ -30,7 +39,7 @@ export const addSceneRecord = async (scene: any) => {
 
 export const fetchAllScenes = async () => {
   const { data, error } = await supabase
-    .from('panorama_scenes')
+    .from('tour_panoramas')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -40,7 +49,7 @@ export const fetchAllScenes = async () => {
 
 export const deleteScene = async (id: string) => {
   const { error } = await supabase
-    .from('panorama_scenes')
+    .from('tour_panoramas')
     .delete()
     .eq('id', id);
 
@@ -50,7 +59,7 @@ export const deleteScene = async (id: string) => {
 
 export const updateScene = async (id: string, updates: any) => {
   const { data, error } = await supabase
-    .from('panorama_scenes')
+    .from('tour_panoramas')
     .update(updates)
     .eq('id', id);
 

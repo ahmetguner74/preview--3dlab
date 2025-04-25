@@ -66,13 +66,13 @@ const SceneList = ({ onViewScene, refreshTrigger }: SceneListProps) => {
         <Card key={scene.id} className="overflow-hidden">
           <div className="aspect-square relative">
             <img 
-              src={scene.imageUrl} 
-              alt={scene.name} 
+              src={scene.image_url} 
+              alt={scene.title} 
               className="w-full h-full object-cover"
             />
           </div>
           <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-base">{scene.name}</CardTitle>
+            <CardTitle className="text-base">{scene.title}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-2">
             <p className="text-sm text-gray-500 line-clamp-1">

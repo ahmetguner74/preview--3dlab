@@ -2,7 +2,7 @@
 import React from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/header/AdminHeader';
-import { AdminDashboard } from "@/components/panorama/AdminDashboard";
+import AdminDashboard from "@/components/panorama/AdminDashboard";
 
 const PanoramaAdmin = () => {
   return (
