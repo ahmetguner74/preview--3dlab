@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import ImageSettingsForm from './ImageSettingsForm';
 import ImageDisplay from './ImageDisplay';
@@ -44,13 +44,21 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [inputValue, setInputValue] = useState(imageUrl || '');
+  const [localSettings, setLocalSettings] = useState(settings);
+  
+  // Dışarıdan gelen settings değişikliğini takip et
+  useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
 
-  const handleSettingsChange = (field: string, value: any) => {
+  const handleSettingsChange = useCallback((field: string, value: any) => {
+    const newSettings = { ...localSettings, [field]: value };
+    setLocalSettings(newSettings);
+    
     if (onSettingsChange) {
-      const newSettings = { ...settings, [field]: value };
       onSettingsChange(newSettings, imageKey);
     }
-  };
+  }, [localSettings, onSettingsChange, imageKey]);
 
   if (imageKey === 'hero_youtube_video') {
     return (
@@ -77,7 +85,7 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
 
       <div className="space-y-6">
         <ImageSettingsForm
-          settings={settings}
+          settings={localSettings}
           onSettingsChange={handleSettingsChange}
           showSettings={showSettings}
           onToggleSettings={() => setShowSettings(!showSettings)}
@@ -87,7 +95,7 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
         {!showSettings && (
           <ImageDisplay
             imageUrl={imageUrl}
-            settings={settings}
+            settings={localSettings}
             onClick={() => imageUrl && onImageClick(imageUrl)}
             updatedAt={updatedAt}
           />

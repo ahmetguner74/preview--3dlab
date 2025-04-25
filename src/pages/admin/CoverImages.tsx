@@ -70,8 +70,16 @@ const CoverImages = () => {
           .eq('image_key', imageKey);
 
         if (error) throw error;
-        toast.success('Ayarlar başarıyla güncellendi');
-        loadCoverImages();
+
+        // Arayüzde de güncelleyelim
+        setCoverImages(prev => prev.map(img => 
+          img.image_key === imageKey 
+            ? { ...img, settings, updated_at: new Date().toISOString() } 
+            : img
+        ));
+        
+        // Bildirimi sadece kayıt zamanında gösterelim, her değişiklikte değil
+        // toast.success('Ayarlar başarıyla güncellendi');
       }
     } catch (err) {
       console.error('Ayarlar güncellenirken hata:', err);

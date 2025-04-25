@@ -24,7 +24,13 @@ const Hero = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [opacity, setOpacity] = useState('0.75');
+  const [settings, setSettings] = useState({
+    opacity: '0.75',
+    position: 'center',
+    height: '100vh',
+    overlay_color: 'rgba(0, 0, 0, 0.5)',
+    blend_mode: 'normal'
+  });
   const isMobile = useIsMobile();
   const heroData = DEFAULT_HERO;
   const lang = i18n.language === "en" ? "en" : "tr";
@@ -32,16 +38,37 @@ const Hero = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [imageUrl, videoLink, opacityData] = await Promise.all([
-        getSiteImage('hero_background'),
-        getSiteImage('hero_youtube_video'),
-        supabase.from('site_settings').select('value').eq('key', 'hero_opacity').single()
-      ]);
-      
-      setBackgroundImage(imageUrl);
-      if (videoLink) setVideoUrl(videoLink);
-      if (opacityData?.data?.value) setOpacity(opacityData.data.value);
-      setLoading(false);
+      try {
+        // Görsel, video ve ayarları paralel olarak çekelim
+        const [imageData, videoLink] = await Promise.all([
+          supabase.from('site_images').select('*').eq('image_key', 'hero_background').maybeSingle(),
+          getSiteImage('hero_youtube_video')
+        ]);
+        
+        // Görsel ve ayarları işleyelim
+        if (imageData?.data) {
+          setBackgroundImage(imageData.data.image_url);
+          
+          // Ayarları kontrol edelim ve varsayılanlarla birleştirelim
+          if (imageData.data.settings && typeof imageData.data.settings === 'object') {
+            setSettings(prev => ({
+              ...prev,
+              ...(imageData.data.settings as any)
+            }));
+          }
+        } else {
+          // Görsel yoksa sadece varsayılan ayarları kullan
+          const fallbackImage = await getSiteImage('hero_background');
+          setBackgroundImage(fallbackImage);
+        }
+        
+        // Video URL'sini ayarlayalım
+        if (videoLink) setVideoUrl(videoLink);
+      } catch (error) {
+        console.error('Hero verisi yüklenirken hata:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     
     fetchData();
@@ -88,18 +115,27 @@ const Hero = () => {
   }, [videoUrl]);
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center bg-black md:bg-transparent py-10 md:py-0 mt-16">
+    <section 
+      className="relative min-h-[85vh] flex items-center justify-center bg-black md:bg-transparent py-10 md:py-0 mt-16"
+      style={{ 
+        minHeight: settings.height || '85vh'
+      }}
+    >
       {backgroundImage && (
         <>
           <div 
             className="absolute inset-0 bg-arch-black z-5"
-            style={{ opacity: opacity }}
+            style={{ 
+              opacity: settings.overlay_color ? 1 : Number(settings.opacity || 0.75),
+              backgroundColor: settings.overlay_color || 'rgba(0, 0, 0, 0.5)'
+            }}
           />
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-no-repeat"
             style={{ 
               backgroundImage: `url('${backgroundImage}')`,
-              opacity: 1
+              backgroundPosition: settings.position || 'center',
+              mixBlendMode: (settings.blend_mode as any) || 'normal',
             }} 
           />
         </>

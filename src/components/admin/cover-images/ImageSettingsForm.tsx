@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
@@ -31,6 +31,11 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
   const form = useForm({
     defaultValues: settings
   });
+
+  // Form değerlerinin değişikliğinde güncelleme
+  useEffect(() => {
+    form.reset(settings);
+  }, [settings, form]);
 
   if (!showSettings) {
     return (
@@ -66,16 +71,22 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             <FormField
               control={form.control}
               name="opacity"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Opaklık</FormLabel>
                   <div className="pt-2">
                     <Slider
-                      defaultValue={[Number(settings.opacity) * 100]}
+                      value={[Number(settings.opacity) * 100]}
                       max={100}
                       step={1}
-                      onValueChange={([value]) => onSettingsChange('opacity', (value / 100).toString())}
+                      onValueChange={([value]) => {
+                        const newValue = (value / 100).toString();
+                        onSettingsChange('opacity', newValue);
+                      }}
                     />
+                    <div className="text-xs text-right mt-1">
+                      {Math.round(Number(settings.opacity) * 100)}%
+                    </div>
                   </div>
                 </FormItem>
               )}
@@ -84,7 +95,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             <div className="space-y-2">
               <FormLabel>Yükseklik</FormLabel>
               <Select 
-                defaultValue={settings.height}
+                value={settings.height}
                 onValueChange={(value) => onSettingsChange('height', value)}
               >
                 <SelectTrigger>
@@ -102,7 +113,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             <div className="space-y-2">
               <FormLabel>Pozisyon</FormLabel>
               <Select 
-                defaultValue={settings.position}
+                value={settings.position}
                 onValueChange={(value) => onSettingsChange('position', value)}
               >
                 <SelectTrigger>
@@ -119,7 +130,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             <div className="space-y-2">
               <FormLabel>Karartma Rengi</FormLabel>
               <Select 
-                defaultValue={settings.overlay_color}
+                value={settings.overlay_color}
                 onValueChange={(value) => onSettingsChange('overlay_color', value)}
               >
                 <SelectTrigger>
@@ -137,7 +148,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             <div className="space-y-2">
               <FormLabel>Karışım Modu</FormLabel>
               <Select 
-                defaultValue={settings.blend_mode}
+                value={settings.blend_mode}
                 onValueChange={(value) => onSettingsChange('blend_mode', value)}
               >
                 <SelectTrigger>
