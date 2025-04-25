@@ -14,15 +14,15 @@ const AboutPreview = () => {
     };
     fetchTeamImage();
   }, []);
-  return <section className="py-24 bg-arch-light-gray">
+  return <section className="py-24 bg-arch-light-gray bg-black">
       <div className="arch-container">
         <div className="grid md:grid-cols-2 gap-12">
           <div className="space-y-6">
             <h2 className="text-sm uppercase text-arch-gray tracking-wider">Hakkımızda</h2>
-            <h3 className="text-2xl md:text-4xl font-display">Tarihi yapılardan modern komplekslere kadar farklı karmaşıklıktaki nesnelerle çalışıyoruz.</h3>
+            <h3 className="text-2xl md:text-4xl font-display text-white">Tarihi yapılardan modern komplekslere kadar farklı karmaşıklıktaki nesnelerle çalışıyoruz.</h3>
             <p className="text-arch-gray">Çalışma sonucunda lazer tarama noktaları bulutu, fotogrametrik model, ortofoto planlar ve ölçülü restorasyon çizimleri tarafınıza teslim edilir.</p>
             <div className="pt-4">
-              <Link to="/about" className="inline-flex items-center gap-1 border-b border-arch-black pb-1 hover:text-arch-gray hover:border-arch-gray transition-colors">
+              <Link to="/about" className="inline-flex items-center gap-1 border-b border-arch-black pb-1 hover:text-arch-gray hover:border-arch-whitetransition-colors">
                 Stüdyomuz hakkında daha fazla bilgi edinin <ArrowUpRight size={16} />
               </Link>
             </div>

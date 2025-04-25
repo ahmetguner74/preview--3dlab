@@ -20,7 +20,7 @@ const Navbar = () => {
       <div className="arch-container">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center px-[20px] py-[6px] my-0 mx-0">
             <div className="font-display text-2xl md:text-3xl font-bold text-yellow-400 mr-2">3D</div>
             <div className="font-display text-lg md:text-xl font-bold text-white">
               DİJİTAL
@@ -44,7 +44,7 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
             <Link to="/admin">
-              <Button variant="outline" size="sm" className="border-white hover:bg-yellow-400 hover:border-yellow-400 text-inherit">
+              <Button variant="outline" size="sm" className="border-white hover:bg-yellow-400 hover:border-yellow-400 text-black">
                 {t("admin")}
               </Button>
             </Link>

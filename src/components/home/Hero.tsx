@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowDownCircle } from 'lucide-react';
 import { getSiteImage } from '@/utils/siteHelpers';
@@ -18,9 +17,11 @@ const DEFAULT_HERO = {
   },
   youtubeChannel: "https://www.youtube.com/channel/UCrSguWcA9nJyuqCdENnXeZA"
 };
-
 const Hero = () => {
-  const { t, i18n } = useTranslation();
+  const {
+    t,
+    i18n
+  } = useTranslation();
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,21 +35,17 @@ const Hero = () => {
   const isMobile = useIsMobile();
   const heroData = DEFAULT_HERO;
   const lang = i18n.language === "en" ? "en" : "tr";
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         // Görsel, video ve ayarları paralel olarak çekelim
-        const [imageData, videoLink] = await Promise.all([
-          supabase.from('site_images').select('*').eq('image_key', 'hero_background').maybeSingle(),
-          getSiteImage('hero_youtube_video')
-        ]);
-        
+        const [imageData, videoLink] = await Promise.all([supabase.from('site_images').select('*').eq('image_key', 'hero_background').maybeSingle(), getSiteImage('hero_youtube_video')]);
+
         // Görsel ve ayarları işleyelim
         if (imageData?.data) {
           setBackgroundImage(imageData.data.image_url);
-          
+
           // Ayarları kontrol edelim ve varsayılanlarla birleştirelim
           if (imageData.data.settings && typeof imageData.data.settings === 'object') {
             setSettings(prev => ({
@@ -61,7 +58,7 @@ const Hero = () => {
           const fallbackImage = await getSiteImage('hero_background');
           setBackgroundImage(fallbackImage);
         }
-        
+
         // Video URL'sini ayarlayalım
         if (videoLink) setVideoUrl(videoLink);
       } catch (error) {
@@ -70,76 +67,54 @@ const Hero = () => {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, []);
-
   const scrollToProjects = () => {
     document.getElementById('projects')?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
   const finalVideoUrl = React.useMemo(() => {
     if (!videoUrl) return null;
-
     let processedUrl = videoUrl;
-
     if (processedUrl.includes('youtube.com/watch?v=')) {
       const videoId = processedUrl.split('v=')[1]?.split('&')[0];
       if (videoId) {
         processedUrl = `https://www.youtube.com/embed/${videoId}`;
       }
     }
-
     if (processedUrl.includes('youtu.be/')) {
       const videoId = processedUrl.split('youtu.be/')[1]?.split('?')[0];
       if (videoId) {
         processedUrl = `https://www.youtube.com/embed/${videoId}`;
       }
     }
-
     if (!processedUrl.includes('youtube.com/embed/')) {
       console.error('Geçersiz YouTube embed URL\'si:', videoUrl);
       return null;
     }
-
     const videoId = processedUrl.split('/embed/')[1]?.split('?')[0];
     if (!videoId) {
       console.error('Video ID çıkarılamadı:', processedUrl);
       return null;
     }
-
     const baseUrl = `https://www.youtube.com/embed/${videoId}`;
     return `${baseUrl}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
   }, [videoUrl]);
-
-  return (
-    <section 
-      className="relative min-h-[85vh] flex items-center justify-center bg-black md:bg-transparent py-10 md:py-0 mt-16"
-      style={{ 
-        minHeight: settings.height || '85vh'
-      }}
-    >
-      {backgroundImage && (
-        <>
-          <div 
-            className="absolute inset-0 bg-arch-black z-5"
-            style={{ 
-              opacity: settings.overlay_color ? 1 : Number(settings.opacity || 0.75),
-              backgroundColor: settings.overlay_color || 'rgba(0, 0, 0, 0.5)'
-            }}
-          />
-          <div 
-            className="absolute inset-0 bg-cover bg-no-repeat"
-            style={{ 
-              backgroundImage: `url('${backgroundImage}')`,
-              backgroundPosition: settings.position || 'center',
-              mixBlendMode: (settings.blend_mode as any) || 'normal',
-            }} 
-          />
-        </>
-      )}
+  return <section className="relative min-h-[85vh] flex items-center justify-center bg-black md:bg-transparent py-10 md:py-0 mt-16" style={{
+    minHeight: settings.height || '85vh'
+  }}>
+      {backgroundImage && <>
+          <div className="absolute inset-0 bg-arch-black z-5" style={{
+        opacity: settings.overlay_color ? 1 : Number(settings.opacity || 0.75),
+        backgroundColor: settings.overlay_color || 'rgba(0, 0, 0, 0.5)'
+      }} />
+          <div className="absolute inset-0 bg-cover bg-no-repeat" style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundPosition: settings.position || 'center',
+        mixBlendMode: settings.blend_mode as any || 'normal'
+      }} />
+        </>}
       
       <div className="arch-container relative z-20 w-full">
         <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 md:gap-16 min-h-[60vh] justify-between px-2 md:px-0">
@@ -151,40 +126,24 @@ const Hero = () => {
               {heroData.subtitle[lang]}
             </p>
             <div className="flex gap-4 mb-6 flex-wrap">
-              <button 
-                onClick={scrollToProjects} 
-                className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-400 hover:bg-yellow-300 font-bold text-base text-black rounded shadow-sm animate-fade-in"
-              >
+              <button onClick={scrollToProjects} className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-400 hover:bg-yellow-300 font-bold text-base text-black rounded shadow-sm animate-fade-in">
                 {t("viewProjects")} <ArrowDownCircle size={18} />
               </button>
             </div>
-            <div className="mt-2">
+            <div className="mt-10">
               <span className="text-xs text-white/90">{t("youtubeInfo")}</span>
             </div>
           </div>
           
           <div className="flex-1 flex items-center justify-center min-w-[340px] md:max-w-2xl">
             <div className={`w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in ${isMobile ? 'h-64' : 'min-h-[450px]'}`}>
-              {finalVideoUrl ? (
-                <iframe 
-                  src={finalVideoUrl} 
-                  title="Hero Video" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen 
-                  className="w-full h-full" 
-                  frameBorder="0" 
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
+              {finalVideoUrl ? <iframe src={finalVideoUrl} title="Hero Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" frameBorder="0" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">
                   Video yüklenemedi
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
