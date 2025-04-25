@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,6 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FileUploadBox from '../admin/FileUploadBox';
 import { Hotspot, InitialView, Position } from '@/types/virtual-tour';
 import { Image, Settings, CircleDot, Plus, Trash } from 'lucide-react';
 import { uploadFileToStorage } from '@/utils/fileStorage';
@@ -18,8 +16,10 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import PanoramaUploader from './PanoramaUploader';
 
 interface PanoramaEditorProps {
+  tourId?: string;
   onSave: (data: {
     title: string;
     image_url: string;
@@ -28,7 +28,7 @@ interface PanoramaEditorProps {
   }) => void;
 }
 
-const PanoramaEditor: React.FC<PanoramaEditorProps> = ({ onSave }) => {
+const PanoramaEditor: React.FC<PanoramaEditorProps> = ({ tourId, onSave }) => {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -47,7 +47,6 @@ const PanoramaEditor: React.FC<PanoramaEditorProps> = ({ onSave }) => {
   const handleImageUpload = async (file: File) => {
     try {
       setUploading(true);
-      // panorama görsellerini 'panoramas' bucket'ına yüklüyoruz
       const imageUrl = await uploadFileToStorage(file, 'panoramas');
       if (imageUrl) {
         setImageUrl(imageUrl);
@@ -65,7 +64,7 @@ const PanoramaEditor: React.FC<PanoramaEditorProps> = ({ onSave }) => {
     if (!newHotspot.title) return;
     
     const hotspot: Hotspot = {
-      id: `temp-${Date.now()}`, // Geçici bir ID oluşturuyoruz, gerçek ID veritabanında oluşturulacak
+      id: `temp-${Date.now()}`,
       ...newHotspot
     };
     
@@ -119,31 +118,19 @@ const PanoramaEditor: React.FC<PanoramaEditorProps> = ({ onSave }) => {
             
             <div>
               <label className="block text-sm font-medium mb-2">Panorama Görseli</label>
-              {imageUrl ? (
-                <div className="relative">
-                  <img 
-                    src={imageUrl} 
-                    alt={title} 
-                    className="w-full h-64 object-cover rounded-md"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <Button variant="outline" onClick={() => setImageUrl('')}>
-                      Görseli Değiştir
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <FileUploadBox
-                  onFileSelected={handleImageUpload}
-                  title="Panorama Yükle"
-                  description="360° panorama görseli yükleyin (equirectangular format)"
-                  allowedTypes={['jpg', 'jpeg', 'png']}
-                  icon={<Image className="w-12 h-12 mx-auto text-gray-400" />}
-                  // İsLoading özelliği FileUploadBoxProps içinde tanımlı değil, kaldırıyorum
+              {tourId ? (
+                <PanoramaUploader 
+                  tourId={tourId}
+                  onComplete={() => {
+                    window.location.reload();
+                  }}
                 />
-              )}
-              {uploading && (
-                <div className="mt-2 text-sm text-blue-500">Yükleniyor...</div>
+              ) : (
+                <Alert>
+                  <AlertDescription>
+                    Panorama yükleyebilmek için önce turu kaydetmeniz gerekmektedir.
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
           </TabsContent>
