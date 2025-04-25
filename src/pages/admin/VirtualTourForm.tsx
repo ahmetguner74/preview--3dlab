@@ -87,7 +87,13 @@ const VirtualTourForm = () => {
         // Güncelleme
         const { error } = await supabase
           .from('virtual_tours')
-          .update(values)
+          .update({
+            title: values.title,
+            description: values.description,
+            status: values.status,
+            slug: values.slug,
+            visible: values.visible
+          })
           .eq('id', id);
 
         if (error) throw error;
@@ -96,7 +102,13 @@ const VirtualTourForm = () => {
         // Yeni tur oluşturma
         const { error } = await supabase
           .from('virtual_tours')
-          .insert(values);
+          .insert({
+            title: values.title,
+            description: values.description,
+            status: values.status,
+            slug: values.slug,
+            visible: values.visible
+          });
 
         if (error) throw error;
         toast.success('Tur başarıyla oluşturuldu');

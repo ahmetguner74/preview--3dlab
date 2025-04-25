@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import VirtualTourViewer from '@/components/virtual-tour/VirtualTourViewer';
-import { Panorama, InitialView } from '@/types/virtual-tour';
+import { Panorama, InitialView, Position } from '@/types/virtual-tour';
 
 const VirtualTourDetail = () => {
   const { slug } = useParams();
@@ -36,22 +36,37 @@ const VirtualTourDetail = () => {
       if (panoramaError) throw panoramaError;
 
       // Veriyi doğru formata dönüştür
-      const formattedPanoramas: Panorama[] = panoramas?.map(p => ({
-        id: p.id,
-        title: p.title,
-        image_url: p.image_url,
-        initial_view: p.initial_view as InitialView,
-        sort_order: p.sort_order,
-        hotspots: p.hotspots?.map(h => ({
-          id: h.id,
-          title: h.title,
-          description: h.description,
-          position: h.position,
-          target_panorama_id: h.target_panorama_id,
-          hotspot_type: h.hotspot_type,
-          custom_data: h.custom_data
-        }))
-      })) || [];
+      const formattedPanoramas: Panorama[] = panoramas?.map(p => {
+        const initialView: InitialView = {
+          yaw: p.initial_view?.yaw || 0,
+          pitch: p.initial_view?.pitch || 0,
+          fov: p.initial_view?.fov || 90
+        };
+
+        return {
+          id: p.id,
+          title: p.title,
+          image_url: p.image_url,
+          initial_view: initialView,
+          sort_order: p.sort_order,
+          hotspots: p.hotspots?.map(h => {
+            const position: Position = {
+              yaw: h.position?.yaw || 0,
+              pitch: h.position?.pitch || 0
+            };
+
+            return {
+              id: h.id,
+              title: h.title,
+              description: h.description,
+              position: position,
+              target_panorama_id: h.target_panorama_id,
+              hotspot_type: h.hotspot_type as 'info' | 'link' | 'custom',
+              custom_data: h.custom_data
+            };
+          }) || []
+        };
+      }) || [];
 
       return {
         ...tour,
