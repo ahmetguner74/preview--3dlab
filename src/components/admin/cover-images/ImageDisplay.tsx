@@ -28,18 +28,24 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ imageUrl, settings, onClick
       <div 
         className="aspect-video bg-gray-100 rounded cursor-pointer overflow-hidden mb-2"
         onClick={onClick}
-        style={{
-          backgroundImage: `url(${imageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: settings.position,
-          opacity: Number(settings.opacity),
-          mixBlendMode: settings.blend_mode as any
-        }}
       >
         <div 
-          className="w-full h-full" 
-          style={{ backgroundColor: settings.overlay_color }}
-        />
+          className="w-full h-full relative"
+          style={{
+            backgroundImage: `url(${imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: settings.position,
+          }}
+        >
+          <div 
+            className="w-full h-full" 
+            style={{ 
+              backgroundColor: settings.overlay_color,
+              mixBlendMode: settings.blend_mode as any,
+              opacity: Number(settings.opacity)
+            }}
+          />
+        </div>
       </div>
       {updatedAt && (
         <div className="text-xs text-gray-500">

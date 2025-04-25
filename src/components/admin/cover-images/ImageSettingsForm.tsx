@@ -1,11 +1,12 @@
 
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, Save } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface ImageSettingsFormProps {
   settings: {
@@ -18,6 +19,7 @@ interface ImageSettingsFormProps {
   showSettings: boolean;
   onToggleSettings: () => void;
   onSettingsChange: (field: string, value: any) => void;
+  onSaveSettings?: () => void;
   previewUrl?: string | null;
 }
 
@@ -26,6 +28,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
   showSettings,
   onToggleSettings,
   onSettingsChange,
+  onSaveSettings,
   previewUrl
 }) => {
   const form = useForm({
@@ -36,6 +39,13 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
   useEffect(() => {
     form.reset(settings);
   }, [settings, form]);
+
+  const handleSaveSettings = () => {
+    if (onSaveSettings) {
+      onSaveSettings();
+      toast.success('Ayarlar başarıyla kaydedildi');
+    }
+  };
 
   if (!showSettings) {
     return (
@@ -60,6 +70,15 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
         >
           <Settings className="h-4 w-4 mr-2" />
           Ayarları Gizle
+        </Button>
+        
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handleSaveSettings}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          Ayarları Kaydet
         </Button>
       </div>
 
@@ -170,18 +189,20 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             <h3 className="font-medium text-sm text-gray-700 mb-4">Canlı Önizleme</h3>
             <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
               <div 
-                className="w-full h-full"
+                className="w-full h-full relative"
                 style={{
                   backgroundImage: `url(${previewUrl})`,
                   backgroundSize: 'cover',
                   backgroundPosition: settings.position,
-                  opacity: Number(settings.opacity),
-                  mixBlendMode: settings.blend_mode as any
                 }}
               >
                 <div 
                   className="w-full h-full" 
-                  style={{ backgroundColor: settings.overlay_color }}
+                  style={{ 
+                    backgroundColor: settings.overlay_color,
+                    mixBlendMode: settings.blend_mode as any,
+                    opacity: Number(settings.opacity)
+                  }}
                 />
               </div>
             </div>

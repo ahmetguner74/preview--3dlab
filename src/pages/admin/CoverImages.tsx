@@ -77,9 +77,6 @@ const CoverImages = () => {
             ? { ...img, settings, updated_at: new Date().toISOString() } 
             : img
         ));
-        
-        // Bildirimi sadece kayıt zamanında gösterelim, her değişiklikte değil
-        // toast.success('Ayarlar başarıyla güncellendi');
       }
     } catch (err) {
       console.error('Ayarlar güncellenirken hata:', err);

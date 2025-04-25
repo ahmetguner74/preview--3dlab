@@ -4,6 +4,7 @@ import FileUploadBox from '@/components/admin/FileUploadBox';
 import ImageSettingsForm from './ImageSettingsForm';
 import ImageDisplay from './ImageDisplay';
 import YouTubeInput from './YouTubeInput';
+import { toast } from 'sonner';
 
 interface CoverImageSectionProps {
   imageKey: string;
@@ -45,20 +46,26 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [inputValue, setInputValue] = useState(imageUrl || '');
   const [localSettings, setLocalSettings] = useState(settings);
+  const [lastSavedSettings, setLastSavedSettings] = useState(settings);
   
   // Dışarıdan gelen settings değişikliğini takip et
   useEffect(() => {
     setLocalSettings(settings);
+    setLastSavedSettings(settings);
   }, [settings]);
 
   const handleSettingsChange = useCallback((field: string, value: any) => {
     const newSettings = { ...localSettings, [field]: value };
     setLocalSettings(newSettings);
-    
-    if (onSettingsChange) {
-      onSettingsChange(newSettings, imageKey);
+  }, [localSettings]);
+
+  const handleSaveSettings = useCallback(() => {
+    if (onSettingsChange && JSON.stringify(localSettings) !== JSON.stringify(lastSavedSettings)) {
+      onSettingsChange(localSettings, imageKey);
+      setLastSavedSettings(localSettings);
+      toast.success('Görünüm ayarları kaydedildi');
     }
-  }, [localSettings, onSettingsChange, imageKey]);
+  }, [localSettings, lastSavedSettings, onSettingsChange, imageKey]);
 
   if (imageKey === 'hero_youtube_video') {
     return (
@@ -89,6 +96,7 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
           onSettingsChange={handleSettingsChange}
           showSettings={showSettings}
           onToggleSettings={() => setShowSettings(!showSettings)}
+          onSaveSettings={handleSaveSettings}
           previewUrl={imageUrl}
         />
         
