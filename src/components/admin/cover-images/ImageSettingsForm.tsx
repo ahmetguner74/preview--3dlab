@@ -1,20 +1,16 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Settings, Save } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 
 interface ImageSettingsFormProps {
   settings: {
     opacity: string;
-    height: string;
-    position: string;
     overlay_color: string;
-    blend_mode: string;
   };
   showSettings: boolean;
   onToggleSettings: () => void;
@@ -35,17 +31,9 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
     defaultValues: settings
   });
 
-  // Form değerlerinin değişikliğinde güncelleme
-  useEffect(() => {
+  React.useEffect(() => {
     form.reset(settings);
   }, [settings, form]);
-
-  const handleSaveSettings = () => {
-    if (onSaveSettings) {
-      onSaveSettings();
-      toast.success('Ayarlar başarıyla kaydedildi');
-    }
-  };
 
   if (!showSettings) {
     return (
@@ -53,6 +41,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
         variant="ghost"
         size="sm"
         onClick={onToggleSettings}
+        className="w-full md:w-auto"
       >
         <Settings className="h-4 w-4 mr-2" />
         Görünüm Ayarları
@@ -62,11 +51,12 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleSettings}
+          className="w-full md:w-auto"
         >
           <Settings className="h-4 w-4 mr-2" />
           Ayarları Gizle
@@ -75,16 +65,17 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
         <Button
           variant="default"
           size="sm"
-          onClick={handleSaveSettings}
+          onClick={onSaveSettings}
+          className="w-full md:w-auto"
         >
           <Save className="h-4 w-4 mr-2" />
           Ayarları Kaydet
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Form {...form}>
-          <div className="space-y-4 bg-white p-4 rounded-lg border">
+          <div className="space-y-6 bg-white p-4 rounded-lg border">
             <h3 className="font-medium text-sm text-gray-700 mb-4">Görsel Ayarları</h3>
 
             <FormField
@@ -112,42 +103,7 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
             />
 
             <div className="space-y-2">
-              <FormLabel>Yükseklik</FormLabel>
-              <Select 
-                value={settings.height}
-                onValueChange={(value) => onSettingsChange('height', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="50vh">Yarı Ekran</SelectItem>
-                  <SelectItem value="75vh">3/4 Ekran</SelectItem>
-                  <SelectItem value="100vh">Tam Ekran</SelectItem>
-                  <SelectItem value="120vh">Geniş Ekran</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <FormLabel>Pozisyon</FormLabel>
-              <Select 
-                value={settings.position}
-                onValueChange={(value) => onSettingsChange('position', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="top">Üst</SelectItem>
-                  <SelectItem value="center">Orta</SelectItem>
-                  <SelectItem value="bottom">Alt</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <FormLabel>Karartma Rengi</FormLabel>
+              <FormLabel>Karartma Seviyesi</FormLabel>
               <Select 
                 value={settings.overlay_color}
                 onValueChange={(value) => onSettingsChange('overlay_color', value)}
@@ -163,24 +119,6 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <FormLabel>Karışım Modu</FormLabel>
-              <Select 
-                value={settings.blend_mode}
-                onValueChange={(value) => onSettingsChange('blend_mode', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="multiply">Multiply</SelectItem>
-                  <SelectItem value="screen">Screen</SelectItem>
-                  <SelectItem value="overlay">Overlay</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </Form>
 
@@ -193,14 +131,13 @@ const ImageSettingsForm: React.FC<ImageSettingsFormProps> = ({
                 style={{
                   backgroundImage: `url(${previewUrl})`,
                   backgroundSize: 'cover',
-                  backgroundPosition: settings.position,
+                  backgroundPosition: 'center',
                 }}
               >
                 <div 
                   className="w-full h-full" 
                   style={{ 
                     backgroundColor: settings.overlay_color,
-                    mixBlendMode: settings.blend_mode as any,
                     opacity: Number(settings.opacity)
                   }}
                 />

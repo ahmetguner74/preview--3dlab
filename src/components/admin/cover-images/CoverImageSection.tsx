@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import FileUploadBox from '@/components/admin/FileUploadBox';
 import ImageSettingsForm from './ImageSettingsForm';
 import ImageDisplay from './ImageDisplay';
@@ -14,10 +14,7 @@ interface CoverImageSectionProps {
   updatedAt?: string | null;
   settings?: {
     opacity: string;
-    height: string;
-    position: string;
     overlay_color: string;
-    blend_mode: string;
   };
   onImageClick: (url: string) => void;
   onFileSelected: (file: File, imageKey: string) => Promise<void>;
@@ -33,10 +30,7 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
   updatedAt,
   settings = {
     opacity: '0.7',
-    height: '100vh',
-    position: 'center',
     overlay_color: 'rgba(0, 0, 0, 0.5)',
-    blend_mode: 'normal'
   },
   onImageClick,
   onFileSelected,
@@ -48,8 +42,7 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
   const [localSettings, setLocalSettings] = useState(settings);
   const [lastSavedSettings, setLastSavedSettings] = useState(settings);
   
-  // Dışarıdan gelen settings değişikliğini takip et
-  useEffect(() => {
+  React.useEffect(() => {
     setLocalSettings(settings);
     setLastSavedSettings(settings);
   }, [settings]);
@@ -69,7 +62,7 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
 
   if (imageKey === 'hero_youtube_video') {
     return (
-      <div className="border rounded-lg p-6 bg-white">
+      <div className="border rounded-lg p-4 md:p-6 bg-white">
         <h3 className="text-lg font-medium mb-2">{title}</h3>
         <p className="text-sm text-gray-500 mb-4">{description}</p>
         <YouTubeInput
@@ -82,8 +75,8 @@ const CoverImageSection: React.FC<CoverImageSectionProps> = ({
   }
 
   return (
-    <div className="border rounded-lg p-6 bg-white">
-      <div className="flex items-center justify-between mb-4">
+    <div className="border rounded-lg p-4 md:p-6 bg-white">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div>
           <h3 className="text-lg font-medium">{title}</h3>
           <p className="text-sm text-gray-500">{description}</p>

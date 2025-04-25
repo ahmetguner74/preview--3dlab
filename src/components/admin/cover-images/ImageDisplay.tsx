@@ -5,10 +5,7 @@ interface ImageDisplayProps {
   imageUrl: string | null;
   settings: {
     opacity: string;
-    height: string;
-    position: string;
     overlay_color: string;
-    blend_mode: string;
   };
   onClick: () => void;
   updatedAt?: string | null;
@@ -34,14 +31,13 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ imageUrl, settings, onClick
           style={{
             backgroundImage: `url(${imageUrl})`,
             backgroundSize: 'cover',
-            backgroundPosition: settings.position,
+            backgroundPosition: 'center',
           }}
         >
           <div 
             className="w-full h-full" 
             style={{ 
               backgroundColor: settings.overlay_color,
-              mixBlendMode: settings.blend_mode as any,
               opacity: Number(settings.opacity)
             }}
           />
