@@ -5,7 +5,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import TourBasicForm, { TourFormValues } from '@/components/virtual-tour/form/TourBasicForm';
-import PanoramaManagement from '@/components/virtual-tour/form/PanoramaManagement';
+import PanoramaManager from '@/components/virtual-tour/PanoramaManager';
 import { TourStatus } from '@/types/virtual-tour';
 
 const VirtualTourForm = () => {
@@ -13,29 +13,15 @@ const VirtualTourForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [refreshPanoramas, setRefreshPanoramas] = useState(0);
-  const [panoramas, setPanoramas] = useState<any[]>([]);
   const [formData, setFormData] = useState<TourFormValues | null>(null);
 
   useEffect(() => {
-    if (id) {
-      fetchTourData().then(data => {
-        if (data) {
-          // Database'den gelen verileri TourFormValues formatına dönüştür
-          setFormData({
-            title: data.title,
-            description: data.description || '',
-            slug: data.slug,
-            status: data.status as TourStatus, // Type assertion ile TourStatus tipine dönüştür
-            visible: data.visible
-          });
-        }
-      });
-      fetchPanoramas();
-    }
-  }, [id, refreshPanoramas]);
+    if (id) fetchTourData();
+  }, [id]);
 
   const fetchTourData = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('virtual_tours')
         .select('*')
@@ -44,29 +30,19 @@ const VirtualTourForm = () => {
 
       if (error) throw error;
       if (data) {
-        return data;
+        setFormData({
+          title: data.title,
+          description: data.description || '',
+          slug: data.slug,
+          status: data.status as TourStatus,
+          visible: data.visible
+        });
       }
     } catch (error) {
       console.error('Tur verisi yüklenirken hata:', error);
       toast.error('Tur verisi yüklenemedi');
-    }
-  };
-
-  const fetchPanoramas = async () => {
-    if (!id) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('tour_panoramas')
-        .select('*')
-        .eq('tour_id', id)
-        .order('sort_order', { ascending: true });
-      
-      if (error) throw error;
-      setPanoramas(data || []);
-    } catch (error) {
-      console.error('Panoramalar yüklenirken hata:', error);
-      toast.error('Panoramalar yüklenemedi');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,8 +81,6 @@ const VirtualTourForm = () => {
         
         if (data && data.length > 0) {
           navigate(`/admin/virtual-tours/${data[0].id}/edit`);
-        } else {
-          navigate('/admin/virtual-tours');
         }
       }
     } catch (error) {
@@ -117,38 +91,30 @@ const VirtualTourForm = () => {
     }
   };
 
+  if (loading) {
+    return <div>Yükleniyor...</div>;
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
       
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-200 p-4">
-          <h1 className="text-2xl font-semibold">
-            {id ? 'Turu Düzenle' : 'Yeni Tur'}
-          </h1>
-        </header>
-
-        <main className="flex-1 p-6">
-          <div className="max-w-5xl mx-auto space-y-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <TourBasicForm
-                initialValues={formData}
-                onSubmit={handleSubmit}
-                loading={loading}
-              />
-            </div>
-
-            {id && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <PanoramaManagement
-                  tourId={id}
-                  panoramas={panoramas}
-                  onPanoramaAdded={() => setRefreshPanoramas(prev => prev + 1)}
-                />
-              </div>
-            )}
+      <div className="flex-1">
+        {id ? (
+          <PanoramaManager
+            tourId={id}
+            onPanoramaAdded={() => setRefreshPanoramas(prev => prev + 1)}
+          />
+        ) : (
+          <div className="p-6">
+            <h1 className="text-2xl font-semibold mb-6">Yeni Tur</h1>
+            <TourBasicForm
+              initialValues={formData}
+              onSubmit={handleSubmit}
+              loading={loading}
+            />
           </div>
-        </main>
+        )}
       </div>
     </div>
   );
