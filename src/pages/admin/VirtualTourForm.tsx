@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { supabase } from '@/integrations/supabase/client';
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,6 +91,13 @@ const VirtualTourForm = () => {
         if (error) throw error;
         toast.success('Tur başarıyla güncellendi');
       } else {
+        // Yeni tur oluşturma işlemi sırasında title ve slug alanlarının zorunlu olduğunu kontrol ederiz
+        if (!values.title || !values.slug) {
+          toast.error('Başlık ve URL alanları zorunludur');
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase
           .from('virtual_tours')
           .insert({
@@ -198,13 +206,14 @@ const VirtualTourForm = () => {
                   <PanoramaEditor
                     onSave={async (data) => {
                       try {
+                        // InitialView tipinin JSON olarak dönüştürülmesi
                         const { error } = await supabase
                           .from('tour_panoramas')
                           .insert({
                             tour_id: id,
                             title: data.title,
                             image_url: data.image_url,
-                            initial_view: data.initial_view,
+                            initial_view: data.initial_view as any, // JSON olarak kaydedilmesi için as any ile dönüştürüyoruz
                             sort_order: 0
                           });
 

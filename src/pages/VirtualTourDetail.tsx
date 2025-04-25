@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import VirtualTourViewer from '@/components/virtual-tour/VirtualTourViewer';
-import { Panorama, InitialView, Position } from '@/types/virtual-tour';
+import { Panorama, InitialView, Position, Hotspot } from '@/types/virtual-tour';
 
 const VirtualTourDetail = () => {
   const { slug } = useParams();
@@ -38,42 +38,53 @@ const VirtualTourDetail = () => {
       // Veriyi doğru formata dönüştür
       const formattedPanoramas: Panorama[] = panoramas?.map(p => {
         // JSON verisini düzgün şekilde parse et
-        let initialViewData = typeof p.initial_view === 'string' 
-          ? JSON.parse(p.initial_view)
-          : p.initial_view;
-
-        const initialView: InitialView = {
-          yaw: initialViewData?.yaw || 0,
-          pitch: initialViewData?.pitch || 0,
-          fov: initialViewData?.fov || 90
-        };
+        let initialViewData: InitialView;
+        
+        if (typeof p.initial_view === 'string') {
+          try {
+            initialViewData = JSON.parse(p.initial_view);
+          } catch (e) {
+            initialViewData = { yaw: 0, pitch: 0, fov: 90 };
+          }
+        } else if (p.initial_view && typeof p.initial_view === 'object') {
+          initialViewData = p.initial_view as InitialView;
+        } else {
+          initialViewData = { yaw: 0, pitch: 0, fov: 90 };
+        }
 
         return {
           id: p.id,
           title: p.title,
           image_url: p.image_url,
-          initial_view: initialView,
-          sort_order: p.sort_order,
+          initial_view: initialViewData,
+          sort_order: p.sort_order ?? 0,
           hotspots: p.hotspots?.map(h => {
             // JSON verisini düzgün şekilde parse et
-            let positionData = typeof h.position === 'string'
-              ? JSON.parse(h.position)
-              : h.position;
+            let positionData: Position;
+            
+            if (typeof h.position === 'string') {
+              try {
+                positionData = JSON.parse(h.position);
+              } catch (e) {
+                positionData = { yaw: 0, pitch: 0 };
+              }
+            } else if (h.position && typeof h.position === 'object') {
+              positionData = h.position as Position;
+            } else {
+              positionData = { yaw: 0, pitch: 0 };
+            }
 
-            const position: Position = {
-              yaw: positionData?.yaw || 0,
-              pitch: positionData?.pitch || 0
-            };
-
-            return {
+            const hotspot: Hotspot = {
               id: h.id,
               title: h.title,
               description: h.description,
-              position: position,
+              position: positionData,
               target_panorama_id: h.target_panorama_id,
-              hotspot_type: h.hotspot_type as 'info' | 'link' | 'custom',
+              hotspot_type: (h.hotspot_type as 'info' | 'link' | 'custom') || 'info',
               custom_data: h.custom_data
             };
+            
+            return hotspot;
           }) || []
         };
       }) || [];
