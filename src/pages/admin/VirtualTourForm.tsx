@@ -1,25 +1,17 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { TourStatus } from '@/types/virtual-tour';
+import PanoramaEditor from '@/components/virtual-tour/PanoramaEditor';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Başlık zorunludur'),
@@ -35,13 +27,14 @@ const VirtualTourForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showPanoramaEditor, setShowPanoramaEditor] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
-      status: 'taslak',
+      status: 'taslak' as TourStatus,
       slug: '',
       visible: false,
     },
@@ -63,7 +56,6 @@ const VirtualTourForm = () => {
 
       if (error) throw error;
       if (data) {
-        // Veriyi form değerlerine dönüştür
         const formData: FormValues = {
           title: data.title,
           description: data.description || '',
@@ -84,7 +76,6 @@ const VirtualTourForm = () => {
       setLoading(true);
 
       if (id) {
-        // Güncelleme
         const { error } = await supabase
           .from('virtual_tours')
           .update({
@@ -99,7 +90,6 @@ const VirtualTourForm = () => {
         if (error) throw error;
         toast.success('Tur başarıyla güncellendi');
       } else {
-        // Yeni tur oluşturma
         const { error } = await supabase
           .from('virtual_tours')
           .insert({
@@ -135,7 +125,7 @@ const VirtualTourForm = () => {
         </header>
 
         <main className="flex-1 p-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-5xl mx-auto space-y-6">
             <div className="bg-white rounded-lg shadow p-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -194,6 +184,42 @@ const VirtualTourForm = () => {
                 </form>
               </Form>
             </div>
+
+            {form.getValues('title') && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">Panoramalar</h2>
+                  <Button onClick={() => setShowPanoramaEditor(true)}>
+                    Panorama Ekle
+                  </Button>
+                </div>
+
+                {showPanoramaEditor && (
+                  <PanoramaEditor
+                    onSave={async (data) => {
+                      try {
+                        const { error } = await supabase
+                          .from('tour_panoramas')
+                          .insert({
+                            tour_id: id,
+                            title: data.title,
+                            image_url: data.image_url,
+                            initial_view: data.initial_view,
+                            sort_order: 0
+                          });
+
+                        if (error) throw error;
+                        toast.success('Panorama başarıyla eklendi');
+                        setShowPanoramaEditor(false);
+                      } catch (error) {
+                        console.error('Panorama eklenirken hata:', error);
+                        toast.error('Panorama eklenemedi');
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>
