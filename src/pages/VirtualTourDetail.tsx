@@ -47,7 +47,13 @@ const VirtualTourDetail = () => {
             initialViewData = { yaw: 0, pitch: 0, fov: 90 };
           }
         } else if (p.initial_view && typeof p.initial_view === 'object') {
-          initialViewData = p.initial_view as InitialView;
+          // JSON verisini güvenli bir şekilde InitialView tipine dönüştür
+          const jsonData = p.initial_view as Record<string, any>;
+          initialViewData = {
+            yaw: Number(jsonData.yaw ?? 0),
+            pitch: Number(jsonData.pitch ?? 0),
+            fov: Number(jsonData.fov ?? 90)
+          };
         } else {
           initialViewData = { yaw: 0, pitch: 0, fov: 90 };
         }
@@ -69,7 +75,12 @@ const VirtualTourDetail = () => {
                 positionData = { yaw: 0, pitch: 0 };
               }
             } else if (h.position && typeof h.position === 'object') {
-              positionData = h.position as Position;
+              // JSON verisini güvenli bir şekilde Position tipine dönüştür
+              const jsonData = h.position as Record<string, any>;
+              positionData = {
+                yaw: Number(jsonData.yaw ?? 0),
+                pitch: Number(jsonData.pitch ?? 0)
+              };
             } else {
               positionData = { yaw: 0, pitch: 0 };
             }

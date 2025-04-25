@@ -139,8 +139,11 @@ const PanoramaEditor: React.FC<PanoramaEditorProps> = ({ onSave }) => {
                   description="360° panorama görseli yükleyin (equirectangular format)"
                   allowedTypes={['jpg', 'jpeg', 'png']}
                   icon={<Image className="w-12 h-12 mx-auto text-gray-400" />}
-                  isLoading={uploading}
+                  // İsLoading özelliği FileUploadBoxProps içinde tanımlı değil, kaldırıyorum
                 />
+              )}
+              {uploading && (
+                <div className="mt-2 text-sm text-blue-500">Yükleniyor...</div>
               )}
             </div>
           </TabsContent>
