@@ -13,6 +13,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TourStatus } from '@/types/virtual-tour';
 import PanoramaEditor from '@/components/virtual-tour/PanoramaEditor';
+import PanoramaUploader from '@/components/virtual-tour/PanoramaUploader';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Başlık zorunludur'),
@@ -29,6 +30,8 @@ const VirtualTourForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPanoramaEditor, setShowPanoramaEditor] = useState(false);
+  const [refreshPanoramas, setRefreshPanoramas] = useState(0);
+  const [panoramas, setPanoramas] = useState<any[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,8 +47,9 @@ const VirtualTourForm = () => {
   useEffect(() => {
     if (id) {
       fetchTourData();
+      fetchPanoramas();
     }
-  }, [id]);
+  }, [id, refreshPanoramas]);
 
   const fetchTourData = async () => {
     try {
@@ -69,6 +73,24 @@ const VirtualTourForm = () => {
     } catch (error) {
       console.error('Tur verisi yüklenirken hata:', error);
       toast.error('Tur verisi yüklenemedi');
+    }
+  };
+
+  const fetchPanoramas = async () => {
+    if (!id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('tour_panoramas')
+        .select('*')
+        .eq('tour_id', id)
+        .order('sort_order', { ascending: true });
+      
+      if (error) throw error;
+      setPanoramas(data || []);
+    } catch (error) {
+      console.error('Panoramalar yüklenirken hata:', error);
+      toast.error('Panoramalar yüklenemedi');
     }
   };
 
@@ -98,7 +120,7 @@ const VirtualTourForm = () => {
           return;
         }
 
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('virtual_tours')
           .insert({
             title: values.title,
@@ -106,19 +128,30 @@ const VirtualTourForm = () => {
             status: values.status,
             slug: values.slug,
             visible: values.visible
-          });
+          })
+          .select();
 
         if (error) throw error;
         toast.success('Tur başarıyla oluşturuldu');
+        
+        // Yeni oluşturulan turun düzenleme sayfasına yönlendirme
+        if (data && data.length > 0) {
+          navigate(`/admin/virtual-tours/${data[0].id}/edit`);
+        } else {
+          navigate('/admin/virtual-tours');
+        }
       }
-
-      navigate('/admin/virtual-tours');
     } catch (error) {
       console.error('Tur kaydedilirken hata:', error);
       toast.error('Tur kaydedilemedi');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePanoramaUploadComplete = () => {
+    setRefreshPanoramas(prev => prev + 1);
+    toast.success('Panoramalar başarıyla yüklendi');
   };
 
   return (
@@ -193,7 +226,7 @@ const VirtualTourForm = () => {
               </Form>
             </div>
 
-            {form.getValues('title') && (
+            {id && (
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold">Panoramalar</h2>
@@ -202,24 +235,54 @@ const VirtualTourForm = () => {
                   </Button>
                 </div>
 
+                {/* Mevcut panoramaların listesi */}
+                {panoramas.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    {panoramas.map((panorama) => (
+                      <div key={panorama.id} className="border rounded-md p-3">
+                        <p className="font-medium">{panorama.title}</p>
+                        <div className="aspect-square bg-gray-100 mt-2 overflow-hidden rounded">
+                          <img 
+                            src={panorama.image_url} 
+                            alt={panorama.title} 
+                            className="object-cover w-full h-full" 
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 my-4">Henüz panorama eklenmemiş.</p>
+                )}
+
+                {/* Panorama yükleyici */}
+                <div className="mb-6">
+                  <h3 className="text-md font-medium mb-3">Panorama Yükle</h3>
+                  <PanoramaUploader 
+                    tourId={id} 
+                    onComplete={handlePanoramaUploadComplete}
+                  />
+                </div>
+
                 {showPanoramaEditor && (
                   <PanoramaEditor
+                    tourId={id}
                     onSave={async (data) => {
                       try {
-                        // InitialView tipinin JSON olarak dönüştürülmesi
                         const { error } = await supabase
                           .from('tour_panoramas')
                           .insert({
                             tour_id: id,
                             title: data.title,
                             image_url: data.image_url,
-                            initial_view: data.initial_view as any, // JSON olarak kaydedilmesi için as any ile dönüştürüyoruz
-                            sort_order: 0
+                            initial_view: data.initial_view as any,
+                            sort_order: panoramas.length
                           });
 
                         if (error) throw error;
                         toast.success('Panorama başarıyla eklendi');
                         setShowPanoramaEditor(false);
+                        setRefreshPanoramas(prev => prev + 1);
                       } catch (error) {
                         console.error('Panorama eklenirken hata:', error);
                         toast.error('Panorama eklenemedi');
