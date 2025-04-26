@@ -7,11 +7,11 @@ const LanguageSwitcher: React.FC = () => {
   const changeLang = (lng: string) => {
     i18n.changeLanguage(lng);
   };
-  return <div className="flex items-center gap-2">
-      <button onClick={() => changeLang("tr")} className="rounded-full font-medium text-justify mx-[4px] text-lg bg-red-600 hover:bg-red-500">
+  return <div className="flex items-center gap-2 bg-transparent">
+      <button onClick={() => changeLang("tr")} className="rounded-full font-medium text-justify mx-[4px] text-lg bg-transparent">
         TR
       </button>
-      <button onClick={() => changeLang("en")} className="bg-blue-500 hover:bg-blue-400 rounded-full text-lg">
+      <button onClick={() => changeLang("en")} className="rounded-full text-lg bg-transparent">
         EN
       </button>
     </div>;
