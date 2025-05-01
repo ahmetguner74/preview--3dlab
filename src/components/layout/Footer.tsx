@@ -12,40 +12,40 @@ const Footer = () => {
       <div className="arch-container">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-lg font-medium mb-4">ARCHITECTURE</h3>
+            <h3 className="text-lg font-medium mb-4">3D DİJİTAL</h3>
             <p className="text-sm text-arch-gray max-w-xs">
-              Creating modern, sustainable architectural solutions with a focus on aesthetics and functionality.
+              {t("footerDescription")}
             </p>
           </div>
           
           <div>
-            <h3 className="text-lg font-medium mb-4">{t("Projects")}</h3>
+            <h3 className="text-lg font-medium mb-4">{t("projects")}</h3>
             <ul className="space-y-2">
               <li>
-                <NavLink to="/" className="text-sm hover:text-arch-gray transition-colors">{t("Projects")}</NavLink>
+                <NavLink to="/projects" className="text-sm hover:text-arch-gray transition-colors">{t("projects")}</NavLink>
               </li>
               <li>
-                <NavLink to="/about" className="text-sm hover:text-arch-gray transition-colors">{t("About")}</NavLink>
+                <NavLink to="/about" className="text-sm hover:text-arch-gray transition-colors">{t("about")}</NavLink>
               </li>
               <li>
-                <NavLink to="/contact" className="text-sm hover:text-arch-gray transition-colors">{t("Contact")}</NavLink>
+                <NavLink to="/contact" className="text-sm hover:text-arch-gray transition-colors">{t("contact")}</NavLink>
               </li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-lg font-medium mb-4">Contact</h3>
+            <h3 className="text-lg font-medium mb-4">{t("contact")}</h3>
             <address className="not-italic">
-              <p className="text-sm mb-2">123 Architecture St.</p>
-              <p className="text-sm mb-2">City, Country</p>
+              <p className="text-sm mb-2">{t("footerAddress")}</p>
+              <p className="text-sm mb-2">{t("footerCity")}</p>
               <p className="text-sm mb-2">
-                <a href="mailto:info@architecture.com" className="hover:text-arch-gray transition-colors">
-                  info@architecture.com
+                <a href="mailto:info@3ddigital.com" className="hover:text-arch-gray transition-colors">
+                  info@3ddigital.com
                 </a>
               </p>
               <p className="text-sm">
-                <a href="tel:+123456789" className="hover:text-arch-gray transition-colors">
-                  +12 345 6789
+                <a href="tel:+902121234567" className="hover:text-arch-gray transition-colors">
+                  +90 212 123 4567
                 </a>
               </p>
             </address>
@@ -54,12 +54,12 @@ const Footer = () => {
         
         <div className="mt-12 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-arch-gray mb-4 md:mb-0">
-            © {year} Architecture. All rights reserved.
+            © {year} 3D Digital. {t("footerRights")}
           </p>
           
           <div className="flex space-x-6">
-            <a href="#" className="text-sm hover:text-arch-gray transition-colors">Privacy Policy</a>
-            <a href="#" className="text-sm hover:text-arch-gray transition-colors">Terms of Service</a>
+            <a href="#" className="text-sm hover:text-arch-gray transition-colors">{t("footerPrivacy")}</a>
+            <a href="#" className="text-sm hover:text-arch-gray transition-colors">{t("footerTerms")}</a>
           </div>
         </div>
       </div>

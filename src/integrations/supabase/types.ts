@@ -249,6 +249,137 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_hotspots: {
+        Row: {
+          created_at: string
+          custom_data: Json | null
+          description: string | null
+          hotspot_type: string
+          id: string
+          panorama_id: string
+          position: Json
+          target_panorama_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_data?: Json | null
+          description?: string | null
+          hotspot_type?: string
+          id?: string
+          panorama_id: string
+          position?: Json
+          target_panorama_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_data?: Json | null
+          description?: string | null
+          hotspot_type?: string
+          id?: string
+          panorama_id?: string
+          position?: Json
+          target_panorama_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_hotspots_panorama_id_fkey"
+            columns: ["panorama_id"]
+            isOneToOne: false
+            referencedRelation: "tour_panoramas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_hotspots_target_panorama_id_fkey"
+            columns: ["target_panorama_id"]
+            isOneToOne: false
+            referencedRelation: "tour_panoramas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tour_panoramas: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          initial_view: Json | null
+          sort_order: number | null
+          title: string
+          tour_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          initial_view?: Json | null
+          sort_order?: number | null
+          title: string
+          tour_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          initial_view?: Json | null
+          sort_order?: number | null
+          title?: string
+          tour_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_panoramas_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "virtual_tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      virtual_tours: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          slug: string
+          status: string
+          thumbnail: string | null
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          slug: string
+          status?: string
+          thumbnail?: string | null
+          title: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          slug?: string
+          status?: string
+          thumbnail?: string | null
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

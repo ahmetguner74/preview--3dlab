@@ -1,3 +1,4 @@
+
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -21,6 +22,10 @@ const resources = {
       // HERO
       "heroTitle": "3D DİJİTALLEŞTİRME ATÖLYESİ",
       "heroSubtitle": "Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.",
+      // ABOUT
+      "aboutDescription": "Tarihi yapılardan modern komplekslere kadar farklı karmaşıklıktaki nesnelerle çalışıyoruz.",
+      "aboutResult": "Çalışma sonucunda lazer tarama noktaları bulutu, fotogrametrik model, ortofoto planlar ve ölçülü restorasyon çizimleri tarafınıza teslim edilir.",
+      "learnMore": "Stüdyomuz hakkında daha fazla bilgi edinin",
       // Chat / Widget
       "chatTitle": "Bize Mesaj Bırakın",
       "chatInputName": "Adınız",
@@ -47,15 +52,22 @@ const resources = {
       "languageChangeInfo": "Dil değişimi şimdilik demo amaçlı devredışı bırakıldı.",
       "adminDemoSettings": "Demo Yönetici Ayarı",
       "adminSettingsInfo": "Daha fazla detay ve özelleştirme çok yakında burada olacak.",
+      // Footer
+      "footerDescription": "Modern, sürdürülebilir mimari çözümler oluşturuyoruz.",
+      "footerAddress": "123 Mimarlık Caddesi",
+      "footerCity": "İstanbul, Türkiye", 
+      "footerPrivacy": "Gizlilik Politikası",
+      "footerTerms": "Kullanım Koşulları",
+      "footerRights": "Tüm hakları saklıdır.",
     },
   },
   en: {
     translation: {
-      "Projects": "Projects",
-      "About": "About",
-      "Contact": "Contact",
-      "Admin": "Admin",
-      "Video": "Video",
+      "projects": "Projects",
+      "about": "About",
+      "contact": "Contact",
+      "admin": "Admin",
+      "video": "Video",
       "3D Model": "3D Model",
       "Point Cloud": "Point Cloud",
       "Gallery": "Gallery",
@@ -66,6 +78,10 @@ const resources = {
       "youtubeInfo": "A promo or feature video of our technology or project is played here automatically.",
       "heroTitle": "3D DIGITIZATION WORKSHOP",
       "heroSubtitle": "We digitize your data with a professional approach.",
+      // ABOUT
+      "aboutDescription": "We work with objects of different complexity from historical buildings to modern complexes.",
+      "aboutResult": "As a result of the work, laser scanning point clouds, photogrammetric model, orthophoto plans and measured restoration drawings are delivered to you.",
+      "learnMore": "Learn more about our studio",
       "chatTitle": "Leave Us a Message",
       "chatInputName": "Your Name",
       "chatInputMessage": "Your message...",
@@ -89,6 +105,13 @@ const resources = {
       "languageChangeInfo": "Language change is currently disabled for demo purposes.",
       "adminDemoSettings": "Demo Admin Setting",
       "adminSettingsInfo": "More settings and customization will be available here soon.",
+      // Footer
+      "footerDescription": "Creating modern, sustainable architectural solutions.",
+      "footerAddress": "123 Architecture St.",
+      "footerCity": "Istanbul, Turkey",
+      "footerPrivacy": "Privacy Policy",
+      "footerTerms": "Terms of Service",
+      "footerRights": "All rights reserved.",
     },
   },
 };
