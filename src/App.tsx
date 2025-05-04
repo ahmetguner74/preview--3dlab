@@ -17,6 +17,7 @@ import CoverImages from "./pages/admin/CoverImages";
 import Messages from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
 import AboutContent from "./pages/admin/AboutContent";
+import YoloProcessing from "./pages/YoloProcessing";
 import NotFound from "./pages/NotFound";
 import WhatsappButton from "./components/ui/WhatsappButton";
 import "./i18n";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
+          <Route path="/yolo" element={<YoloProcessing />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
