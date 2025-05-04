@@ -1,76 +1,145 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  MessageSquare, 
-  Settings,
-  LayoutGrid,
+import {
+  LayoutDashboard,
+  FileText,
   Image,
-  Images
+  Settings,
+  MessageSquare,
+  LogOut,
+  Home,
+  Users
 } from 'lucide-react';
 
 export const AdminSidebar = () => {
   const location = useLocation();
   
-  const menuItems = [
-    { 
-      icon: LayoutDashboard, 
-      label: 'Gösterge Paneli', 
-      path: '/admin',
-      current: location.pathname === '/admin'
-    },
-    { 
-      icon: FileText, 
-      label: 'Projeler', 
-      path: '/admin/projects',
-      current: location.pathname.includes('/admin/projects')
-    },
-    { 
-      icon: MessageSquare, 
-      label: 'Mesajlar', 
-      path: '/admin/messages',
-      current: location.pathname.includes('/admin/messages')
-    },
-    { 
-      icon: Images, 
-      label: 'Kapak Görselleri', 
-      path: '/admin/cover-images',
-      current: location.pathname.includes('/admin/cover-images')
-    },
-    { 
-      icon: Settings, 
-      label: 'Ayarlar', 
-      path: '/admin/settings',
-      current: location.pathname.includes('/admin/settings')
-    },
-  ];
-
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+  
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+    <div className="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 flex flex-col">
+      {/* Logo ve marka */}
       <div className="p-4 border-b border-gray-200">
-        <Link to="/" className="flex items-center">
-          <LayoutGrid className="h-6 w-6 text-arch-black mr-2" />
-          <span className="font-semibold text-xl text-arch-black">Arch</span>
+        <Link to="/admin" className="flex items-center">
+          <div className="font-display text-xl font-bold text-yellow-400 mr-2">3D</div>
+          <div className="font-display text-lg font-bold">DİJİTAL</div>
         </Link>
       </div>
       
-      <nav className="py-4">
-        {menuItems.map((item, index) => (
-          <Link
-            key={index}
-            to={item.path}
-            className={`flex items-center py-3 px-6 text-sm ${
-              item.current 
-                ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
-                : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <item.icon className={`mr-3 h-5 w-5 ${item.current ? 'text-blue-600' : 'text-gray-500'}`} />
-            <span>{item.label}</span>
-          </Link>
-        ))}
+      {/* Menü öğeleri */}
+      <nav className="flex-1 overflow-y-auto py-4">
+        <ul className="space-y-1 px-3">
+          <li>
+            <Link 
+              to="/admin" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/admin') && !isActive('/admin/projects') && !isActive('/admin/about-content') && !isActive('/admin/cover-images')
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <LayoutDashboard size={18} className="mr-3" />
+              <span>Dashboard</span>
+            </Link>
+          </li>
+          
+          <li>
+            <Link 
+              to="/admin/projects" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/admin/projects') 
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <FileText size={18} className="mr-3" />
+              <span>Projeler</span>
+            </Link>
+          </li>
+
+          <li>
+            <Link 
+              to="/admin/about-content" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/admin/about-content') 
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Users size={18} className="mr-3" />
+              <span>Hakkımızda</span>
+            </Link>
+          </li>
+          
+          <li>
+            <Link 
+              to="/admin/cover-images" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/admin/cover-images') 
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Image size={18} className="mr-3" />
+              <span>Kapak Görselleri</span>
+            </Link>
+          </li>
+          
+          <li>
+            <Link 
+              to="/admin/messages" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/admin/messages') 
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <MessageSquare size={18} className="mr-3" />
+              <span>Mesajlar</span>
+            </Link>
+          </li>
+          
+          <li>
+            <Link 
+              to="/admin/settings" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/admin/settings') 
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Settings size={18} className="mr-3" />
+              <span>Ayarlar</span>
+            </Link>
+          </li>
+        </ul>
       </nav>
+      
+      {/* Alt menü */}
+      <div className="p-4 border-t border-gray-200">
+        <ul className="space-y-1">
+          <li>
+            <Link 
+              to="/" 
+              target="_blank" 
+              className="flex items-center px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50"
+            >
+              <Home size={18} className="mr-3" />
+              <span>Siteye Git</span>
+            </Link>
+          </li>
+          
+          <li>
+            <button className="flex w-full items-center px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50">
+              <LogOut size={18} className="mr-3" />
+              <span>Çıkış Yap</span>
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };
