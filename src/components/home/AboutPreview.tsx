@@ -26,39 +26,35 @@ const AboutPreview = () => {
     };
     
     fetchAboutContent();
-  }, []);
+  }, [currentLanguage]); // Dil değiştiğinde içeriği tekrar yükle
   
   return (
-    <section className="py-24 bg-arch-light-gray bg-black">
+    <section className="py-24 bg-black">
       <div className="arch-container">
         <div className="grid md:grid-cols-2 gap-12">
           <div className="space-y-6">
-            <h2 className="text-sm uppercase text-arch-gray tracking-wider">{t("about")}</h2>
+            <h2 className="text-sm uppercase text-gray-400 tracking-wider">{t("about")}</h2>
             <h3 className="text-2xl md:text-4xl font-display text-white">
-              {currentLanguage === "tr" 
-                ? "Tarihi yapılardan modern komplekslere kadar farklı karmaşıklıktaki nesnelerle çalışıyoruz." 
-                : "We work with objects of different complexity from historical buildings to modern complexes."}
+              {t("aboutDescription")}
             </h3>
-            <p className="text-arch-gray">
-              {currentLanguage === "tr"
-                ? "Çalışma sonucunda lazer tarama noktaları bulutu, fotogrametrik model, ortofoto planlar ve ölçülü restorasyon çizimleri tarafınıza teslim edilir."
-                : "As a result of the work, laser scanning point clouds, photogrammetric model, orthophoto plans and measured restoration drawings are delivered to you."}
+            <p className="text-gray-400">
+              {t("aboutResult")}
             </p>
             <div className="pt-4">
-              <Link to="/about" className="inline-flex items-center gap-1 border-b border-arch-black pb-1 hover:text-arch-gray hover:border-arch-white transition-colors">
-                {currentLanguage === "tr" ? "Stüdyomuz hakkında daha fazla bilgi edinin" : "Learn more about our studio"} <ArrowUpRight size={16} />
+              <Link to="/about" className="inline-flex items-center gap-1 border-b border-white pb-1 text-white hover:text-gray-300 hover:border-gray-300 transition-colors">
+                {t("learnMore")} <ArrowUpRight size={16} />
               </Link>
             </div>
           </div>
           
-          <div className="h-64 md:h-auto overflow-hidden">
+          <div className="h-64 md:h-auto overflow-hidden rounded-md">
             {loading ? (
-              <div className="w-full h-full animate-pulse bg-gray-300"></div>
+              <div className="w-full h-full animate-pulse bg-gray-700"></div>
             ) : (
               <img 
                 src={teamSection?.image_url || "https://images.unsplash.com/photo-1517502884422-41eaead166d4"} 
                 alt={currentLanguage === "tr" ? "Mimarlık stüdyo ekibi" : "Architecture studio team"} 
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover transition-transform hover:scale-105 duration-700" 
               />
             )}
           </div>

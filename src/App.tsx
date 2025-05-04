@@ -18,6 +18,7 @@ import Messages from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
 import AboutContent from "./pages/admin/AboutContent";
 import NotFound from "./pages/NotFound";
+import WhatsappButton from "./components/ui/WhatsappButton";
 import "./i18n";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <WhatsappButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

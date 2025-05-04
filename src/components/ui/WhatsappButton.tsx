@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowRight } from "lucide-react"; // icons.whatsapp desteği yok
+import { Phone } from "lucide-react"; // WhatsApp ikonu olmadığı için Telefon ikonunu kullanalım
 
 const WhatsappButton = () => {
   // Direkt telefon numarası kullanılacak.
@@ -11,11 +11,11 @@ const WhatsappButton = () => {
       href={`https://wa.me/${phone.replace(/^\+/, "")}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-8 right-8 z-40 flex items-center gap-2 bg-green-500 hover:bg-green-600 transition-colors rounded-full px-4 py-3 shadow-lg animate-fade-in"
+      className="fixed bottom-8 right-8 z-40 flex items-center gap-2 bg-green-500 hover:bg-green-600 transition-colors rounded-full px-4 py-3 shadow-lg text-white"
       style={{ marginBottom: 72 }} // Chat ile üst üste binmesin diye
       title="WhatsApp ile iletişim"
     >
-      <ArrowRight size={24} className="text-white" />
+      <Phone size={24} className="text-white" />
       <span className="hidden sm:block text-white font-bold">WhatsApp</span>
     </a>
   );
