@@ -26,7 +26,7 @@ export const getAboutContent = async (): Promise<AboutContent[]> => {
       return [];
     }
     
-    return data || [];
+    return data as AboutContent[] || [];
   } catch (error) {
     console.error('Hakkımızda içeriği getirme hatası:', error);
     return [];
