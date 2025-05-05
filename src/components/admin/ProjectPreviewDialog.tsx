@@ -156,7 +156,15 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
 
         <div className="p-8">
           <ProjectDescription project={project as Project} />
-
+          
+          {pointCloudModels.length > 0 && (
+            <ProjectPointCloud
+              models={pointCloudModels}
+              activePointCloudUrl={activePointCloud!}
+              onPointCloudSelect={onPointCloudSelect}
+            />
+          )}
+          
           {hasBeforeAfter && (
             <ProjectBeforeAfter 
               beforeImageUrl={beforeImage!}
@@ -174,14 +182,6 @@ const ProjectPreviewDialog: React.FC<ProjectPreviewDialogProps> = ({
           
           {hasVideos && (
             <ProjectVideo videoUrl={videoUrl} />
-          )}
-          
-          {pointCloudModels.length > 0 && (
-            <ProjectPointCloud
-              models={pointCloudModels}
-              activePointCloudUrl={activePointCloud!}
-              onPointCloudSelect={onPointCloudSelect}
-            />
           )}
           
           {threeDModels.length > 0 && (

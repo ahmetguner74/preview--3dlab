@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -92,6 +93,18 @@ const ProjectDetail = () => {
           <ProjectHeader project={project} />
           <ProjectDescription project={project} />
 
+          {/* Nokta Bulutu bölümü en üste taşındı */}
+          {pointCloudModels.length > 0 && (
+            <div className="mb-16">
+              <h2 className="text-2xl font-display mb-6">{t("Point Cloud")}</h2>
+              <ProjectPointCloud
+                models={pointCloudModels}
+                activePointCloudUrl={activePointCloud}
+                onPointCloudSelect={(modelUrl) => handlePointCloudSelect(models, modelUrl)}
+              />
+            </div>
+          )}
+
           <div className="mb-16">
             <h2 className="text-2xl font-display mb-6">{t("Gallery")}</h2>
             <ProjectGallery images={images} title={project.title} />
@@ -122,17 +135,6 @@ const ProjectDetail = () => {
                 models={threeDModels}
                 activeModelUrl={activeThreeDModel}
                 onModelSelect={(modelUrl) => handleThreeDModelSelect(models, modelUrl)}
-              />
-            </div>
-          )}
-
-          {pointCloudModels.length > 0 && (
-            <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">{t("Point Cloud")}</h2>
-              <ProjectPointCloud
-                models={pointCloudModels}
-                activePointCloudUrl={activePointCloud}
-                onPointCloudSelect={(modelUrl) => handlePointCloudSelect(models, modelUrl)}
               />
             </div>
           )}

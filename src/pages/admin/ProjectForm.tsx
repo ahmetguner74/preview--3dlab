@@ -22,7 +22,7 @@ const ProjectForm = () => {
   const isEditing = id !== undefined && id !== 'new';
   
   // Tab yönetimi hook'u
-  const { activeTab, handleTabChange } = useTabState("genel");
+  const { activeTab, handleTabChange } = useTabState("nokta-bulutu"); // Varsayılan olarak nokta-bulutu sekmesi açılacak
   
   // Proje form hook'u
   const { 
@@ -71,19 +71,28 @@ const ProjectForm = () => {
         
         <div className="flex-1">
           <Tabs 
-            defaultValue="genel" 
+            defaultValue="nokta-bulutu" 
             value={activeTab} 
             onValueChange={handleTabChange} 
             className="w-full"
           >
             <TabsList className="bg-gray-100 mb-6">
+              <TabsTrigger value="nokta-bulutu">Nokta Bulutu</TabsTrigger>
               <TabsTrigger value="genel">Genel</TabsTrigger>
               <TabsTrigger value="icerik">İçerik</TabsTrigger>
               <TabsTrigger value="medya">Medya</TabsTrigger>
-              <TabsTrigger value="nokta-bulutu">Nokta Bulutu</TabsTrigger>
               <TabsTrigger value="3d-model">3D Model</TabsTrigger>
               <TabsTrigger value="ayarlar">Ayarlar</TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="nokta-bulutu">
+              <PointCloudTab 
+                projectId={id}
+                isEditing={isEditing}
+                project3DModels={project3DModels}
+                setProject3DModels={setProject3DModels}
+              />
+            </TabsContent>
             
             <TabsContent value="genel">
               <GeneralTab 
@@ -111,15 +120,6 @@ const ProjectForm = () => {
                 setProjectVideos={setProjectVideos}
                 thumbnail={project.thumbnail}
                 onThumbnailUpdated={handleThumbnailUpdate}
-              />
-            </TabsContent>
-            
-            <TabsContent value="nokta-bulutu">
-              <PointCloudTab 
-                projectId={id}
-                isEditing={isEditing}
-                project3DModels={project3DModels}
-                setProject3DModels={setProject3DModels}
               />
             </TabsContent>
             
