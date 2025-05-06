@@ -7,17 +7,25 @@ export interface YoloProcessingOptions {
   modelType?: 'detect' | 'segment' | 'classify';
 }
 
+export interface YoloApiResponse {
+  boxes?: number[][];
+  scores?: number[];
+  classes?: number[] | string[];
+  result_jpg?: string;
+  error?: string;
+}
+
 /**
- * Görüntüyü YOLOv8 API'ye gönderir ve işlenmiş görüntüyü döndürür
+ * Görüntüyü YOLOv8 API'ye gönderir ve yanıtı döndürür
  */
 export const processImageWithYolo = async (
   imageFile: File, 
   options: YoloProcessingOptions = {}
-): Promise<string> => {
+): Promise<YoloApiResponse> => {
   try {
     // Form verisi hazırla
     const formData = new FormData();
-    formData.append('image', imageFile);
+    formData.append('file', imageFile); // API'nin beklediği parametre adı: file
     
     // Opsiyonları ekle
     if (options.confidence) {
@@ -32,8 +40,8 @@ export const processImageWithYolo = async (
       formData.append('model_type', options.modelType);
     }
     
-    // API URL'sini ortam değişkeninden al veya varsayılan kullan
-    const apiUrl = process.env.REACT_APP_YOLO_API_URL || 'http://localhost:8000/process-image';
+    // API URL'i
+    const apiUrl = 'https://c9e0-176-240-248-164.ngrok-free.app/predict/';
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -45,11 +53,19 @@ export const processImageWithYolo = async (
       throw new Error(`API hatası (${response.status}): ${errorText}`);
     }
     
-    // API'den dönen görüntüyü blob olarak al
-    const blob = await response.blob();
+    // API'den dönen JSON yanıtını al
+    const jsonResponse = await response.json();
     
-    // Blob'u URL'ye dönüştür
-    return URL.createObjectURL(blob);
+    // Base64 resim varsa onu URL'ye dönüştür
+    if (jsonResponse.result_jpg) {
+      const imageUrl = `data:image/jpeg;base64,${jsonResponse.result_jpg}`;
+      return { 
+        ...jsonResponse,
+        result_jpg: imageUrl
+      };
+    }
+    
+    return jsonResponse;
   } catch (error) {
     console.error('Görüntü işleme hatası:', error);
     throw error;

@@ -5,15 +5,17 @@ import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info } from 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { processImageWithYolo } from '@/utils/yoloApi';
+import { processImageWithYolo, YoloApiResponse } from '@/utils/yoloApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTranslation } from 'react-i18next';
 
 const YoloProcessing = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  const [apiResponse, setApiResponse] = useState<YoloApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("upload");
   const { t } = useTranslation();
@@ -37,6 +39,7 @@ const YoloProcessing = () => {
       
       // İşlenmiş görüntüyü temizle
       setProcessedImageUrl(null);
+      setApiResponse(null);
       
       // Upload tab'ına geç
       setActiveTab("upload");
@@ -58,8 +61,13 @@ const YoloProcessing = () => {
     setIsLoading(true);
 
     try {
-      const processedUrl = await processImageWithYolo(selectedFile);
-      setProcessedImageUrl(processedUrl);
+      const response = await processImageWithYolo(selectedFile);
+      setApiResponse(response);
+      
+      if (response.result_jpg) {
+        setProcessedImageUrl(response.result_jpg);
+      }
+      
       toast.success('Görüntü başarıyla işlendi!');
       // Otomatik olarak sonuç tab'ına geç
       setActiveTab("result");
@@ -184,7 +192,7 @@ const YoloProcessing = () => {
                 </CardHeader>
                 <CardContent>
                   {processedImageUrl ? (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       <div className="aspect-video bg-black rounded-md overflow-hidden flex items-center justify-center">
                         <img
                           src={processedImageUrl}
@@ -193,10 +201,57 @@ const YoloProcessing = () => {
                         />
                       </div>
                       
+                      {apiResponse && (
+                        <>
+                          <h3 className="text-lg font-semibold mb-2">Algılama Sonuçları</h3>
+                          
+                          {apiResponse.boxes && apiResponse.boxes.length > 0 ? (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>No</TableHead>
+                                  <TableHead>Sınıf</TableHead>
+                                  <TableHead>Doğruluk</TableHead>
+                                  <TableHead>Koordinatlar</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {apiResponse.boxes.map((box, index) => (
+                                  <TableRow key={index}>
+                                    <TableCell>{index + 1}</TableCell>
+                                    <TableCell>
+                                      {apiResponse.classes && apiResponse.classes[index] !== undefined 
+                                        ? `${apiResponse.classes[index]}` 
+                                        : 'Bilinmeyen'}
+                                    </TableCell>
+                                    <TableCell>
+                                      {apiResponse.scores && apiResponse.scores[index] !== undefined
+                                        ? `%${(apiResponse.scores[index] * 100).toFixed(2)}`
+                                        : '-'}
+                                    </TableCell>
+                                    <TableCell>
+                                      <span className="text-xs font-mono">
+                                        [{box.map(coord => coord.toFixed(1)).join(', ')}]
+                                      </span>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          ) : (
+                            <Alert>
+                              <AlertDescription>
+                                Hiçbir nesne algılanmadı veya koordinat bilgisi bulunamadı.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+                        </>
+                      )}
+                      
                       <Alert>
                         <Check className="h-4 w-4" />
                         <AlertDescription>
-                          Görüntü başarıyla işlendi. Algılanan nesneler renkli kutularla işaretlenmiştir.
+                          Görüntü başarıyla işlendi.
                         </AlertDescription>
                       </Alert>
                     </div>
