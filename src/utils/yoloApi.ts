@@ -65,7 +65,7 @@ export const processImageWithYolo = async (
     
     // CORS hatası için kontrol
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      console.error('CORS hatası muhtemelen. API'ye erişim engellendi.');
+      console.error('CORS hatası muhtemelen. API\'ye erişim engellendi.');
       
       // Test verisi ile devam et - gerçek API yanıtını taklit etmek için
       if (imageFile) {
