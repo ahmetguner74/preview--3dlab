@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
-import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle } from 'lucide-react';
+import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -147,7 +147,8 @@ const YoloProcessing = () => {
                         <span className="font-medium">Dosya adı:</span> {selectedFile?.name}
                       </div>
                       
-                      <Alert variant="info">
+                      <Alert className="bg-blue-50 text-blue-700 border-blue-200">
+                        <Info className="h-4 w-4 text-blue-500" />
                         <AlertDescription>
                           İşlemi başlatmak için "Görüntüyü İşle" düğmesine tıklayın. İşlem sunucu yüküne bağlı olarak birkaç saniye sürebilir.
                         </AlertDescription>

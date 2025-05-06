@@ -41,7 +41,8 @@ export const processImageWithYolo = async (
     });
     
     if (!response.ok) {
-      throw new Error(`API hatası: ${response.status}`);
+      const errorText = await response.text().catch(() => 'Bilinmeyen hata');
+      throw new Error(`API hatası (${response.status}): ${errorText}`);
     }
     
     // API'den dönen görüntüyü blob olarak al

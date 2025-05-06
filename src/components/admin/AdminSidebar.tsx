@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -91,9 +90,9 @@ export const AdminSidebar = () => {
           
           <li>
             <Link 
-              to="/yolo" 
+              to="/admin/yolo" 
               className={`flex items-center px-3 py-2 rounded-md text-sm ${
-                isActive('/yolo') 
+                isActive('/admin/yolo') 
                 ? 'bg-gray-100 text-gray-900 font-medium' 
                 : 'text-gray-600 hover:bg-gray-50'
               }`}
