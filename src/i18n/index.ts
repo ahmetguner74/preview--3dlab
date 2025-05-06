@@ -1,8 +1,40 @@
-
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
+// Dil çevirileri
 const resources = {
+  en: {
+    translation: {
+      'projects': 'Projects',
+      'about': 'About',
+      'contact': 'Contact',
+      'Global Point Cloud Viewer': 'Global Point Cloud Viewer',
+      'Upload and visualize LAS, LAZ or EPT format point cloud data on a 3D globe. Supports WGS84 and UTM coordinate systems.': 'Upload and visualize LAS, LAZ or EPT format point cloud data on a 3D globe. Supports WGS84 and UTM coordinate systems.',
+      'Upload': 'Upload',
+      'View': 'View',
+      'Settings': 'Settings',
+      'Coordinate System': 'Coordinate System',
+      'Global coordinate system used for GPS': 'Global coordinate system used for GPS',
+      'Universal Transverse Mercator projection': 'Universal Transverse Mercator projection',
+      'Current Point Cloud': 'Current Point Cloud',
+      'Globe Point Cloud': 'Globe Point Cloud', 
+      'Dosya seçin veya sürükleyin': 'Select or drag a file',
+      'Desteklenen formatlar': 'Supported formats',
+      'veya URL belirtin': 'or specify URL',
+      'Publicly accessible URL to a point cloud file': 'Publicly accessible URL to a point cloud file',
+      'Yakınlaştır': 'Zoom in',
+      'Uzaklaştır': 'Zoom out',
+      'Döndür': 'Rotate',
+      'Arazi': 'Terrain',
+      'Katmanlar': 'Layers',
+      'Nokta bulutu yükleniyor...': 'Loading point cloud...',
+      'Yükleme başarılı': 'Upload successful',
+      'Nokta bulutu başarıyla yüklendi.': 'Point cloud uploaded successfully.',
+      'Yükle ve Görüntüle': 'Upload and View',
+      'Yükleniyor...': 'Loading...',
+      'Point Cloud': 'Point Cloud'
+    }
+  },
   tr: {
     translation: {
       // --- NAV, HERO, BUTONS ---
@@ -59,59 +91,6 @@ const resources = {
       "footerPrivacy": "Gizlilik Politikası",
       "footerTerms": "Kullanım Koşulları",
       "footerRights": "Tüm hakları saklıdır.",
-    },
-  },
-  en: {
-    translation: {
-      "projects": "Projects",
-      "about": "About",
-      "contact": "Contact",
-      "admin": "Admin",
-      "video": "Video",
-      "3D Model": "3D Model",
-      "Point Cloud": "Point Cloud",
-      "Gallery": "Gallery",
-      "Before / After": "Before / After",
-      "View Projects": "View Projects",
-      "viewProjects": "View Projects",
-      "youtubeWatch": "Watch on YouTube",
-      "youtubeInfo": "A promo or feature video of our technology or project is played here automatically.",
-      "heroTitle": "3D DIGITIZATION WORKSHOP",
-      "heroSubtitle": "We digitize your data with a professional approach.",
-      // ABOUT
-      "aboutDescription": "We work with objects of different complexity from historical buildings to modern complexes.",
-      "aboutResult": "As a result of the work, laser scanning point clouds, photogrammetric model, orthophoto plans and measured restoration drawings are delivered to you.",
-      "learnMore": "Learn more about our studio",
-      "chatTitle": "Leave Us a Message",
-      "chatInputName": "Your Name",
-      "chatInputMessage": "Your message...",
-      "chatSend": "Send",
-      "chatDisclaimer": "Your message can be viewed by site admin.",
-      "chatButtonOpen": "Leave a message",
-      "Messages": "Messages",
-      "messages": "Messages",
-      "Settings": "Settings",
-      "settings": "Settings",
-      "Coming Soon!": "Coming Soon!",
-      "Return to Dashboard": "Return to Dashboard",
-      "returnDashboard": "Return to Dashboard",
-      "No messages have been received yet.": "No messages have been received yet.",
-      "noMessagesYet": "No messages have been received yet.",
-      "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
-        "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.",
-      "adminMessageInfo": "Recent messages from site visitors appear below. You can reply by contacting via email.",
-      "generalSettings": "General Settings",
-      "siteLanguage": "Site Language",
-      "languageChangeInfo": "Language change is currently disabled for demo purposes.",
-      "adminDemoSettings": "Demo Admin Setting",
-      "adminSettingsInfo": "More settings and customization will be available here soon.",
-      // Footer
-      "footerDescription": "Creating modern, sustainable architectural solutions.",
-      "footerAddress": "123 Architecture St.",
-      "footerCity": "Istanbul, Turkey",
-      "footerPrivacy": "Privacy Policy",
-      "footerTerms": "Terms of Service",
-      "footerRights": "All rights reserved.",
     },
   },
 };

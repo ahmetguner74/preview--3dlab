@@ -68,6 +68,14 @@ const Navbar = () => {
             >
               YOLOv8
             </NavLink>
+            <NavLink 
+              to="/global-point-cloud" 
+              className={({ isActive }) => 
+                isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'
+              }
+            >
+              {t('Globe Point Cloud')}
+            </NavLink>
           </nav>
 
           <div className="flex items-center">
@@ -126,6 +134,15 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 YOLOv8
+              </NavLink>
+              <NavLink 
+                to="/global-point-cloud" 
+                className={({ isActive }) => 
+                  isActive ? 'text-black font-medium' : 'text-gray-600'
+                }
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('Globe Point Cloud')}
               </NavLink>
               <div className="pt-2">
                 <LanguageSwitcher />

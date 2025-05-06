@@ -18,6 +18,7 @@ import Messages from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
 import AboutContent from "./pages/admin/AboutContent";
 import YoloProcessing from "./pages/YoloProcessing";
+import GlobalPointCloud from "./pages/GlobalPointCloud";
 import NotFound from "./pages/NotFound";
 import WhatsappButton from "./components/ui/WhatsappButton";
 import "./i18n";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
           <Route path="/yolo" element={<YoloProcessing />} />
+          <Route path="/global-point-cloud" element={<GlobalPointCloud />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
