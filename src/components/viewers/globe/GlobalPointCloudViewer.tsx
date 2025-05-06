@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Ion, Viewer, createWorldTerrainAsync, createOsmBuildingsAsync } from 'cesium';
+import { Ion, Viewer, createWorldTerrainAsync, createOsmBuildingsAsync, Cartesian3 } from 'cesium';
 import { Viewer as ResiumViewer, Globe, CameraFlyTo, Entity } from 'resium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
@@ -71,11 +71,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
         
         // Örneğin nokta bulutu konumuna kamera animasyonu:
         cesiumViewer.camera.flyTo({
-          destination: {
-            x: 0,
-            y: 0,
-            z: 10000000
-          }
+          destination: Cartesian3.fromDegrees(0, 0, 10000000)
         });
 
         setIsLoading(false);
@@ -100,7 +96,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
           <Globe />
           <CameraFlyTo 
             duration={2} 
-            destination={{x: 1216389.0, y: -4736806.0, z: 4081226.0}} 
+            destination={Cartesian3.fromDegrees(30, 30, 1000000)}
           />
         </ResiumViewer>
       </div>

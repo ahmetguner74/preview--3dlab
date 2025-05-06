@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Layers, ZoomIn, ZoomOut, RotateClockwise, Globe, Settings } from 'lucide-react';
+import { Layers, ZoomIn, ZoomOut, RotateCw, Globe, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface PointCloudControlsProps {
@@ -53,7 +53,7 @@ const PointCloudControls: React.FC<PointCloudControlsProps> = ({ pointCloudData 
           <span className="ml-1 hidden sm:inline">{t('Uzaklaştır')}</span>
         </Button>
         <Button size="sm" variant="outline" onClick={handleRotate} title={t('Döndür')}>
-          <RotateClockwise size={16} />
+          <RotateCw size={16} />
           <span className="ml-1 hidden sm:inline">{t('Döndür')}</span>
         </Button>
       </div>
