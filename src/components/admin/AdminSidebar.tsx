@@ -9,7 +9,8 @@ import {
   MessageSquare,
   LogOut,
   Home,
-  Users
+  Users,
+  Layers
 } from 'lucide-react';
 
 export const AdminSidebar = () => {
@@ -85,6 +86,20 @@ export const AdminSidebar = () => {
             >
               <Image size={18} className="mr-3" />
               <span>Kapak Görselleri</span>
+            </Link>
+          </li>
+          
+          <li>
+            <Link 
+              to="/yolo" 
+              className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                isActive('/yolo') 
+                ? 'bg-gray-100 text-gray-900 font-medium' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Layers size={18} className="mr-3" />
+              <span>YOLOv8 İşleme</span>
             </Link>
           </li>
           

@@ -23,7 +23,14 @@ import NotFound from "./pages/NotFound";
 import WhatsappButton from "./components/ui/WhatsappButton";
 import "./i18n";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -48,7 +55,7 @@ const App = () => (
           <Route path="/admin/messages" element={<Messages />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
           <Route path="/admin/about-content" element={<AboutContent />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/admin/yolo" element={<YoloProcessing />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <WhatsappButton />
