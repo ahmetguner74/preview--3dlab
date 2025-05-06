@@ -73,7 +73,10 @@ const YoloProcessing = () => {
       setActiveTab("result");
     } catch (error) {
       console.error('İşleme hatası:', error);
-      toast.error('Görüntü işlenirken bir hata oluştu.');
+      toast.error('Görüntü işlenirken bir hata oluştu. Lütfen tekrar deneyin.');
+      
+      // Kullanıcıya API erişim sorunu hakkında bilgi ver
+      toast.error('API erişim hatası: CORS politikası engellendi. Sistem şu an test verilerle çalışmaktadır.');
     } finally {
       setIsLoading(false);
     }
@@ -104,6 +107,13 @@ const YoloProcessing = () => {
               className="hidden"
             />
           </div>
+
+          <Alert className="bg-blue-50 text-blue-700 border-blue-200">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription>
+              Not: Sistem şu anda CORS kısıtlamaları nedeniyle test modunda çalışmaktadır. Gerçek API erişimi için sunucu yapılandırması gereklidir.
+            </AlertDescription>
+          </Alert>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 w-full md:w-auto mb-6">
@@ -245,6 +255,13 @@ const YoloProcessing = () => {
                               </AlertDescription>
                             </Alert>
                           )}
+                          
+                          <Alert className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                            <AlertDescription>
+                              Not: CORS kısıtlamaları nedeniyle şu anda test verileri gösterilmektedir.
+                            </AlertDescription>
+                          </Alert>
                         </>
                       )}
                       
