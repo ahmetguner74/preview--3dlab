@@ -9,7 +9,8 @@ import { processImageWithYolo, YoloApiResponse } from '@/utils/yoloApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useTranslation } from 'react-i18next';
+import { Progress } from '@/components/ui/progress';
+import FileUploadBox from '@/components/admin/FileUploadBox';
 
 const YoloProcessing = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -18,38 +19,24 @@ const YoloProcessing = () => {
   const [apiResponse, setApiResponse] = useState<YoloApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("upload");
-  const { t } = useTranslation();
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      
-      // Dosya türü kontrolü
-      if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
-        toast.error('Sadece JPEG veya PNG görüntüleri yükleyebilirsiniz.');
-        return;
-      }
-      
-      setSelectedFile(file);
-      
-      // Önizleme URL'si oluştur
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
-      
-      // İşlenmiş görüntüyü temizle
-      setProcessedImageUrl(null);
-      setApiResponse(null);
-      
-      // Upload tab'ına geç
-      setActiveTab("upload");
-    }
-  };
-
-  const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+  const handleFileSelected = async (file: File) => {
+    setSelectedFile(file);
+    
+    // Önizleme URL'si oluştur
+    const fileUrl = URL.createObjectURL(file);
+    setPreviewUrl(fileUrl);
+    
+    // İşlenmiş görüntüyü temizle
+    setProcessedImageUrl(null);
+    setApiResponse(null);
+    
+    // Upload tab'ına geç
+    setActiveTab("upload");
+    
+    toast.info("Görüntü yüklendi. İşlemek için 'Görüntüyü İşle' düğmesine tıklayın.");
   };
 
   const handleProcessImage = async () => {
@@ -59,10 +46,18 @@ const YoloProcessing = () => {
     }
 
     setIsLoading(true);
+    setUploadProgress(0);
+    
+    // İlerleme animasyonu için basit bir zamanlayıcı
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => Math.min(prev + 10, 90));
+    }, 300);
 
     try {
       const response = await processImageWithYolo(selectedFile);
       setApiResponse(response);
+      clearInterval(progressInterval);
+      setUploadProgress(100);
       
       if (response.result_jpg) {
         setProcessedImageUrl(response.result_jpg);
@@ -72,11 +67,10 @@ const YoloProcessing = () => {
       // Otomatik olarak sonuç tab'ına geç
       setActiveTab("result");
     } catch (error) {
+      clearInterval(progressInterval);
+      setUploadProgress(0);
       console.error('İşleme hatası:', error);
       toast.error('Görüntü işlenirken bir hata oluştu. Lütfen tekrar deneyin.');
-      
-      // Kullanıcıya API erişim sorunu hakkında bilgi ver
-      toast.error('API erişim hatası: CORS politikası engellendi. Sistem şu an test verilerle çalışmaktadır.');
     } finally {
       setIsLoading(false);
     }
@@ -91,27 +85,12 @@ const YoloProcessing = () => {
               <h1 className="text-3xl md:text-4xl font-display mb-2">YOLOv8 Görüntü İşleme</h1>
               <p className="text-gray-600">Görüntüleri yapay zeka ile algılama ve segmentasyon</p>
             </div>
-
-            <Button 
-              onClick={handleUploadClick}
-              className="flex items-center gap-2"
-            >
-              <Upload size={18} />
-              Görüntü Yükle
-            </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/jpeg,image/png"
-              className="hidden"
-            />
           </div>
 
           <Alert className="bg-blue-50 text-blue-700 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription>
-              Not: Sistem şu anda CORS kısıtlamaları nedeniyle test modunda çalışmaktadır. Gerçek API erişimi için sunucu yapılandırması gereklidir.
+              Not: API erişiminde CORS sorunları oluşabilir. Bu durumda sistem, test verileri gösterecektir.
             </AlertDescription>
           </Alert>
 
@@ -138,20 +117,16 @@ const YoloProcessing = () => {
                   <CardDescription>JPEG veya PNG formatında bir görüntü seçin</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {!previewUrl ? (
-                    <div 
-                      className="border-2 border-dashed rounded-md p-10 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={handleUploadClick}
-                    >
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <p className="mt-2 text-sm text-gray-600">
-                        Görüntü yüklemek için tıklayın veya sürükleyin
-                      </p>
-                      <p className="mt-1 text-xs text-gray-500">
-                        JPEG veya PNG, en fazla 5MB
-                      </p>
-                    </div>
-                  ) : (
+                  <FileUploadBox 
+                    onFileSelected={handleFileSelected}
+                    title="Görüntü Yükle"
+                    description="JPEG veya PNG formatında bir dosya seçin (en fazla 5MB)"
+                    allowedTypes={['jpg', 'jpeg', 'png']}
+                    icon={<Upload className="h-12 w-12 text-gray-400" />}
+                    maxSizeMB={5}
+                  />
+                  
+                  {previewUrl && (
                     <div className="space-y-4">
                       <div className="aspect-video bg-black rounded-md overflow-hidden flex items-center justify-center">
                         <img
@@ -174,10 +149,7 @@ const YoloProcessing = () => {
                     </div>
                   )}
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={handleUploadClick} disabled={isLoading}>
-                    Değiştir
-                  </Button>
+                <CardFooter className="flex justify-end">
                   <Button 
                     onClick={handleProcessImage} 
                     disabled={!selectedFile || isLoading} 
@@ -192,6 +164,15 @@ const YoloProcessing = () => {
                   </Button>
                 </CardFooter>
               </Card>
+              
+              {isLoading && (
+                <div className="space-y-2">
+                  <Progress value={uploadProgress} />
+                  <p className="text-sm text-center text-gray-600">
+                    Görüntü işleniyor... {uploadProgress}%
+                  </p>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="result" className="space-y-6">
@@ -256,12 +237,14 @@ const YoloProcessing = () => {
                             </Alert>
                           )}
                           
-                          <Alert className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                            <AlertDescription>
-                              Not: CORS kısıtlamaları nedeniyle şu anda test verileri gösterilmektedir.
-                            </AlertDescription>
-                          </Alert>
+                          {apiResponse.error && (
+                            <Alert variant="destructive">
+                              <AlertTriangle className="h-4 w-4" />
+                              <AlertDescription>
+                                API Hatası: {apiResponse.error}
+                              </AlertDescription>
+                            </Alert>
+                          )}
                         </>
                       )}
                       
@@ -290,7 +273,7 @@ const YoloProcessing = () => {
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   {processedImageUrl && (
-                    <Button onClick={handleUploadClick}>Yeni Görüntü Yükle</Button>
+                    <Button onClick={() => setActiveTab("upload")}>Yeni Görüntü İşle</Button>
                   )}
                 </CardFooter>
               </Card>

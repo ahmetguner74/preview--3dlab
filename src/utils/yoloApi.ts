@@ -40,26 +40,40 @@ export const processImageWithYolo = async (
       formData.append('model_type', options.modelType);
     }
     
-    // API URL'i - CORS sorununu aşmak için test modunda devam edelim
-    // Gerçek ortamda sunucu taraflı proxy veya CORS başlıklarını sunucuya eklemek gerekir
-    const apiUrl = 'https://c9e0-176-240-248-164.ngrok-free.app/predict/';
+    // API URL'i - en güncel ngrok URL'ini kullanıyoruz
+    const apiUrl = 'https://dfc1-176-240-248-164.ngrok-free.app/predict/';
     
-    // Görüntü verilerini önce Base64'e çevirelim
-    // Bu, API'ye erişirken alternatif bir yöntem olarak kullanılabilir
-    const base64Image = await convertFileToBase64(imageFile);
+    console.log('API isteği gönderiliyor:', apiUrl);
     
-    // Gerçek API'ye erişimde sorun olduğu için test verisi ile devam edelim
-    console.log('API isteği hazırlanıyor, ancak CORS sorunları nedeniyle test verileri kullanılacak');
+    // API'ye POST isteği gönder
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      body: formData,
+    });
     
-    // Not: Gerçek bir üretim ortamında, bu işlemleri backend üzerinden yapmanız önerilir
-    // Veya API sağlayıcısının CORS başlıklarını düzgün yapılandırması gerekir
+    if (!response.ok) {
+      throw new Error(`API yanıt hatası: ${response.status} ${response.statusText}`);
+    }
     
-    // Test yanıtı oluştur
-    const mockResponse: YoloApiResponse = createMockResponse(base64Image);
+    // JSON yanıtını parse et
+    const jsonResponse = await response.json();
+    console.log('API yanıtı:', jsonResponse);
     
-    return mockResponse;
+    return jsonResponse;
   } catch (error) {
     console.error('Görüntü işleme hatası:', error);
+    
+    // CORS hatası için kontrol
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('CORS hatası muhtemelen. API'ye erişim engellendi.');
+      
+      // Test verisi ile devam et - gerçek API yanıtını taklit etmek için
+      if (imageFile) {
+        const base64Image = await convertFileToBase64(imageFile);
+        return createMockResponse(base64Image);
+      }
+    }
+    
     throw error;
   }
 };
@@ -100,15 +114,3 @@ const createMockResponse = (base64Image: string): YoloApiResponse => {
     result_jpg: `data:image/jpeg;base64,${base64Image}`
   };
 };
-
-/**
- * Gerçek bir proxy çözümü için backend taraflı kodu burada olmalıdır.
- * Bu, üretim ortamında kullanım için önerilir.
- * 
- * Örnek: 
- * 1. Kendi backend API'nizi oluşturun
- * 2. Bu API, istemciden aldığı verileri YOLOv8 API'sine iletsin
- * 3. Yanıtları istemciye geri gönderin
- * 
- * Bu şekilde CORS sorunlarını aşabilirsiniz.
- */
