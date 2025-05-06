@@ -11,9 +11,12 @@ export interface YoloApiResponse {
   boxes?: number[][];
   scores?: number[];
   classes?: number[] | string[];
-  result_jpg?: string;
+  result_image?: string;
   error?: string;
 }
+
+// API kök URL'i
+export const YOLO_API_BASE_URL = 'https://dfc1-176-240-248-164.ngrok-free.app';
 
 /**
  * Görüntüyü YOLOv8 API'ye gönderir ve yanıtı döndürür
@@ -40,8 +43,8 @@ export const processImageWithYolo = async (
       formData.append('model_type', options.modelType);
     }
     
-    // API URL'i - en güncel ngrok URL'ini kullanıyoruz
-    const apiUrl = 'https://dfc1-176-240-248-164.ngrok-free.app/predict/';
+    // API URL'i
+    const apiUrl = `${YOLO_API_BASE_URL}/predict/`;
     
     console.log('API isteği gönderiliyor:', apiUrl);
     
@@ -111,6 +114,6 @@ const createMockResponse = (base64Image: string): YoloApiResponse => {
     ],
     scores: [0.92, 0.87, 0.76],
     classes: ["insan", "araba", "bisiklet"],
-    result_jpg: `data:image/jpeg;base64,${base64Image}`
+    result_image: "test_result.jpg"
   };
 };

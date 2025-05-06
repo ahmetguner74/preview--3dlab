@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/layout/Layout';
-import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info } from 'lucide-react';
+import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { processImageWithYolo, YoloApiResponse } from '@/utils/yoloApi';
+import { processImageWithYolo, YoloApiResponse, YOLO_API_BASE_URL } from '@/utils/yoloApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,7 +20,26 @@ const YoloProcessing = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("upload");
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [longProcessing, setLongProcessing] = useState<boolean>(false);
+  
+  // Zaman aşımı kontrolü
+  useEffect(() => {
+    let timerId: number | undefined;
+    
+    if (isLoading) {
+      // 10 saniye sonra uzun işlem uyarısı göster
+      timerId = window.setTimeout(() => {
+        setLongProcessing(true);
+        toast.warning("İşlem biraz uzun sürüyor, lütfen bekleyin.");
+      }, 10000);
+    }
+    
+    return () => {
+      if (timerId) {
+        window.clearTimeout(timerId);
+      }
+    };
+  }, [isLoading]);
 
   const handleFileSelected = async (file: File) => {
     setSelectedFile(file);
@@ -32,6 +51,7 @@ const YoloProcessing = () => {
     // İşlenmiş görüntüyü temizle
     setProcessedImageUrl(null);
     setApiResponse(null);
+    setLongProcessing(false);
     
     // Upload tab'ına geç
     setActiveTab("upload");
@@ -47,10 +67,12 @@ const YoloProcessing = () => {
 
     setIsLoading(true);
     setUploadProgress(0);
+    setLongProcessing(false);
+    setProcessedImageUrl(null);
     
     // İlerleme animasyonu için basit bir zamanlayıcı
     const progressInterval = setInterval(() => {
-      setUploadProgress(prev => Math.min(prev + 10, 90));
+      setUploadProgress(prev => Math.min(prev + 5, 90));
     }, 300);
 
     try {
@@ -59,8 +81,11 @@ const YoloProcessing = () => {
       clearInterval(progressInterval);
       setUploadProgress(100);
       
-      if (response.result_jpg) {
-        setProcessedImageUrl(response.result_jpg);
+      // İşlenmiş görüntü URL'si oluştur
+      if (response.result_image) {
+        setProcessedImageUrl(`${YOLO_API_BASE_URL}/${response.result_image}`);
+      } else {
+        setProcessedImageUrl(null);
       }
       
       toast.success('Görüntü başarıyla işlendi!');
@@ -73,6 +98,7 @@ const YoloProcessing = () => {
       toast.error('Görüntü işlenirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsLoading(false);
+      setLongProcessing(false);
     }
   };
 
@@ -168,9 +194,17 @@ const YoloProcessing = () => {
               {isLoading && (
                 <div className="space-y-2">
                   <Progress value={uploadProgress} />
-                  <p className="text-sm text-center text-gray-600">
-                    Görüntü işleniyor... {uploadProgress}%
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">
+                      Görüntü işleniyor... {uploadProgress}%
+                    </p>
+                    {longProcessing && (
+                      <div className="flex items-center text-amber-500">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span className="text-sm">İşlem biraz uzun sürüyor, lütfen bekleyin...</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </TabsContent>
@@ -182,14 +216,25 @@ const YoloProcessing = () => {
                   <CardDescription>YOLOv8 tarafından algılanan nesneler</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {processedImageUrl ? (
+                  {apiResponse ? (
                     <div className="space-y-6">
                       <div className="aspect-video bg-black rounded-md overflow-hidden flex items-center justify-center">
-                        <img
-                          src={processedImageUrl}
-                          alt="İşlenmiş görüntü"
-                          className="max-w-full max-h-full object-contain"
-                        />
+                        {processedImageUrl ? (
+                          <img
+                            src={processedImageUrl}
+                            alt="İşlenmiş görüntü"
+                            className="max-w-full max-h-full object-contain"
+                            onError={() => {
+                              toast.error("İşlenmiş görüntü yüklenemedi");
+                              setProcessedImageUrl(null);
+                            }}
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-gray-400 h-full w-full">
+                            <AlertTriangle className="h-12 w-12 mb-2" />
+                            <p>İşlenmiş görüntü bulunamadı</p>
+                          </div>
+                        )}
                       </div>
                       
                       {apiResponse && (
