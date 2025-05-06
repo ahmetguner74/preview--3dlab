@@ -117,3 +117,13 @@ const createMockResponse = (base64Image: string): YoloApiResponse => {
     result_image: "test_result.jpg"
   };
 };
+
+/**
+ * İşlenmiş görüntü URL'sini oluşturur
+ */
+export const getProcessedImageUrl = (resultImage?: string): string | null => {
+  if (!resultImage) return null;
+  
+  // Statik dosya URL'ini oluştur
+  return `${YOLO_API_BASE_URL}/static/${resultImage}`;
+};

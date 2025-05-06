@@ -5,7 +5,7 @@ import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info, Clock 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { processImageWithYolo, YoloApiResponse, YOLO_API_BASE_URL } from '@/utils/yoloApi';
+import { processImageWithYolo, YoloApiResponse, YOLO_API_BASE_URL, getProcessedImageUrl } from '@/utils/yoloApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,18 +27,26 @@ const YoloProcessing = () => {
     let timerId: number | undefined;
     
     if (isLoading) {
+      // İlerleme animasyonu için basit bir zamanlayıcı
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 5, 90));
+      }, 300);
+      
       // 10 saniye sonra uzun işlem uyarısı göster
       timerId = window.setTimeout(() => {
         setLongProcessing(true);
         toast.warning("İşlem biraz uzun sürüyor, lütfen bekleyin.");
       }, 10000);
+      
+      return () => {
+        clearInterval(progressInterval);
+        if (timerId) {
+          window.clearTimeout(timerId);
+        }
+      };
     }
     
-    return () => {
-      if (timerId) {
-        window.clearTimeout(timerId);
-      }
-    };
+    return undefined;
   }, [isLoading]);
 
   const handleFileSelected = async (file: File) => {
@@ -52,6 +60,7 @@ const YoloProcessing = () => {
     setProcessedImageUrl(null);
     setApiResponse(null);
     setLongProcessing(false);
+    setUploadProgress(0);
     
     // Upload tab'ına geç
     setActiveTab("upload");
@@ -69,21 +78,16 @@ const YoloProcessing = () => {
     setUploadProgress(0);
     setLongProcessing(false);
     setProcessedImageUrl(null);
-    
-    // İlerleme animasyonu için basit bir zamanlayıcı
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => Math.min(prev + 5, 90));
-    }, 300);
 
     try {
       const response = await processImageWithYolo(selectedFile);
       setApiResponse(response);
-      clearInterval(progressInterval);
       setUploadProgress(100);
       
       // İşlenmiş görüntü URL'si oluştur
       if (response.result_image) {
-        setProcessedImageUrl(`${YOLO_API_BASE_URL}/${response.result_image}`);
+        const imageUrl = getProcessedImageUrl(response.result_image);
+        setProcessedImageUrl(imageUrl);
       } else {
         setProcessedImageUrl(null);
       }
@@ -92,7 +96,6 @@ const YoloProcessing = () => {
       // Otomatik olarak sonuç tab'ına geç
       setActiveTab("result");
     } catch (error) {
-      clearInterval(progressInterval);
       setUploadProgress(0);
       console.error('İşleme hatası:', error);
       toast.error('Görüntü işlenirken bir hata oluştu. Lütfen tekrar deneyin.');
