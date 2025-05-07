@@ -16,7 +16,7 @@ export interface YoloApiResponse {
 }
 
 // API kök URL'i
-export const YOLO_API_BASE_URL = 'https://4513-176-240-248-164.ngrok-free.app';
+export const YOLO_API_BASE_URL = 'https://ata-et-jelsoft-nominated.trycloudflare.com';
 
 /**
  * Görüntüyü YOLOv8 API'ye gönderir ve yanıtı döndürür
@@ -127,4 +127,3 @@ export const getProcessedImageUrl = (resultImage?: string): string | null => {
   // Statik dosya URL'ini oluştur
   return `${YOLO_API_BASE_URL}/static/${resultImage}`;
 };
-

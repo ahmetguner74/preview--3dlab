@@ -1,15 +1,14 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
-import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info, Clock } from 'lucide-react';
+import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { processImageWithYolo, YoloApiResponse, YOLO_API_BASE_URL, getProcessedImageUrl } from '@/utils/yoloApi';
+import { processImageWithYolo, YoloApiResponse, getProcessedImageUrl } from '@/utils/yoloApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
 import FileUploadBox from '@/components/admin/FileUploadBox';
 
 const YoloProcessing = () => {
@@ -19,36 +18,7 @@ const YoloProcessing = () => {
   const [apiResponse, setApiResponse] = useState<YoloApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("upload");
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [longProcessing, setLongProcessing] = useState<boolean>(false);
   
-  // Zaman aşımı kontrolü
-  useEffect(() => {
-    let timerId: number | undefined;
-    
-    if (isLoading) {
-      // İlerleme animasyonu için basit bir zamanlayıcı
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 5, 90));
-      }, 300);
-      
-      // 10 saniye sonra uzun işlem uyarısı göster
-      timerId = window.setTimeout(() => {
-        setLongProcessing(true);
-        toast.warning("İşlem biraz uzun sürüyor, lütfen bekleyin.");
-      }, 10000);
-      
-      return () => {
-        clearInterval(progressInterval);
-        if (timerId) {
-          window.clearTimeout(timerId);
-        }
-      };
-    }
-    
-    return undefined;
-  }, [isLoading]);
-
   const handleFileSelected = async (file: File) => {
     setSelectedFile(file);
     
@@ -59,8 +29,6 @@ const YoloProcessing = () => {
     // İşlenmiş görüntüyü temizle
     setProcessedImageUrl(null);
     setApiResponse(null);
-    setLongProcessing(false);
-    setUploadProgress(0);
     
     // Upload tab'ına geç
     setActiveTab("upload");
@@ -75,14 +43,11 @@ const YoloProcessing = () => {
     }
 
     setIsLoading(true);
-    setUploadProgress(0);
-    setLongProcessing(false);
     setProcessedImageUrl(null);
 
     try {
       const response = await processImageWithYolo(selectedFile);
       setApiResponse(response);
-      setUploadProgress(100);
       
       // İşlenmiş görüntü URL'si oluştur
       if (response.result_image) {
@@ -96,12 +61,10 @@ const YoloProcessing = () => {
       // Otomatik olarak sonuç tab'ına geç
       setActiveTab("result");
     } catch (error) {
-      setUploadProgress(0);
       console.error('İşleme hatası:', error);
       toast.error('Görüntü işlenirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsLoading(false);
-      setLongProcessing(false);
     }
   };
 
@@ -193,23 +156,6 @@ const YoloProcessing = () => {
                   </Button>
                 </CardFooter>
               </Card>
-              
-              {isLoading && (
-                <div className="space-y-2">
-                  <Progress value={uploadProgress} />
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      Görüntü işleniyor... {uploadProgress}%
-                    </p>
-                    {longProcessing && (
-                      <div className="flex items-center text-amber-500">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span className="text-sm">İşlem biraz uzun sürüyor, lütfen bekleyin...</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </TabsContent>
             
             <TabsContent value="result" className="space-y-6">
