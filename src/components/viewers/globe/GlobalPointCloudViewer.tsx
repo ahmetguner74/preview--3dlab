@@ -1,11 +1,11 @@
 
 import React, { useEffect } from 'react';
-import { Ion, Viewer, createWorldTerrainAsync, createOsmBuildingsAsync, Cartesian3 } from 'cesium';
+import * as Cesium from 'cesium';
 import { Viewer as ResiumViewer, Globe, CameraFlyTo, Entity } from 'resium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 // Cesium ion varsayılan erişim token'ı
-Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NDE0MjMsImlhdCI6MTYxMDEwNjQ3NH0.tduKTXoNW_5N9ykzUmHhLtYsqhB7xkg7OcIOxhW8tLc';
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NDE0MjMsImlhdCI6MTYxMDEwNjQ3NH0.tduKTXoNW_5N9ykzUmHhLtYsqhB7xkg7OcIOxhW8tLc';
 
 interface GlobalPointCloudViewerProps {
   pointCloudData: {
@@ -17,12 +17,12 @@ interface GlobalPointCloudViewerProps {
 }
 
 const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCloudData }) => {
-  const [cesiumViewer, setCesiumViewer] = React.useState<Viewer | null>(null);
+  const [cesiumViewer, setCesiumViewer] = React.useState<Cesium.Viewer | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   
   // Cesium viewer referansını saklarız
-  const viewerRef = React.useRef<Viewer | null>(null);
+  const viewerRef = React.useRef<Cesium.Viewer | null>(null);
 
   useEffect(() => {
     // Komponent unmount olduğunda viewer'ı temizleriz
@@ -34,14 +34,14 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
   }, []);
 
   // Viewer oluşturulduğunda çağrılacak handler
-  const handleViewerMount = (viewer: Viewer) => {
+  const handleViewerMount = (viewer: Cesium.Viewer) => {
     viewerRef.current = viewer;
     setCesiumViewer(viewer);
     
     // Kullanıcı deneyimi için otomatik olarak dünya yüzeyini ve binaları yükleriz
     Promise.all([
-      createWorldTerrainAsync(),
-      createOsmBuildingsAsync()
+      Cesium.createWorldTerrainAsync(),
+      Cesium.createOsmBuildingsAsync()
     ]).then(([terrain, buildings]) => {
       viewer.scene.globe.depthTestAgainstTerrain = true;
       viewer.scene.primitives.add(buildings);
@@ -71,7 +71,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
         
         // Örneğin nokta bulutu konumuna kamera animasyonu:
         cesiumViewer.camera.flyTo({
-          destination: Cartesian3.fromDegrees(0, 0, 10000000)
+          destination: Cesium.Cartesian3.fromDegrees(0, 0, 10000000)
         });
 
         setIsLoading(false);
@@ -96,7 +96,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
           <Globe />
           <CameraFlyTo 
             duration={2} 
-            destination={Cartesian3.fromDegrees(30, 30, 1000000)}
+            destination={Cesium.Cartesian3.fromDegrees(30, 30, 1000000)}
           />
         </ResiumViewer>
       </div>
