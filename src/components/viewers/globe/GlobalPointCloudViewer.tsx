@@ -1,11 +1,9 @@
-
 import React, { useEffect } from 'react';
-import * as Cesium from 'cesium';
-import { Viewer as ResiumViewer, Globe, CameraFlyTo, Entity } from 'resium';
-import 'cesium/Build/Cesium/Widgets/widgets.css';
+import { Ion, createWorldTerrainAsync, createOsmBuildingsAsync, Cartesian3 } from 'cesium';
+import { Viewer as ResiumViewer, Globe, CameraFlyTo } from 'resium';
 
 // Cesium ion varsayılan erişim token'ı
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NDE0MjMsImlhdCI6MTYxMDEwNjQ3NH0.tduKTXoNW_5N9ykzUmHhLtYsqhB7xkg7OcIOxhW8tLc';
+Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NDE0MjMsImlhdCI6MTYxMDEwNjQ3NH0.tduKTXoNW_5N9ykzUmHhLtYsqhB7xkg7OcIOxhW8tLc';
 
 interface GlobalPointCloudViewerProps {
   pointCloudData: {
@@ -40,8 +38,8 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
     
     // Kullanıcı deneyimi için otomatik olarak dünya yüzeyini ve binaları yükleriz
     Promise.all([
-      Cesium.createWorldTerrainAsync(),
-      Cesium.createOsmBuildingsAsync()
+      createWorldTerrainAsync(),
+      createOsmBuildingsAsync()
     ]).then(([terrain, buildings]) => {
       viewer.scene.globe.depthTestAgainstTerrain = true;
       viewer.scene.primitives.add(buildings);
@@ -71,7 +69,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
         
         // Örneğin nokta bulutu konumuna kamera animasyonu:
         cesiumViewer.camera.flyTo({
-          destination: Cesium.Cartesian3.fromDegrees(0, 0, 10000000)
+          destination: Cartesian3.fromDegrees(0, 0, 10000000)
         });
 
         setIsLoading(false);
@@ -96,7 +94,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
           <Globe />
           <CameraFlyTo 
             duration={2} 
-            destination={Cesium.Cartesian3.fromDegrees(30, 30, 1000000)}
+            destination={Cartesian3.fromDegrees(30, 30, 1000000)}
           />
         </ResiumViewer>
       </div>
