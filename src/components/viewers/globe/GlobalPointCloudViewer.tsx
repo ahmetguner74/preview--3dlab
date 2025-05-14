@@ -1,5 +1,6 @@
+
 import React, { useEffect } from 'react';
-import { Ion, createWorldTerrainAsync, createOsmBuildingsAsync, Cartesian3 } from 'cesium';
+import { Ion, createWorldTerrainAsync, createOsmBuildingsAsync, Cartesian3, Viewer as CesiumViewer } from 'cesium';
 import { Viewer as ResiumViewer, Globe, CameraFlyTo } from 'resium';
 
 // Cesium ion varsayılan erişim token'ı
@@ -15,12 +16,12 @@ interface GlobalPointCloudViewerProps {
 }
 
 const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCloudData }) => {
-  const [cesiumViewer, setCesiumViewer] = React.useState<Cesium.Viewer | null>(null);
+  const [cesiumViewer, setCesiumViewer] = React.useState<CesiumViewer | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   
   // Cesium viewer referansını saklarız
-  const viewerRef = React.useRef<Cesium.Viewer | null>(null);
+  const viewerRef = React.useRef<CesiumViewer | null>(null);
 
   useEffect(() => {
     // Komponent unmount olduğunda viewer'ı temizleriz
@@ -32,7 +33,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
   }, []);
 
   // Viewer oluşturulduğunda çağrılacak handler
-  const handleViewerMount = (viewer: Cesium.Viewer) => {
+  const handleViewerMount = (viewer: CesiumViewer) => {
     viewerRef.current = viewer;
     setCesiumViewer(viewer);
     
@@ -64,7 +65,7 @@ const GlobalPointCloudViewer: React.FC<GlobalPointCloudViewerProps> = ({ pointCl
         // Burada sadece temel bir şablon sunuyoruz
         
         // Örneğin bir 3D Tiles point cloud asset'i için:
-        // const pointCloud = await Cesium.Cesium3DTileset.fromUrl(pointCloudData.url);
+        // const pointCloud = await Cesium3DTileset.fromUrl(pointCloudData.url);
         // cesiumViewer.scene.primitives.add(pointCloud);
         
         // Örneğin nokta bulutu konumuna kamera animasyonu:
