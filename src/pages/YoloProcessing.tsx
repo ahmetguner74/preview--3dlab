@@ -1,15 +1,14 @@
 
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
-import { Upload, Loader2, Image as ImageIcon, Check, AlertTriangle, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { processImageWithYolo, YoloApiResponse, getProcessedImageUrl } from '@/utils/yoloApi';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import FileUploadBox from '@/components/admin/FileUploadBox';
+import { YoloUploadTab } from '@/components/yolo/YoloUploadTab';
+import { YoloResultTab } from '@/components/yolo/YoloResultTab';
+import { YoloTabHeader } from '@/components/yolo/YoloTabHeader';
 
 const YoloProcessing = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -21,18 +20,11 @@ const YoloProcessing = () => {
   
   const handleFileSelected = async (file: File) => {
     setSelectedFile(file);
-    
-    // Önizleme URL'si oluştur
     const fileUrl = URL.createObjectURL(file);
     setPreviewUrl(fileUrl);
-    
-    // İşlenmiş görüntüyü temizle
     setProcessedImageUrl(null);
     setApiResponse(null);
-    
-    // Upload tab'ına geç
     setActiveTab("upload");
-    
     toast.info("Görüntü yüklendi. İşlemek için 'Görüntüyü İşle' düğmesine tıklayın.");
   };
 
@@ -49,7 +41,6 @@ const YoloProcessing = () => {
       const response = await processImageWithYolo(selectedFile);
       setApiResponse(response);
       
-      // İşlenmiş görüntü URL'si oluştur
       if (response.result_image) {
         const imageUrl = getProcessedImageUrl(response.result_image);
         setProcessedImageUrl(imageUrl);
@@ -58,7 +49,6 @@ const YoloProcessing = () => {
       }
       
       toast.success('Görüntü başarıyla işlendi!');
-      // Otomatik olarak sonuç tab'ına geç
       setActiveTab("result");
     } catch (error) {
       console.error('İşleme hatası:', error);
@@ -89,188 +79,30 @@ const YoloProcessing = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 w-full md:w-auto mb-6">
               <TabsTrigger value="upload">
-                <div className="flex items-center">
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  Görüntü
-                </div>
+                <YoloTabHeader icon="upload" label="Görüntü" />
               </TabsTrigger>
               <TabsTrigger value="result">
-                <div className="flex items-center">
-                  <Check className="mr-2 h-4 w-4" />
-                  Sonuç
-                </div>
+                <YoloTabHeader icon="result" label="Sonuç" />
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="upload" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Görüntü Yükle</CardTitle>
-                  <CardDescription>JPEG veya PNG formatında bir görüntü seçin</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FileUploadBox 
-                    onFileSelected={handleFileSelected}
-                    title="Görüntü Yükle"
-                    description="JPEG veya PNG formatında bir dosya seçin (en fazla 5MB)"
-                    allowedTypes={['jpg', 'jpeg', 'png']}
-                    icon={<Upload className="h-12 w-12 text-gray-400" />}
-                    maxSizeMB={5}
-                  />
-                  
-                  {previewUrl && (
-                    <div className="space-y-4">
-                      <div className="aspect-video bg-black rounded-md overflow-hidden flex items-center justify-center">
-                        <img
-                          src={previewUrl}
-                          alt="Önizleme"
-                          className="max-w-full max-h-full object-contain"
-                        />
-                      </div>
-                      
-                      <div className="text-sm text-gray-600">
-                        <span className="font-medium">Dosya adı:</span> {selectedFile?.name}
-                      </div>
-                      
-                      <Alert className="bg-blue-50 text-blue-700 border-blue-200">
-                        <Info className="h-4 w-4 text-blue-500" />
-                        <AlertDescription>
-                          İşlemi başlatmak için "Görüntüyü İşle" düğmesine tıklayın. İşlem sunucu yüküne bağlı olarak birkaç saniye sürebilir.
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button 
-                    onClick={handleProcessImage} 
-                    disabled={!selectedFile || isLoading} 
-                    className="flex items-center gap-2"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        İşleniyor...
-                      </>
-                    ) : 'Görüntüyü İşle'}
-                  </Button>
-                </CardFooter>
-              </Card>
+              <YoloUploadTab 
+                previewUrl={previewUrl}
+                selectedFile={selectedFile}
+                isLoading={isLoading}
+                onFileSelected={handleFileSelected}
+                onProcessImage={handleProcessImage}
+              />
             </TabsContent>
             
             <TabsContent value="result" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>İşlenmiş Görüntü</CardTitle>
-                  <CardDescription>YOLOv8 tarafından algılanan nesneler</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {apiResponse ? (
-                    <div className="space-y-6">
-                      <div className="aspect-video bg-black rounded-md overflow-hidden flex items-center justify-center">
-                        {processedImageUrl ? (
-                          <img
-                            src={processedImageUrl}
-                            alt="İşlenmiş görüntü"
-                            className="max-w-full max-h-full object-contain"
-                            onError={() => {
-                              toast.error("İşlenmiş görüntü yüklenemedi");
-                              setProcessedImageUrl(null);
-                            }}
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center text-gray-400 h-full w-full">
-                            <AlertTriangle className="h-12 w-12 mb-2" />
-                            <p>İşlenmiş görüntü bulunamadı</p>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {apiResponse && (
-                        <>
-                          <h3 className="text-lg font-semibold mb-2">Algılama Sonuçları</h3>
-                          
-                          {apiResponse.boxes && apiResponse.boxes.length > 0 ? (
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>No</TableHead>
-                                  <TableHead>Sınıf</TableHead>
-                                  <TableHead>Doğruluk</TableHead>
-                                  <TableHead>Koordinatlar</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {apiResponse.boxes.map((box, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell>{index + 1}</TableCell>
-                                    <TableCell>
-                                      {apiResponse.classes && apiResponse.classes[index] !== undefined 
-                                        ? `${apiResponse.classes[index]}` 
-                                        : 'Bilinmeyen'}
-                                    </TableCell>
-                                    <TableCell>
-                                      {apiResponse.scores && apiResponse.scores[index] !== undefined
-                                        ? `%${(apiResponse.scores[index] * 100).toFixed(2)}`
-                                        : '-'}
-                                    </TableCell>
-                                    <TableCell>
-                                      <span className="text-xs font-mono">
-                                        [{box.map(coord => coord.toFixed(1)).join(', ')}]
-                                      </span>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          ) : (
-                            <Alert>
-                              <AlertDescription>
-                                Hiçbir nesne algılanmadı veya koordinat bilgisi bulunamadı.
-                              </AlertDescription>
-                            </Alert>
-                          )}
-                          
-                          {apiResponse.error && (
-                            <Alert variant="destructive">
-                              <AlertTriangle className="h-4 w-4" />
-                              <AlertDescription>
-                                API Hatası: {apiResponse.error}
-                              </AlertDescription>
-                            </Alert>
-                          )}
-                        </>
-                      )}
-                      
-                      <Alert>
-                        <Check className="h-4 w-4" />
-                        <AlertDescription>
-                          Görüntü başarıyla işlendi.
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-gray-100 rounded-md flex items-center justify-center text-gray-400 flex-col gap-2">
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="h-12 w-12 animate-spin" />
-                          <p>İşleniyor...</p>
-                        </>
-                      ) : (
-                        <>
-                          <AlertTriangle className="h-12 w-12" />
-                          <p>Henüz işlenmiş görüntü yok</p>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  {processedImageUrl && (
-                    <Button onClick={() => setActiveTab("upload")}>Yeni Görüntü İşle</Button>
-                  )}
-                </CardFooter>
-              </Card>
+              <YoloResultTab 
+                apiResponse={apiResponse}
+                isLoading={isLoading}
+                processedImageUrl={processedImageUrl}
+                onNewImage={() => setActiveTab("upload")}
+              />
             </TabsContent>
           </Tabs>
         </div>
