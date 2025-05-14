@@ -124,7 +124,12 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
           style={{ background: backgroundColor }}
           gl={{ preserveDrawingBuffer: true }}
         >
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+          {/* Burada PerspectiveCamera kullanımını düzelttik */}
+          <PerspectiveCamera 
+            makeDefault 
+            position={[0, 0, 5]} 
+            fov={50} 
+          />
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
           <Suspense fallback={<Loader />}>
