@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
-import { Canvas, useThree, useLoader } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, useGLTF, useProgress, Html } from '@react-three/drei';
 
 // Yükleme göstergesi bileşeni
@@ -20,34 +20,22 @@ function Loader() {
 // GLB/GLTF Model bileşeni
 function Model({ url }: { url: string }) {
   const { scene } = useGLTF(url);
-  const { camera } = useThree();
   
   useEffect(() => {
-    // Model yüklendiğinde kamerayı modele odakla
+    if (!scene) return;
+    
+    // Model yüklendiğinde otomatik ölçeklendirme ve konumlandırma
     const box = new THREE.Box3().setFromObject(scene);
     const center = new THREE.Vector3();
     box.getCenter(center);
-    const size = new THREE.Vector3();
-    box.getSize(size);
     
-    const maxDim = Math.max(size.x, size.y, size.z);
-    
-    if (camera instanceof THREE.PerspectiveCamera) {
-      const fov = camera.fov * (Math.PI / 180);
-      let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-      cameraZ *= 1.5;
-      camera.position.z = cameraZ;
-      camera.position.y = center.y;
-    } else {
-      camera.position.z = maxDim * 2;
-      camera.position.y = center.y;
-    }
-    
-    camera.lookAt(center);
-    camera.updateProjectionMatrix();
-  }, [scene, camera]);
+    // Modeli merkeze taşı
+    scene.position.x = -center.x;
+    scene.position.y = -center.y;
+    scene.position.z = -center.z;
+  }, [scene]);
 
-  return <primitive object={scene} dispose={null} />;
+  return scene ? <primitive object={scene} dispose={null} /> : null;
 }
 
 interface ThreeModelViewerProps {
@@ -112,16 +100,8 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
           dpr={[1, 2]}
           style={{ background: backgroundColor }}
           gl={{ preserveDrawingBuffer: true }}
+          camera={{ position: [0, 0, 5], fov: 50 }}
         >
-          {/* PerspectiveCamera bileşenini düzeltilmiş şekilde kullanıyoruz */}
-          <PerspectiveCamera
-            makeDefault
-          >
-            <mesh visible={false} position={[0, 0, 5]}>
-              <boxGeometry args={[0.1, 0.1, 0.1]} />
-              <meshBasicMaterial />
-            </mesh>
-          </PerspectiveCamera>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
           <Suspense fallback={<Loader />}>
