@@ -9,32 +9,33 @@ export const upload3DModel = async (
   projectId: string, 
   modelType: '3d_model' | 'point_cloud'
 ): Promise<string | null> => {
-  const modelUrl = await uploadFileToStorage(file, 'models');
-  
-  if (modelUrl) {
-    try {
-      // Veritabanına ekle
-      const { error } = await supabase
-        .from('project_3d_models')
-        .insert({
-          project_id: projectId,
-          model_url: modelUrl,
-          model_type: modelType
-        });
-      
-      if (error) {
-        console.error('Model kaydı hatası:', error);
-        return null;
-      }
-      
-      return modelUrl;
-    } catch (error) {
-      console.error('Model yükleme hatası:', error);
-      return null;
+  try {
+    // Dosyayı storage'a yükle
+    const modelUrl = await uploadFileToStorage(file, 'models');
+    
+    if (!modelUrl) {
+      throw new Error('Dosya yükleme işlemi başarısız');
     }
+    
+    // Veritabanına ekle
+    const { error } = await supabase
+      .from('project_3d_models')
+      .insert({
+        project_id: projectId,
+        model_url: modelUrl,
+        model_type: modelType
+      });
+    
+    if (error) {
+      console.error('Model kaydı hatası:', error);
+      throw error;
+    }
+    
+    return modelUrl;
+  } catch (error) {
+    console.error('Model yükleme hatası:', error);
+    return null;
   }
-  
-  return null;
 };
 
 // Proje 3D modellerini getir

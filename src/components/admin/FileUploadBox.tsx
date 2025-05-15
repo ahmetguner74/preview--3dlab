@@ -11,6 +11,7 @@ interface FileUploadBoxProps {
   allowedTypes?: string[];
   icon?: React.ReactNode;
   maxSizeMB?: number;
+  isUploading?: boolean;
 }
 
 const FileUploadBox = ({
@@ -19,10 +20,10 @@ const FileUploadBox = ({
   description,
   allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'obj', 'gltf', 'glb', 'las', 'laz', 'xyz', 'pts'],
   icon,
-  maxSizeMB = 5
+  maxSizeMB = 5,
+  isUploading = false
 }: FileUploadBoxProps) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -73,7 +74,6 @@ const FileUploadBox = ({
     }
 
     try {
-      setIsUploading(true);
       setErrorMessage(null);
       console.log(`Dosya yükleme başlatılıyor: ${file.name} (${file.size} bytes)`);
       await onFileSelected(file);
@@ -84,7 +84,6 @@ const FileUploadBox = ({
       setErrorMessage(errorMessage);
       toast.error(`Dosya yüklenemedi: ${errorMessage}`);
     } finally {
-      setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
