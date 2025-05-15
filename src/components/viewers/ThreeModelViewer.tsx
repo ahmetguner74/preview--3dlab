@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, useGLTF, useProgress, Html } from '@react-three/drei';
+import { OrbitControls, Environment, useGLTF, useProgress, Html } from '@react-three/drei';
 
 // Yükleme göstergesi bileşeni
 function Loader() {
