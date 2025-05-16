@@ -19,23 +19,31 @@ function Loader() {
 
 // GLB/GLTF Model bileşeni
 function Model({ url }: { url: string }) {
-  const { scene } = useGLTF(url);
+  const [error, setError] = useState<boolean>(false);
   
-  useEffect(() => {
-    if (!scene) return;
+  try {
+    const { scene } = useGLTF(url);
     
-    // Model yüklendiğinde otomatik ölçeklendirme ve konumlandırma
-    const box = new THREE.Box3().setFromObject(scene);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    
-    // Modeli merkeze taşı
-    scene.position.x = -center.x;
-    scene.position.y = -center.y;
-    scene.position.z = -center.z;
-  }, [scene]);
+    useEffect(() => {
+      if (!scene) return;
+      
+      // Model yüklendiğinde otomatik ölçeklendirme ve konumlandırma
+      const box = new THREE.Box3().setFromObject(scene);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      
+      // Modeli merkeze taşı
+      scene.position.x = -center.x;
+      scene.position.y = -center.y;
+      scene.position.z = -center.z;
+    }, [scene]);
 
-  return scene ? <primitive object={scene} dispose={null} /> : null;
+    return scene ? <primitive object={scene} dispose={null} /> : null;
+  } catch (err) {
+    console.error("Model yüklenirken hata:", err);
+    setError(true);
+    return null;
+  }
 }
 
 interface ThreeModelViewerProps {
@@ -50,8 +58,17 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isError, setIsError] = useState(false);
 
+  // Hata durumlarını kontrol et
+  useEffect(() => {
+    if (!modelUrl || !isValidModelUrl()) {
+      setIsError(true);
+    } else {
+      setIsError(false);
+    }
+  }, [modelUrl]);
+
   // Sketchfab iframe kodunu kontrol et
-  if (modelUrl.includes('<iframe') && modelUrl.includes('sketchfab.com')) {
+  if (modelUrl?.includes('<iframe') && modelUrl?.includes('sketchfab.com')) {
     return (
       <div 
         className="w-full h-full min-h-[400px]" 
@@ -68,7 +85,7 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
   };
 
   // Fab.com URL'sini kontrol et
-  if (modelUrl.startsWith('https://fab.com/')) {
+  if (modelUrl?.startsWith('https://fab.com/')) {
     return (
       <div className="w-full h-full min-h-[400px] flex items-center justify-center flex-col">
         <iframe 
@@ -91,42 +108,49 @@ const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({
     );
   }
 
-  return (
-    <div className="w-full h-full min-h-[400px] relative">
-      {isValidModelUrl() ? (
-        <Canvas
-          ref={canvasRef}
-          shadows
-          dpr={[1, 2]}
-          style={{ background: backgroundColor }}
-          gl={{ preserveDrawingBuffer: true }}
-          camera={{ position: [0, 0, 5], fov: 50 }}
-        >
-          <ambientLight intensity={0.5} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-          <Suspense fallback={<Loader />}>
-            <Model url={modelUrl} />
-            <Environment preset="city" />
-          </Suspense>
-          <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
-        </Canvas>
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-          {isError ? (
+  // Three.js ile renderleme yapmayı dene
+  try {
+    return (
+      <div className="w-full h-full min-h-[400px] relative">
+        {isValidModelUrl() && !isError ? (
+          <Canvas
+            ref={canvasRef}
+            shadows
+            dpr={[1, 2]}
+            style={{ background: backgroundColor }}
+            gl={{ preserveDrawingBuffer: true }}
+            camera={{ position: [0, 0, 5], fov: 50 }}
+          >
+            <ambientLight intensity={0.5} />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+            <Suspense fallback={<Loader />}>
+              <Model url={modelUrl} />
+              <Environment preset="city" />
+            </Suspense>
+            <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+          </Canvas>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
             <div className="text-center">
-              <p>Model yüklenemedi.</p>
+              <p>Geçerli bir 3D model URL'si belirtilmedi veya yüklenemedi.</p>
               <p className="text-sm">Desteklenen formatlar: GLB, GLTF</p>
             </div>
-          ) : (
-            <div className="text-center">
-              <p>Geçerli bir 3D model URL'si belirtilmedi.</p>
-              <p className="text-sm">Desteklenen formatlar: GLB, GLTF</p>
-            </div>
-          )}
+          </div>
+        )}
+      </div>
+    );
+  } catch (error) {
+    console.error("Three.js hatası:", error);
+    
+    return (
+      <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-gray-100 text-gray-500">
+        <div className="text-center">
+          <p>3D görüntüleyicide bir hata oluştu.</p>
+          <p className="text-sm">Lütfen daha sonra tekrar deneyin.</p>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
 };
 
 export default ThreeModelViewer;
