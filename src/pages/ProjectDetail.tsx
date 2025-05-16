@@ -9,7 +9,6 @@ import ProjectDescription from '@/components/project-detail/ProjectDescription';
 import ProjectGallery from '@/components/project-detail/ProjectGallery';
 import ProjectBeforeAfter from '@/components/project-detail/ProjectBeforeAfter';
 import ProjectVideo from '@/components/project-detail/ProjectVideo';
-import ProjectThreeDModel from '@/components/project-detail/ProjectThreeDModel';
 import ProjectPointCloud from '@/components/project-detail/ProjectPointCloud';
 import ProjectSimilar from '@/components/project-detail/ProjectSimilar';
 import { useProjectData } from '@/hooks/useProjectData';
@@ -59,10 +58,8 @@ const ProjectDetail = () => {
     ? videos[0].url
     : '';
 
-  const threeDModels = models.filter(model => model.type === '3d_model');
   const pointCloudModels = models.filter(model => model.type === 'point_cloud');
 
-  const activeThreeDModel = threeDModels.length > 0 ? threeDModels[0].url : null;
   const activePointCloud = pointCloudModels.length > 0
     ? pointCloudModels[0].url
     : 'https://potree.github.io/potree/examples/clipping_volume.html';
@@ -128,16 +125,7 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          {threeDModels.length > 0 && (
-            <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">{t("3D Model")}</h2>
-              <ProjectThreeDModel
-                models={threeDModels}
-                activeModelUrl={activeThreeDModel}
-                onModelSelect={(modelUrl) => handleThreeDModelSelect(models, modelUrl)}
-              />
-            </div>
-          )}
+          {/* 3D Model bölümü geçici olarak kaldırıldı */}
 
           <ProjectSimilar title={project.title} projectId={project.id} />
         </div>

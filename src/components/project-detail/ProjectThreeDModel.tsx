@@ -13,10 +13,6 @@ const ProjectThreeDModel: React.FC<ProjectThreeDModelProps> = ({
   activeModelUrl,
   onModelSelect
 }) => {
-  // Modellerden iframe/sketchfab olanları ve olmayanları ayrı ayrı yönet
-  const isSketchfabModel = activeModelUrl && activeModelUrl.includes('<iframe') && activeModelUrl.includes('sketchfab.com');
-  const isFabModel = activeModelUrl && activeModelUrl.startsWith('https://fab.com/');
-
   return (
     <>
       <div className="h-[500px] bg-arch-light-gray">
