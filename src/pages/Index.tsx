@@ -4,7 +4,6 @@ import Layout from '../components/layout/Layout';
 import Hero from '../components/home/Hero';
 import ProjectGrid from '../components/home/ProjectGrid';
 import AboutPreview from '../components/home/AboutPreview';
-import ChatWidget from '../components/ui/ChatWidget';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import '../i18n';
@@ -15,7 +14,6 @@ const Index = () => {
       <Hero />
       <ProjectGrid />
       <AboutPreview />
-      <ChatWidget />
       
       {/* Admin Panel Butonu */}
       <div className="fixed bottom-24 left-4 z-50">

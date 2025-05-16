@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { upload3DModel } from '@/utils/mediaHelpers';
+import { upload3DModel } from '@/utils/project3DModels';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 import { Project3DModel } from '@/types/project';
