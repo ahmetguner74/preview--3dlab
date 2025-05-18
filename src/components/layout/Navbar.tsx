@@ -1,14 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { t } = useTranslation();
+  const {
+    t
+  } = useTranslation();
 
   // Scroll efekti
   useEffect(() => {
@@ -16,16 +16,11 @@ const Navbar = () => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 10);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-        ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}
-    >
+  return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
+        ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
       <div className="arch-container">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -36,46 +31,27 @@ const Navbar = () => {
 
           {/* Masaüstü menü */}
           <nav className="hidden md:flex space-x-6">
-            <NavLink 
-              to="/projects" 
-              className={({ isActive }) => 
-                isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'
-              }
-            >
+            <NavLink to="/projects" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               {t('projects')}
             </NavLink>
-            <NavLink 
-              to="/about" 
-              className={({ isActive }) => 
-                isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'
-              }
-            >
+            <NavLink to="/about" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               {t('about')}
             </NavLink>
-            <NavLink 
-              to="/contact" 
-              className={({ isActive }) => 
-                isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'
-              }
-            >
+            <NavLink to="/contact" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               {t('contact')}
             </NavLink>
-            <NavLink 
-              to="/yolo" 
-              className={({ isActive }) => 
-                isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'
-              }
-            >
+            <NavLink to="/yolo" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               YOLOv8
             </NavLink>
-            <NavLink 
-              to="/global-point-cloud" 
-              className={({ isActive }) => 
-                isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'
-              }
-            >
-              {t('Globe Point Cloud')}
-            </NavLink>
+            
           </nav>
 
           <div className="flex items-center">
@@ -85,74 +61,46 @@ const Navbar = () => {
             </div>
 
             {/* Mobil menü butonu */}
-            <button 
-              className="md:hidden ml-4"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
+            <button className="md:hidden ml-4" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
         
         {/* Mobil menü */}
-        {isMenuOpen && (
-          <div className="md:hidden pt-4 pb-2">
+        {isMenuOpen && <div className="md:hidden pt-4 pb-2">
             <nav className="flex flex-col space-y-4">
-              <NavLink 
-                to="/projects" 
-                className={({ isActive }) => 
-                  isActive ? 'text-black font-medium' : 'text-gray-600'
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <NavLink to="/projects" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 {t('projects')}
               </NavLink>
-              <NavLink 
-                to="/about" 
-                className={({ isActive }) => 
-                  isActive ? 'text-black font-medium' : 'text-gray-600'
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <NavLink to="/about" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 {t('about')}
               </NavLink>
-              <NavLink 
-                to="/contact" 
-                className={({ isActive }) => 
-                  isActive ? 'text-black font-medium' : 'text-gray-600'
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <NavLink to="/contact" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 {t('contact')}
               </NavLink>
-              <NavLink 
-                to="/yolo" 
-                className={({ isActive }) => 
-                  isActive ? 'text-black font-medium' : 'text-gray-600'
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <NavLink to="/yolo" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 YOLOv8
               </NavLink>
-              <NavLink 
-                to="/global-point-cloud" 
-                className={({ isActive }) => 
-                  isActive ? 'text-black font-medium' : 'text-gray-600'
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <NavLink to="/global-point-cloud" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 {t('Globe Point Cloud')}
               </NavLink>
               <div className="pt-2">
                 <LanguageSwitcher />
               </div>
             </nav>
-          </div>
-        )}
+          </div>}
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Navbar;
