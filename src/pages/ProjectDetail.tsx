@@ -62,7 +62,7 @@ const ProjectDetail = () => {
 
   const activePointCloud = pointCloudModels.length > 0
     ? pointCloudModels[0].url
-    : 'https://potree.github.io/potree/examples/clipping_volume.html';
+    : null;
 
   return (
     <Layout>
@@ -90,8 +90,8 @@ const ProjectDetail = () => {
           <ProjectHeader project={project} />
           <ProjectDescription project={project} />
 
-          {/* Nokta Bulutu bölümü en üste taşındı */}
-          {pointCloudModels.length > 0 && (
+          {/* Nokta Bulutu bölümü */}
+          {pointCloudModels.length > 0 && activePointCloud && (
             <div className="mb-16">
               <h2 className="text-2xl font-display mb-6">{t("Point Cloud")}</h2>
               <ProjectPointCloud
@@ -124,8 +124,6 @@ const ProjectDetail = () => {
               <ProjectVideo videoUrl={videoUrl} />
             </div>
           )}
-
-          {/* 3D Model bölümü geçici olarak kaldırıldı */}
 
           <ProjectSimilar title={project.title} projectId={project.id} />
         </div>

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import ThreeModelViewer from '@/components/viewers/ThreeModelViewer';
 
 interface ProjectThreeDModelProps {
   models: {url: string, type: string}[];
@@ -13,16 +12,11 @@ const ProjectThreeDModel: React.FC<ProjectThreeDModelProps> = ({
   activeModelUrl,
   onModelSelect
 }) => {
+  // ThreeModelViewer kullanımını kaldırıyoruz
   return (
     <>
-      <div className="h-[500px] bg-arch-light-gray">
-        {activeModelUrl ? (
-          <ThreeModelViewer modelUrl={activeModelUrl} backgroundColor="#f5f5f5" />
-        ) : (
-          <div className="flex items-center justify-center h-full text-arch-gray">
-            3D model bulunamadı
-          </div>
-        )}
+      <div className="h-[500px] bg-arch-light-gray flex items-center justify-center">
+        <p>3D model görüntüleme devre dışı bırakılmıştır.</p>
       </div>
       
       {models.length > 1 && (
