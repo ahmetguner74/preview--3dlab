@@ -12,7 +12,6 @@ const ProjectThreeDModel: React.FC<ProjectThreeDModelProps> = ({
   activeModelUrl,
   onModelSelect
 }) => {
-  // ThreeModelViewer kullanımını kaldırıyoruz
   return (
     <>
       <div className="h-[500px] bg-arch-light-gray flex items-center justify-center">
