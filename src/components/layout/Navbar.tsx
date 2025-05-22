@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -19,6 +21,7 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
   return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
         ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
       <div className="arch-container">
@@ -51,7 +54,6 @@ const Navbar = () => {
           }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               YOLOv8
             </NavLink>
-            
           </nav>
 
           <div className="flex items-center">
@@ -90,11 +92,6 @@ const Navbar = () => {
           }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 YOLOv8
               </NavLink>
-              <NavLink to="/global-point-cloud" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                {t('Globe Point Cloud')}
-              </NavLink>
               <div className="pt-2">
                 <LanguageSwitcher />
               </div>
@@ -103,4 +100,5 @@ const Navbar = () => {
       </div>
     </header>;
 };
+
 export default Navbar;
