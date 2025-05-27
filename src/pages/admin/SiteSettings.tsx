@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftCircle } from 'lucide-react';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Project } from '@/types/project';
 import { toast } from "sonner";
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import { ProjectListHeader } from '@/components/admin/projects/ProjectListHeader';
 import { ProjectFilter } from '@/components/admin/projects/ProjectFilter';
 import { ProjectListToolbar } from '@/components/admin/projects/ProjectListToolbar';

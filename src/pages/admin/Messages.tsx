@@ -1,6 +1,5 @@
-
 import React from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 import { MessageCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";

@@ -10,7 +10,7 @@ import ImageWMS from 'ol/source/ImageWMS';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { GeoJSON } from 'ol/format';
-import { BaseLayer } from 'ol/layer/Base';
+import BaseLayer from 'ol/layer/Base';
 import 'ol/ol.css';
 
 interface MapViewerProps {

@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/header/AdminHeader';
 import CoverImageGrid from '@/components/admin/cover-images/CoverImageGrid';
 import ImagePreviewDialog from '@/components/admin/ImagePreviewDialog';
