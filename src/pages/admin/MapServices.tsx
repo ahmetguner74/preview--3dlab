@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import AdminHeader from '@/components/admin/header/AdminHeader';
+import MapServicesList from '@/components/admin/map-services/MapServicesList';
+import MapServiceForm from '@/components/admin/map-services/MapServiceForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { AdminHeader } from '@/components/admin/header/AdminHeader';
-import MapServiceForm from '@/components/admin/map-services/MapServiceForm';
-import MapServicesList from '@/components/admin/map-services/MapServicesList';
 import { mapServicesApi } from '@/api/mapServicesApi';
 import { MapService, CreateMapServiceRequest } from '@/types/mapService';
 import { Plus } from 'lucide-react';
@@ -15,9 +14,9 @@ import { toast } from 'sonner';
 const MapServices = () => {
   const [services, setServices] = useState<MapService[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formLoading, setFormLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [editingService, setEditingService] = useState<MapService | null>(null);
+  const [editingService, setEditingService] = useState<MapService | undefined>();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchServices();
@@ -36,26 +35,29 @@ const MapServices = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchServices();
+    setRefreshing(false);
+    toast.success('Veriler güncellendi');
+  };
+
   const handleSubmit = async (data: CreateMapServiceRequest) => {
     try {
-      setFormLoading(true);
-      
       if (editingService) {
-        const updated = await mapServicesApi.updateMapService(editingService.id, data);
-        setServices(services.map(s => s.id === editingService.id ? updated : s));
+        await mapServicesApi.updateMapService(editingService.id, data);
         toast.success('Harita servisi güncellendi');
       } else {
-        const newService = await mapServicesApi.createMapService(data);
-        setServices([newService, ...services]);
-        toast.success('Harita servisi eklendi');
+        await mapServicesApi.createMapService(data);
+        toast.success('Yeni harita servisi eklendi');
       }
       
-      handleCloseForm();
+      setShowForm(false);
+      setEditingService(undefined);
+      await fetchServices();
     } catch (error) {
       console.error('Harita servisi kaydedilirken hata:', error);
       toast.error('Harita servisi kaydedilemedi');
-    } finally {
-      setFormLoading(false);
     }
   };
 
@@ -67,8 +69,8 @@ const MapServices = () => {
   const handleDelete = async (id: string) => {
     try {
       await mapServicesApi.deleteMapService(id);
-      setServices(services.filter(s => s.id !== id));
       toast.success('Harita servisi silindi');
+      await fetchServices();
     } catch (error) {
       console.error('Harita servisi silinirken hata:', error);
       toast.error('Harita servisi silinemedi');
@@ -77,18 +79,18 @@ const MapServices = () => {
 
   const handleToggleVisibility = async (id: string, visible: boolean) => {
     try {
-      const updated = await mapServicesApi.toggleVisibility(id, visible);
-      setServices(services.map(s => s.id === id ? updated : s));
-      toast.success(`Harita servisi ${visible ? 'görünür' : 'gizli'} yapıldı`);
+      await mapServicesApi.toggleVisibility(id, visible);
+      toast.success(`Harita servisi ${visible ? 'gösterilecek' : 'gizlenecek'}`);
+      await fetchServices();
     } catch (error) {
       console.error('Görünürlük değiştirilirken hata:', error);
       toast.error('Görünürlük değiştirilemedi');
     }
   };
 
-  const handleCloseForm = () => {
+  const handleCancel = () => {
     setShowForm(false);
-    setEditingService(null);
+    setEditingService(undefined);
   };
 
   return (
@@ -96,21 +98,27 @@ const MapServices = () => {
       <AdminSidebar />
       
       <div className="flex-1 flex flex-col">
-        <AdminHeader title="Harita Servisleri" />
+        <AdminHeader 
+          title="Harita Servisleri" 
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+        />
         
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-6xl mx-auto space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>GeoServer Harita Servisleri</CardTitle>
+            {!showForm ? (
+              <>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-2xl font-bold">Harita Servisleri</h1>
+                    <p className="text-gray-600">GeoServer WMS ve WFS servislerinizi yönetin</p>
+                  </div>
                   <Button onClick={() => setShowForm(true)}>
-                    <Plus size={16} className="mr-1" />
+                    <Plus size={16} className="mr-2" />
                     Yeni Servis Ekle
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent>
+
                 <MapServicesList
                   services={services}
                   onEdit={handleEdit}
@@ -118,27 +126,26 @@ const MapServices = () => {
                   onToggleVisibility={handleToggleVisibility}
                   loading={loading}
                 />
-              </CardContent>
-            </Card>
+              </>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {editingService ? 'Harita Servisini Düzenle' : 'Yeni Harita Servisi Ekle'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MapServiceForm
+                    service={editingService}
+                    onSubmit={handleSubmit}
+                    onCancel={handleCancel}
+                  />
+                </CardContent>
+              </Card>
+            )}
           </div>
         </main>
       </div>
-
-      <Dialog open={showForm} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingService ? 'Harita Servisini Düzenle' : 'Yeni Harita Servisi Ekle'}
-            </DialogTitle>
-          </DialogHeader>
-          <MapServiceForm
-            service={editingService || undefined}
-            onSubmit={handleSubmit}
-            onCancel={handleCloseForm}
-            loading={formLoading}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

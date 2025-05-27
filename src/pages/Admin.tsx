@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftCircle, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { AdminSidebar } from '../components/admin/AdminSidebar';
+import AdminSidebar from '../components/admin/AdminSidebar';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
 
 const Admin = () => {

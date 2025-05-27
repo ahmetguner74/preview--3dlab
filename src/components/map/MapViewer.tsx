@@ -2,12 +2,15 @@
 import React, { useEffect, useRef } from 'react';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
+import ImageLayer from 'ol/layer/Image';
 import { OSM } from 'ol/source';
 import { fromLonLat } from 'ol/proj';
 import TileWMS from 'ol/source/TileWMS';
+import ImageWMS from 'ol/source/ImageWMS';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { GeoJSON } from 'ol/format';
+import { BaseLayer } from 'ol/layer/Base';
 import 'ol/ol.css';
 
 interface MapViewerProps {
@@ -39,16 +42,15 @@ const MapViewer: React.FC<MapViewerProps> = ({
       source: new OSM()
     });
 
-    const layers = [baseLayer];
+    const layers: BaseLayer[] = [baseLayer];
 
     // Servis tipine göre layer ekle
     if (serviceType === 'WMS') {
-      const wmsLayer = new TileLayer({
-        source: new TileWMS({
+      const wmsLayer = new ImageLayer({
+        source: new ImageWMS({
           url: serviceUrl,
           params: {
             'LAYERS': layerName,
-            'TILED': true,
           },
           serverType: 'geoserver',
           crossOrigin: 'anonymous'

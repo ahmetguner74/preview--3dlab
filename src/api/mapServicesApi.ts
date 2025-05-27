@@ -11,7 +11,7 @@ export const mapServicesApi = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as MapService[];
   },
 
   // Görünür harita servislerini getir
@@ -23,7 +23,7 @@ export const mapServicesApi = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as MapService[];
   },
 
   // Yeni harita servisi oluştur
@@ -35,7 +35,7 @@ export const mapServicesApi = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as MapService;
   },
 
   // Harita servisini güncelle
@@ -48,7 +48,7 @@ export const mapServicesApi = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as MapService;
   },
 
   // Harita servisini sil
@@ -71,6 +71,6 @@ export const mapServicesApi = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as MapService;
   }
 };

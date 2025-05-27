@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,7 +21,7 @@ import YoloProcessing from "./pages/YoloProcessing";
 import NotFound from "./pages/NotFound";
 import WhatsappButton from "./components/ui/WhatsappButton";
 import Maps from "./pages/Maps";
-import MapServices from "./pages/MapServices";
+import MapServices from "./pages/admin/MapServices";
 import "./i18n";
 
 const queryClient = new QueryClient({

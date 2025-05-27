@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, FolderOpen, Settings, Image, FileText, MessageSquare, Cog, Map } from 'lucide-react';
@@ -56,22 +57,25 @@ const AdminSidebar = () => {
       </div>
       <nav>
         <ul>
-          {menuItems.map((item) => (
-            <li key={item.path} className="mb-1">
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center px-6 py-3 hover:bg-gray-700 transition-colors ${
+          {menuItems.map((item) => {
+            const isActive = item.exact 
+              ? location.pathname === item.path 
+              : location.pathname.startsWith(item.path);
+            
+            return (
+              <li key={item.path} className="mb-1">
+                <NavLink
+                  to={item.path}
+                  className={`flex items-center px-6 py-3 hover:bg-gray-700 transition-colors ${
                     isActive ? 'bg-gray-700 font-medium' : ''
-                  }`
-                }
-                exact={item.exact}
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
+                  }`}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.label}
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </div>
