@@ -2,6 +2,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { MapService, CreateMapServiceRequest } from '@/types/mapService';
 
+// Çoklu katman isimlerini parse etme fonksiyonu
+export const parseLayerNames = (layerName: string): string[] => {
+  return layerName.split(',').map(name => name.trim()).filter(name => name.length > 0);
+};
+
 export const mapServicesApi = {
   // Tüm harita servislerini getir
   async getMapServices(): Promise<MapService[]> {

@@ -81,6 +81,7 @@ export type Database = {
           name: string
           service_type: string
           service_url: string
+          thumbnail_url: string | null
           updated_at: string
           visible: boolean
         }
@@ -92,6 +93,7 @@ export type Database = {
           name: string
           service_type: string
           service_url: string
+          thumbnail_url?: string | null
           updated_at?: string
           visible?: boolean
         }
@@ -103,6 +105,7 @@ export type Database = {
           name?: string
           service_type?: string
           service_url?: string
+          thumbnail_url?: string | null
           updated_at?: string
           visible?: boolean
         }

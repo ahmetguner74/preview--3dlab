@@ -7,6 +7,7 @@ export interface MapService {
   service_url: string;
   layer_name: string;
   visible: boolean;
+  thumbnail_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -18,4 +19,5 @@ export interface CreateMapServiceRequest {
   service_url: string;
   layer_name: string;
   visible?: boolean;
+  thumbnail_url?: string;
 }

@@ -2,14 +2,17 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import MapViewer from '@/components/map/MapViewer';
+import AdvancedMapViewer from '@/components/map/AdvancedMapViewer';
 import { MapService } from '@/types/mapService';
+import { parseLayerNames } from '@/api/mapServicesApi';
 
 interface MapCardProps {
   service: MapService;
 }
 
 const MapCard: React.FC<MapCardProps> = ({ service }) => {
+  const layerNames = parseLayerNames(service.layer_name);
+
   return (
     <Card className="overflow-hidden">
       <CardHeader>
@@ -20,25 +23,45 @@ const MapCard: React.FC<MapCardProps> = ({ service }) => {
               <p className="text-gray-600 mt-2">{service.description}</p>
             )}
           </div>
-          <Badge variant={service.service_type === 'WMS' ? 'default' : 'secondary'}>
-            {service.service_type}
-          </Badge>
+          <div className="flex gap-2 ml-4">
+            <Badge variant={service.service_type === 'WMS' ? 'default' : 'secondary'}>
+              {service.service_type}
+            </Badge>
+            {layerNames.length > 1 && (
+              <Badge variant="outline">
+                {layerNames.length} Katman
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <MapViewer
-          serviceUrl={service.service_url}
-          layerName={service.layer_name}
-          serviceType={service.service_type}
+        <AdvancedMapViewer
+          service={service}
           className="h-80 w-full"
         />
         <div className="p-4 bg-gray-50 text-sm text-gray-600">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
-              <strong>Katman:</strong> {service.layer_name}
+              <strong>Katmanlar:</strong> 
+              <div className="mt-1">
+                {layerNames.map((layer, index) => (
+                  <span 
+                    key={index} 
+                    className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs mr-1 mb-1"
+                  >
+                    {layer}
+                  </span>
+                ))}
+              </div>
             </div>
             <div>
-              <strong>Servis:</strong> {service.service_type}
+              <strong>Servis Türü:</strong> {service.service_type}
+              <br />
+              <strong>Özellikler:</strong> 
+              <span className="text-green-600 ml-1">
+                {service.service_type === 'WMS' ? 'Görüntü Sorgulama' : 'Öznitelik Sorgulama'}
+              </span>
             </div>
           </div>
         </div>
