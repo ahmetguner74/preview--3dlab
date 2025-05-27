@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +19,8 @@ import AboutContent from "./pages/admin/AboutContent";
 import YoloProcessing from "./pages/YoloProcessing";
 import NotFound from "./pages/NotFound";
 import WhatsappButton from "./components/ui/WhatsappButton";
+import Maps from "./pages/Maps";
+import MapServices from "./pages/MapServices";
 import "./i18n";
 
 const queryClient = new QueryClient({
@@ -43,11 +44,13 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
+          <Route path="/maps" element={<Maps />} />
           <Route path="/yolo" element={<YoloProcessing />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
           <Route path="/admin/projects/:id/edit" element={<ProjectForm />} />
+          <Route path="/admin/map-services" element={<MapServices />} />
           <Route path="/admin/site-settings" element={<SiteSettings />} />
           <Route path="/admin/cover-images" element={<CoverImages />} />
           <Route path="/admin/messages" element={<Messages />} />

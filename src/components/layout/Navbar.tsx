@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -39,6 +38,11 @@ const Navbar = () => {
           }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               {t('projects')}
             </NavLink>
+            <NavLink to="/maps" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
+              Haritalar
+            </NavLink>
             <NavLink to="/about" className={({
             isActive
           }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
@@ -76,6 +80,11 @@ const Navbar = () => {
             isActive
           }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 {t('projects')}
+              </NavLink>
+              <NavLink to="/maps" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
+                Haritalar
               </NavLink>
               <NavLink to="/about" className={({
             isActive

@@ -72,6 +72,42 @@ export type Database = {
         }
         Relationships: []
       }
+      map_services: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          layer_name: string
+          name: string
+          service_type: string
+          service_url: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          layer_name: string
+          name: string
+          service_type: string
+          service_url: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          layer_name?: string
+          name?: string
+          service_type?: string
+          service_url?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       project_3d_models: {
         Row: {
           created_at: string | null
