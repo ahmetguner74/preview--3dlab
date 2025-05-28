@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
+import BaseLayer from 'ol/layer/Base';
 import OSM from 'ol/source/OSM';
 import ImageWMS from 'ol/source/ImageWMS';
 import { fromLonLat } from 'ol/proj';
@@ -46,7 +47,7 @@ const LiveMapPreview: React.FC<LiveMapPreviewProps> = ({
         source: new OSM()
       });
 
-      const layers = [baseLayer];
+      const layers: BaseLayer[] = [baseLayer];
 
       // WMS katmanları ekle
       if (serviceType === 'WMS') {
