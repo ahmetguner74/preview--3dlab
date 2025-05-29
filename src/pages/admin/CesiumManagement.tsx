@@ -70,7 +70,9 @@ const CesiumManagement = () => {
       // Type casting yaparak Supabase'den gelen string değerleri doğru type'lara çeviriyoruz
       setLayers(data?.map(layer => ({
         ...layer,
-        layer_type: layer.layer_type as 'pointcloud' | 'mesh' | 'ortho' | 'dem' | 'vector' | 'tileset'
+        layer_type: layer.layer_type as 'pointcloud' | 'mesh' | 'ortho' | 'dem' | 'vector' | 'tileset',
+        metadata: (layer.metadata as Record<string, any>) || {},
+        style_config: (layer.style_config as Record<string, any>) || {}
       })) || []);
     } catch (error) {
       console.error('Cesium katmanları yüklenirken hata:', error);
