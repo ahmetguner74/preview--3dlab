@@ -112,7 +112,6 @@ const EnhancedLayerManager: React.FC<EnhancedLayerManagerProps> = ({
                   <Switch
                     checked={layer.visible}
                     onCheckedChange={(checked) => onLayerToggle(layer.id, checked)}
-                    size="sm"
                   />
                   {onLayerSettings && (
                     <Button

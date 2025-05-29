@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,7 +45,11 @@ const CesiumManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProjects(data || []);
+      // Type casting yaparak Supabase'den gelen string değerleri doğru type'lara çeviriyoruz
+      setProjects(data?.map(project => ({
+        ...project,
+        status: project.status as 'taslak' | 'yayinda' | 'arsiv'
+      })) || []);
     } catch (error) {
       console.error('Cesium projeleri yüklenirken hata:', error);
       toast.error('Projeler yüklenirken bir hata oluştu');
@@ -64,7 +67,11 @@ const CesiumManagement = () => {
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      setLayers(data || []);
+      // Type casting yaparak Supabase'den gelen string değerleri doğru type'lara çeviriyoruz
+      setLayers(data?.map(layer => ({
+        ...layer,
+        layer_type: layer.layer_type as 'pointcloud' | 'mesh' | 'ortho' | 'dem' | 'vector' | 'tileset'
+      })) || []);
     } catch (error) {
       console.error('Cesium katmanları yüklenirken hata:', error);
       toast.error('Katmanlar yüklenirken bir hata oluştu');
