@@ -48,6 +48,130 @@ export type Database = {
         }
         Relationships: []
       }
+      cesium_layers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_url: string
+          id: string
+          layer_type: string
+          metadata: Json | null
+          name: string
+          opacity: number
+          project_id: string | null
+          sort_order: number | null
+          style_config: Json | null
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_url: string
+          id?: string
+          layer_type: string
+          metadata?: Json | null
+          name: string
+          opacity?: number
+          project_id?: string | null
+          sort_order?: number | null
+          style_config?: Json | null
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_url?: string
+          id?: string
+          layer_type?: string
+          metadata?: Json | null
+          name?: string
+          opacity?: number
+          project_id?: string | null
+          sort_order?: number | null
+          style_config?: Json | null
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cesium_layers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "cesium_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cesium_project_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_level: string
+          project_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_level?: string
+          project_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_level?: string
+          project_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cesium_project_permissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "cesium_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cesium_projects: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -422,6 +546,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       virtual_tours: {
         Row: {
           created_at: string
@@ -463,7 +608,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_project_access: {
+        Args: { user_id: string; project_id: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       project_status: "taslak" | "yayinda" | "arsiv"

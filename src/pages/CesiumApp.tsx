@@ -1,18 +1,12 @@
 
 import React, { useState, useCallback } from 'react';
 import Layout from '@/components/layout/Layout';
-import CesiumViewer from '@/components/cesium/CesiumViewer';
-import LayerManager from '@/components/cesium/LayerManager';
+import EnhancedCesiumViewer from '@/components/cesium/EnhancedCesiumViewer';
+import EnhancedLayerManager from '@/components/cesium/EnhancedLayerManager';
+import CesiumProjectSelector from '@/components/cesium/CesiumProjectSelector';
 import MeasurementTools from '@/components/cesium/MeasurementTools';
-
-interface Layer {
-  id: string;
-  name: string;
-  type: 'pointcloud' | 'mesh' | 'ortho' | 'dem';
-  visible: boolean;
-  opacity: number;
-  url?: string;
-}
+import { useCesiumProjects, useCesiumLayers } from '@/hooks/useCesiumData';
+import { toast } from 'sonner';
 
 interface MeasurementResult {
   id: string;
@@ -24,44 +18,41 @@ interface MeasurementResult {
 type MeasurementMode = 'none' | 'coordinate' | 'distance' | 'area';
 
 const CesiumApp: React.FC = () => {
-  const [layers, setLayers] = useState<Layer[]>([
-    {
-      id: '1',
-      name: 'Örnek Nokta Bulutu',
-      type: 'pointcloud',
-      visible: true,
-      opacity: 1.0,
-      url: 'https://example.com/pointcloud.3dtiles'
-    },
-    {
-      id: '2',
-      name: 'Ortofoto Katmanı',
-      type: 'ortho',
-      visible: false,
-      opacity: 0.8,
-      url: 'https://example.com/ortho/wms'
-    }
-  ]);
-
+  const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>('none');
   const [measurementResults, setMeasurementResults] = useState<MeasurementResult[]>([]);
 
-  const handleLayerToggle = useCallback((layerId: string, visible: boolean) => {
-    setLayers(prev => prev.map(layer => 
-      layer.id === layerId ? { ...layer, visible } : layer
-    ));
+  const { projects, loading: projectsLoading } = useCesiumProjects();
+  const { layers, loading: layersLoading, toggleLayerVisibility, updateLayerOpacity } = useCesiumLayers(selectedProjectId);
+
+  const handleProjectSelect = useCallback((projectId: string) => {
+    setSelectedProjectId(projectId);
+    console.log('Seçilen proje:', projectId);
   }, []);
+
+  const handleLayerToggle = useCallback((layerId: string, visible: boolean) => {
+    toggleLayerVisibility(layerId, visible);
+  }, [toggleLayerVisibility]);
 
   const handleOpacityChange = useCallback((layerId: string, opacity: number) => {
-    setLayers(prev => prev.map(layer => 
-      layer.id === layerId ? { ...layer, opacity } : layer
-    ));
-  }, []);
+    updateLayerOpacity(layerId, opacity);
+  }, [updateLayerOpacity]);
 
   const handleLayerSettings = useCallback((layerId: string) => {
-    console.log('Layer settings for:', layerId);
-    // TODO: Katman ayarları modalını aç
+    console.log('Katman ayarları:', layerId);
+    toast.info(`${layerId} katmanı için ayarlar yakında gelecek`);
   }, []);
+
+  const handleLayerLoad = useCallback((layerId: string, success: boolean) => {
+    const layer = layers.find(l => l.id === layerId);
+    if (layer) {
+      if (success) {
+        toast.success(`${layer.name} katmanı başarıyla yüklendi`);
+      } else {
+        toast.error(`${layer.name} katmanı yüklenemedi`);
+      }
+    }
+  }, [layers]);
 
   const handleMeasurementModeChange = useCallback((mode: MeasurementMode) => {
     setMeasurementMode(mode);
@@ -73,14 +64,26 @@ const CesiumApp: React.FC = () => {
 
   return (
     <Layout>
-      <div className="relative h-screen w-full bg-black">
-        <CesiumViewer className="absolute inset-0" />
+      <div className="relative h-screen w-full bg-black overflow-hidden">
+        <EnhancedCesiumViewer 
+          className="absolute inset-0" 
+          layers={layers}
+          onLayerLoad={handleLayerLoad}
+        />
         
-        <LayerManager
+        <CesiumProjectSelector
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onProjectSelect={handleProjectSelect}
+          loading={projectsLoading}
+        />
+        
+        <EnhancedLayerManager
           layers={layers}
           onLayerToggle={handleLayerToggle}
           onOpacityChange={handleOpacityChange}
           onLayerSettings={handleLayerSettings}
+          loading={layersLoading}
         />
         
         <MeasurementTools

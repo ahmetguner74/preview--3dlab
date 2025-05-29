@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +22,7 @@ import WhatsappButton from "./components/ui/WhatsappButton";
 import Maps from "./pages/Maps";
 import MapServices from "./pages/admin/MapServices";
 import CesiumApp from "./pages/CesiumApp";
+import CesiumManagement from "./pages/admin/CesiumManagement";
 import "./i18n";
 
 const queryClient = new QueryClient({
@@ -47,11 +47,13 @@ const App = () => (
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:slug" element={<ProjectDetail />} />
           <Route path="/maps" element={<Maps />} />
+          <Route path="/cesium" element={<CesiumApp />} />
           <Route path="/yolo" element={<YoloProcessing />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/projects" element={<ProjectList />} />
           <Route path="/admin/projects/new" element={<ProjectForm />} />
           <Route path="/admin/projects/:id/edit" element={<ProjectForm />} />
+          <Route path="/admin/cesium" element={<CesiumManagement />} />
           <Route path="/admin/map-services" element={<MapServices />} />
           <Route path="/admin/site-settings" element={<SiteSettings />} />
           <Route path="/admin/cover-images" element={<CoverImages />} />

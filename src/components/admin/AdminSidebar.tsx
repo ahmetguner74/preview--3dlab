@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, FolderOpen, Settings, Image, FileText, MessageSquare, Cog, Map } from 'lucide-react';
+import { Home, FolderOpen, Settings, Image, FileText, MessageSquare, Cog, Map, Globe } from 'lucide-react';
 
 const AdminSidebar = () => {
   const location = useLocation();
@@ -17,6 +16,11 @@ const AdminSidebar = () => {
       path: '/admin/projects', 
       icon: FolderOpen, 
       label: 'Projeler' 
+    },
+    { 
+      path: '/admin/cesium', 
+      icon: Globe, 
+      label: 'Cesium Yönetimi' 
     },
     { 
       path: '/admin/map-services', 
