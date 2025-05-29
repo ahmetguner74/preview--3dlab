@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { CesiumProject, CesiumLayer } from '@/types/cesium';
 import { toast } from "sonner";
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { ArrowLeftCircle, LogOut, Plus, Globe, Layers, Eye, EyeOff, Trash2, Edit } from 'lucide-react';
+import CesiumProjectForm from '@/components/admin/cesium/CesiumProjectForm';
+import { ArrowLeftCircle, LogOut, Plus, Globe, Layers, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -23,6 +25,7 @@ const CesiumManagement = () => {
   const [layers, setLayers] = useState<CesiumLayer[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const [showProjectForm, setShowProjectForm] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -196,6 +199,10 @@ const CesiumManagement = () => {
     return <Badge className={typeInfo.color}>{typeInfo.label}</Badge>;
   };
 
+  const handleProjectFormSuccess = () => {
+    fetchProjects();
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -227,7 +234,10 @@ const CesiumManagement = () => {
                   <Globe size={20} />
                   Cesium Projeleri
                 </CardTitle>
-                <Button className="flex items-center gap-2">
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={() => setShowProjectForm(true)}
+                >
                   <Plus size={16} />
                   Yeni Proje
                 </Button>
@@ -375,6 +385,13 @@ const CesiumManagement = () => {
           )}
         </main>
       </div>
+      
+      {/* Proje Ekleme Modalı */}
+      <CesiumProjectForm
+        open={showProjectForm}
+        onOpenChange={setShowProjectForm}
+        onSuccess={handleProjectFormSuccess}
+      />
     </div>
   );
 };
