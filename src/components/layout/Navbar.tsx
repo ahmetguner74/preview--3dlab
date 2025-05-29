@@ -43,6 +43,11 @@ const Navbar = () => {
           }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
               Haritalar
             </NavLink>
+            <NavLink to="/cesium" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
+              3D Viewer
+            </NavLink>
             <NavLink to="/about" className={({
             isActive
           }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
@@ -85,6 +90,11 @@ const Navbar = () => {
             isActive
           }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
                 Haritalar
+              </NavLink>
+              <NavLink to="/cesium" className={({
+            isActive
+          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
+                3D Viewer
               </NavLink>
               <NavLink to="/about" className={({
             isActive

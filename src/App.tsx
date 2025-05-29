@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import WhatsappButton from "./components/ui/WhatsappButton";
 import Maps from "./pages/Maps";
 import MapServices from "./pages/admin/MapServices";
+import CesiumApp from "./pages/CesiumApp";
 import "./i18n";
 
 const queryClient = new QueryClient({
