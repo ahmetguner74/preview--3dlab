@@ -48,6 +48,53 @@ export type Database = {
         }
         Relationships: []
       }
+      cesium_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          id: string
+          metadata: Json | null
+          project_id: string | null
+          updated_at: string
+          upload_status: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          metadata?: Json | null
+          project_id?: string | null
+          updated_at?: string
+          upload_status?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          metadata?: Json | null
+          project_id?: string | null
+          updated_at?: string
+          upload_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cesium_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "cesium_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cesium_layers: {
         Row: {
           created_at: string
@@ -97,6 +144,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "cesium_layers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "cesium_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cesium_notes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          height: number | null
+          id: string
+          latitude: number
+          longitude: number
+          project_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          height?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          project_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          height?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          project_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cesium_notes_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "cesium_projects"

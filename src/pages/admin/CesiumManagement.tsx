@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +5,9 @@ import { CesiumProject, CesiumLayer } from '@/types/cesium';
 import { toast } from "sonner";
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import CesiumProjectForm from '@/components/admin/cesium/CesiumProjectForm';
+import CesiumFileUploader from '@/components/admin/cesium/CesiumFileUploader';
+import CesiumNotesManager from '@/components/admin/cesium/CesiumNotesManager';
+import CesiumLayerForm from '@/components/admin/cesium/CesiumLayerForm';
 import { ArrowLeftCircle, LogOut, Plus, Globe, Layers, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +28,8 @@ const CesiumManagement = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showLayerForm, setShowLayerForm] = useState(false);
+  const [editingLayer, setEditingLayer] = useState<any>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -203,6 +207,22 @@ const CesiumManagement = () => {
     fetchProjects();
   };
 
+  const handleLayerFormSuccess = () => {
+    if (selectedProjectId) {
+      fetchLayers(selectedProjectId);
+    }
+  };
+
+  const handleEditLayer = (layer: any) => {
+    setEditingLayer(layer);
+    setShowLayerForm(true);
+  };
+
+  const handleAddLayer = () => {
+    setEditingLayer(null);
+    setShowLayerForm(true);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -309,79 +329,109 @@ const CesiumManagement = () => {
             </CardContent>
           </Card>
 
-          {/* Katmanlar Kartı */}
+          {/* Proje Detay Sayfası */}
           {selectedProjectId && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Layers size={20} />
-                    Proje Katmanları
-                  </CardTitle>
-                  <Button className="flex items-center gap-2">
-                    <Plus size={16} />
-                    Yeni Katman
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Katman Adı</TableHead>
-                      <TableHead>Tür</TableHead>
-                      <TableHead>Görünürlük</TableHead>
-                      <TableHead>Şeffaflık</TableHead>
-                      <TableHead>Veri URL</TableHead>
-                      <TableHead className="text-right">İşlemler</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {layers.map((layer) => (
-                      <TableRow key={layer.id}>
-                        <TableCell>
-                          <div className="font-medium">{layer.name}</div>
-                        </TableCell>
-                        <TableCell>{getLayerTypeBadge(layer.layer_type)}</TableCell>
-                        <TableCell>
-                          <Switch
-                            checked={layer.visible}
-                            onCheckedChange={() => toggleLayerVisibility(layer)}
-                          />
-                        </TableCell>
-                        <TableCell>{Math.round(layer.opacity * 100)}%</TableCell>
-                        <TableCell>
-                          <div className="max-w-xs truncate text-sm text-gray-500">
-                            {layer.data_url}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="outline" size="sm">
-                              <Edit size={14} />
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => deleteLayer(layer.id)}
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                
-                {layers.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Layers size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Bu proje için henüz katman eklenmemiş</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Sol Kolon: Dosya Yükleme ve Katmanlar */}
+              <div className="space-y-6">
+                {/* Dosya Yükleme */}
+                <CesiumFileUploader
+                  projectId={selectedProjectId}
+                  onFilesChange={() => fetchLayers(selectedProjectId)}
+                />
+
+                {/* Katmanlar Kartı */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Layers size={20} />
+                        Proje Katmanları
+                      </CardTitle>
+                      <Button 
+                        className="flex items-center gap-2"
+                        onClick={handleAddLayer}
+                      >
+                        <Plus size={16} />
+                        Yeni Katman
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Katman Adı</TableHead>
+                          <TableHead>Tür</TableHead>
+                          <TableHead>Görünürlük</TableHead>
+                          <TableHead>Şeffaflık</TableHead>
+                          <TableHead>Veri URL</TableHead>
+                          <TableHead className="text-right">İşlemler</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {layers.map((layer) => (
+                          <TableRow key={layer.id}>
+                            <TableCell>
+                              <div className="font-medium">{layer.name}</div>
+                            </TableCell>
+                            <TableCell>{getLayerTypeBadge(layer.layer_type)}</TableCell>
+                            <TableCell>
+                              <Switch
+                                checked={layer.visible}
+                                onCheckedChange={() => toggleLayerVisibility(layer)}
+                              />
+                            </TableCell>
+                            <TableCell>{Math.round(layer.opacity * 100)}%</TableCell>
+                            <TableCell>
+                              <div className="max-w-xs truncate text-sm text-gray-500">
+                                {layer.data_url}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleEditLayer(layer)}
+                                >
+                                  <Edit size={14} />
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => deleteLayer(layer.id)}
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    
+                    {layers.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        <Layers size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>Bu proje için henüz katman eklenmemiş</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sağ Kolon: Notlar */}
+              <div>
+                <CesiumNotesManager
+                  projectId={selectedProjectId}
+                  onNoteSelect={(note) => {
+                    console.log('Seçilen not:', note);
+                    toast.info(`${note.title} notuna odaklanılıyor`);
+                  }}
+                />
+              </div>
+            </div>
           )}
         </main>
       </div>
@@ -391,6 +441,15 @@ const CesiumManagement = () => {
         open={showProjectForm}
         onOpenChange={setShowProjectForm}
         onSuccess={handleProjectFormSuccess}
+      />
+      
+      {/* Katman Ekleme/Düzenleme Modalı */}
+      <CesiumLayerForm
+        open={showLayerForm}
+        onOpenChange={setShowLayerForm}
+        onSuccess={handleLayerFormSuccess}
+        projectId={selectedProjectId || ''}
+        editingLayer={editingLayer}
       />
     </div>
   );
