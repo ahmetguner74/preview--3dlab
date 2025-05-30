@@ -33,7 +33,10 @@ import { Switch } from '@/components/ui/switch';
 
 const projectSchema = z.object({
   title: z.string().min(1, 'Proje başlığı gereklidir'),
-  slug: z.string().min(1, 'Slug gereklidir').regex(/^[a-z0-9-]+$/, 'Slug sadece küçük harf, sayı ve tire içerebilir'),
+  slug: z.string()
+    .min(1, 'Slug gereklidir')
+    .regex(/^[a-z0-9-]+$/, 'Slug sadece küçük harf, sayı ve tire içerebilir')
+    .refine((val) => !val.startsWith('-') && !val.endsWith('-'), 'Slug tire ile başlayamaz veya bitemez'),
   description: z.string().optional(),
   status: z.enum(['taslak', 'yayinda', 'arsiv']),
   visible: z.boolean(),
@@ -65,7 +68,9 @@ const CesiumProjectForm: React.FC<CesiumProjectFormProps> = ({
 
   const onSubmit = async (data: ProjectFormData) => {
     try {
-      const { error } = await supabase
+      console.log('Form verileri gönderiliyor:', data);
+      
+      const { data: result, error } = await supabase
         .from('cesium_projects')
         .insert([{
           title: data.title,
@@ -73,27 +78,38 @@ const CesiumProjectForm: React.FC<CesiumProjectFormProps> = ({
           description: data.description || null,
           status: data.status,
           visible: data.visible,
-        }]);
+        }])
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase hatası:', error);
+        throw error;
+      }
 
+      console.log('Proje başarıyla oluşturuldu:', result);
       toast.success('Cesium projesi başarıyla oluşturuldu');
       form.reset();
       onOpenChange(false);
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Proje oluşturulurken hata:', error);
-      toast.error('Proje oluşturulamadı');
+      toast.error(`Proje oluşturulamadı: ${error.message || 'Bilinmeyen hata'}`);
     }
   };
 
   const generateSlug = (title: string) => {
+    const turkishMap: { [key: string]: string } = {
+      'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+      'Ç': 'c', 'Ğ': 'g', 'I': 'i', 'İ': 'i', 'Ö': 'o', 'Ş': 's', 'Ü': 'u'
+    };
+    
     return title
       .toLowerCase()
+      .replace(/[çğıöşüÇĞIİÖŞÜ]/g, (char) => turkishMap[char] || char)
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
-      .trim();
+      .replace(/^-+|-+$/g, '');
   };
 
   const handleTitleChange = (value: string) => {
@@ -120,7 +136,7 @@ const CesiumProjectForm: React.FC<CesiumProjectFormProps> = ({
                   <FormLabel>Proje Başlığı</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Proje başlığını girin"
+                      placeholder="Örn: Ankara Villa Projesi"
                       {...field}
                       onChange={(e) => handleTitleChange(e.target.value)}
                     />
@@ -135,13 +151,16 @@ const CesiumProjectForm: React.FC<CesiumProjectFormProps> = ({
               name="slug"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Slug (URL)</FormLabel>
+                  <FormLabel>Slug (URL Adresi)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="proje-url-adresi"
+                      placeholder="Örn: ankara-villa-projesi"
                       {...field}
                     />
                   </FormControl>
+                  <div className="text-xs text-muted-foreground">
+                    Bu, projenin URL adresinde görünecek. Sadece küçük harf, sayı ve tire kullanın.
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
