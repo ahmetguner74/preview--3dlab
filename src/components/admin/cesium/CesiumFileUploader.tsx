@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload, FileText, Loader2, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,14 +113,15 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
 
       setUploadProgress(75);
 
-      // Dosya kaydını güncelle
+      // Dosya kaydını güncelle - metadata spread sorununu çöz
+      const existingMetadata = (fileRecord.metadata as Record<string, any>) || {};
       const { error: updateError } = await supabase
         .from('cesium_files')
         .update({
           file_path: fileUrl,
           upload_status: 'completed',
           metadata: {
-            ...fileRecord.metadata,
+            ...existingMetadata,
             uploadCompleted: new Date().toISOString(),
             fileUrl: fileUrl
           }
