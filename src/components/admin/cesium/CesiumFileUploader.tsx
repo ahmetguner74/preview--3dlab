@@ -281,11 +281,17 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
 
       if (updateError) throw updateError;
 
-      // Yüklenen dosya için otomatik katman oluştur
-      const updatedFileRecord = {
+      // Yüklenen dosya için otomatik katman oluştur - Tip uyumluluğunu sağla
+      const updatedFileRecord: CesiumFile = {
         ...fileRecord,
         file_path: fileUrl,
-        upload_status: 'completed' as const
+        upload_status: 'completed',
+        file_type: fileType, // Doğru tip ile güncelle
+        metadata: {
+          ...existingMetadata,
+          uploadCompleted: new Date().toISOString(),
+          fileUrl: fileUrl
+        }
       };
 
       await createLayerFromFile(updatedFileRecord);

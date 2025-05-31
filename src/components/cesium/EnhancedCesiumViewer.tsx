@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Viewer as CesiumViewer, createWorldTerrainAsync, Ion, Cartesian3, Cesium3DTileset, ImageryLayer, WebMapServiceImageryProvider } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
@@ -94,9 +93,9 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
               throw new Error(`Dosyaya erişilemedi: ${fixedUrl}. Dosyanın mevcut olduğunu ve erişilebilir olduğunu kontrol edin.`);
             }
 
+            // Geçerli Cesium 3D Tileset seçenekleri
             loadedResource = await Cesium3DTileset.fromUrl(fixedUrl, {
               maximumScreenSpaceError: 16,
-              maximumMemoryUsage: 512,
               cullWithChildrenBounds: false,
               cullRequestsWhileMoving: true,
               cullRequestsWhileMovingMultiplier: 60.0,
@@ -222,7 +221,7 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
 
     checkContainerSize();
 
-    // Kullanıcının sağladığı token'ı kullan
+    // Geçerli Cesium Ion token
     Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWNmNzI1NS0wNDRjLTRjN2QtYjMyMi0zMGIxMGU3MDBmYzkiLCJpZCI6NDE3MTMsImlhdCI6MTc0ODcyNjI5Mn0.ARU7thee8WkbfLvADG4jsebahgLZNWEoFoT2Ya42DiE';
 
     const initViewer = async () => {
