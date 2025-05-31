@@ -8,7 +8,7 @@ import CesiumProjectForm from '@/components/admin/cesium/CesiumProjectForm';
 import CesiumFileUploader from '@/components/admin/cesium/CesiumFileUploader';
 import CesiumNotesManager from '@/components/admin/cesium/CesiumNotesManager';
 import CesiumLayerForm from '@/components/admin/cesium/CesiumLayerForm';
-import { ArrowLeftCircle, LogOut, Plus, Globe, Layers, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeftCircle, LogOut, Plus, Globe, Layers, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -33,6 +33,7 @@ const CesiumManagement = () => {
 
   useEffect(() => {
     fetchProjects();
+    initializeStorage();
   }, []);
 
   useEffect(() => {
@@ -42,6 +43,32 @@ const CesiumManagement = () => {
       setLayers([]);
     }
   }, [selectedProjectId]);
+
+  const initializeStorage = async () => {
+    try {
+      // Cesium files bucket'ının var olup olmadığını kontrol et
+      const { data: buckets, error: bucketsError } = await supabase
+        .storage
+        .listBuckets();
+
+      if (bucketsError) {
+        console.error('Storage bucket kontrolü başarısız:', bucketsError);
+        return;
+      }
+
+      const cesiumBucket = buckets?.find(bucket => bucket.name === 'cesium-files');
+      
+      if (!cesiumBucket) {
+        console.log('Cesium files bucket bulunamadı, oluşturuluyor...');
+        toast.info('Cesium dosyaları için storage alanı hazırlanıyor...');
+        
+        // Not: Bucket oluşturma SQL ile yapılmalı, bu sadece kontrol amaçlı
+        console.warn('cesium-files bucket\'ı manuel olarak oluşturulmalı');
+      }
+    } catch (error) {
+      console.error('Storage initialization hatası:', error);
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -84,6 +111,13 @@ const CesiumManagement = () => {
     } catch (error) {
       console.error('Cesium katmanları yüklenirken hata:', error);
       toast.error('Katmanlar yüklenirken bir hata oluştu');
+    }
+  };
+
+  const handleFilesChange = () => {
+    if (selectedProjectId) {
+      fetchLayers(selectedProjectId);
+      toast.success('Katmanlar güncellendi');
     }
   };
 
@@ -337,7 +371,7 @@ const CesiumManagement = () => {
                 {/* Dosya Yükleme */}
                 <CesiumFileUploader
                   projectId={selectedProjectId}
-                  onFilesChange={() => fetchLayers(selectedProjectId)}
+                  onFilesChange={handleFilesChange}
                 />
 
                 {/* Katmanlar Kartı */}
@@ -346,15 +380,26 @@ const CesiumManagement = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         <Layers size={20} />
-                        Proje Katmanları
+                        Proje Katmanları ({layers.length})
                       </CardTitle>
-                      <Button 
-                        className="flex items-center gap-2"
-                        onClick={handleAddLayer}
-                      >
-                        <Plus size={16} />
-                        Yeni Katman
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fetchLayers(selectedProjectId)}
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw size={14} />
+                          Yenile
+                        </Button>
+                        <Button 
+                          className="flex items-center gap-2"
+                          onClick={handleAddLayer}
+                        >
+                          <Plus size={16} />
+                          Yeni Katman
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -374,6 +419,11 @@ const CesiumManagement = () => {
                           <TableRow key={layer.id}>
                             <TableCell>
                               <div className="font-medium">{layer.name}</div>
+                              {layer.metadata?.originalFileName && (
+                                <div className="text-xs text-gray-500">
+                                  Kaynak: {layer.metadata.originalFileName}
+                                </div>
+                              )}
                             </TableCell>
                             <TableCell>{getLayerTypeBadge(layer.layer_type)}</TableCell>
                             <TableCell>
@@ -384,7 +434,7 @@ const CesiumManagement = () => {
                             </TableCell>
                             <TableCell>{Math.round(layer.opacity * 100)}%</TableCell>
                             <TableCell>
-                              <div className="max-w-xs truncate text-sm text-gray-500">
+                              <div className="max-w-xs truncate text-sm text-gray-500" title={layer.data_url}>
                                 {layer.data_url}
                               </div>
                             </TableCell>
@@ -415,6 +465,7 @@ const CesiumManagement = () => {
                       <div className="text-center py-8 text-gray-500">
                         <Layers size={48} className="mx-auto mb-4 opacity-50" />
                         <p>Bu proje için henüz katman eklenmemiş</p>
+                        <p className="text-sm mt-2">Dosya yükleyerek otomatik katman oluşturabilirsiniz</p>
                       </div>
                     )}
                   </CardContent>

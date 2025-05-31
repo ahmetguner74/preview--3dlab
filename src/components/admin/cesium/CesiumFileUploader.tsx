@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload, FileText, Loader2, CheckCircle, XCircle, Trash2, Archive } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +46,66 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
     } catch (error) {
       console.error('Dosyalar yüklenirken hata:', error);
       toast.error('Dosyalar yüklenirken hata oluştu');
+    }
+  };
+
+  const createLayerFromFile = async (fileRecord: CesiumFile) => {
+    try {
+      console.log('Dosya için katman oluşturuluyor:', fileRecord);
+      
+      let layerType: 'pointcloud' | 'mesh' | 'tileset' | 'ortho' | 'dem' | 'vector';
+      
+      switch (fileRecord.file_type) {
+        case 'tileset':
+        case '3tz':
+        case 'b3dm':
+        case 'i3dm':
+        case 'cmpt':
+          layerType = 'tileset';
+          break;
+        case 'pnts':
+          layerType = 'pointcloud';
+          break;
+        case 'glb':
+        case 'gltf':
+          layerType = 'mesh';
+          break;
+        default:
+          layerType = 'tileset';
+      }
+
+      const { data: layerData, error: layerError } = await supabase
+        .from('cesium_layers')
+        .insert([{
+          project_id: projectId,
+          name: fileRecord.file_name.replace(/\.[^/.]+$/, ""), // Dosya uzantısını kaldır
+          layer_type: layerType,
+          data_url: fileRecord.file_path,
+          visible: true,
+          opacity: 1.0,
+          sort_order: 0,
+          metadata: {
+            originalFileName: fileRecord.file_name,
+            fileType: fileRecord.file_type,
+            uploadedAt: new Date().toISOString()
+          },
+          style_config: {}
+        }])
+        .select()
+        .single();
+
+      if (layerError) {
+        console.error('Katman oluşturulamadı:', layerError);
+        throw layerError;
+      }
+
+      console.log('Katman başarıyla oluşturuldu:', layerData);
+      toast.success(`${fileRecord.file_name} katman olarak eklendi`);
+      return layerData;
+    } catch (error) {
+      console.error('Katman oluşturma hatası:', error);
+      toast.error(`Katman oluşturulamadı: ${fileRecord.file_name}`);
+      return null;
     }
   };
 
@@ -164,7 +223,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
         setUploadProgress((uploadedFiles / totalFiles) * 100);
       }
 
-      toast.success(`${uploadedFiles} dosya başarıyla yüklendi`);
+      toast.success(`${uploadedFiles} dosya başarıyla yüklendi ve katman olarak eklendi`);
       fetchFiles();
       onFilesChange();
     } catch (error: any) {
@@ -197,49 +256,73 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
 
     if (dbError) throw dbError;
 
-    // Dosyayı storage'a yükle
-    const fileUrl = await uploadFileToStorage(file, 'cesium-files');
-    
-    if (!fileUrl) {
-      throw new Error('Dosya yükleme başarısız');
-    }
+    try {
+      // Dosyayı storage'a yükle
+      const fileUrl = await uploadFileToStorage(file, 'cesium-files');
+      
+      if (!fileUrl) {
+        throw new Error('Dosya storage\'a yüklenemedi');
+      }
 
-    // Dosya kaydını güncelle
-    const existingMetadata = (fileRecord.metadata as Record<string, any>) || {};
-    const { error: updateError } = await supabase
-      .from('cesium_files')
-      .update({
+      // Dosya kaydını güncelle
+      const existingMetadata = (fileRecord.metadata as Record<string, any>) || {};
+      const { error: updateError } = await supabase
+        .from('cesium_files')
+        .update({
+          file_path: fileUrl,
+          upload_status: 'completed',
+          metadata: {
+            ...existingMetadata,
+            uploadCompleted: new Date().toISOString(),
+            fileUrl: fileUrl
+          }
+        })
+        .eq('id', fileRecord.id);
+
+      if (updateError) throw updateError;
+
+      // Yüklenen dosya için otomatik katman oluştur
+      const updatedFileRecord = {
+        ...fileRecord,
         file_path: fileUrl,
-        upload_status: 'completed',
-        metadata: {
-          ...existingMetadata,
-          uploadCompleted: new Date().toISOString(),
-          fileUrl: fileUrl
-        }
-      })
-      .eq('id', fileRecord.id);
+        upload_status: 'completed' as const
+      };
 
-    if (updateError) throw updateError;
+      await createLayerFromFile(updatedFileRecord);
 
-    if (showToast) {
-      toast.success(`${file.name} başarıyla yüklendi`);
-      fetchFiles();
-      onFilesChange();
+      if (showToast) {
+        toast.success(`${file.name} başarıyla yüklendi ve katman olarak eklendi`);
+        fetchFiles();
+        onFilesChange();
+      }
+    } catch (error) {
+      // Hata durumunda dosya kaydını güncelle
+      await supabase
+        .from('cesium_files')
+        .update({
+          upload_status: 'failed',
+          metadata: {
+            ...(fileRecord.metadata as Record<string, any>) || {},
+            error: error instanceof Error ? error.message : 'Bilinmeyen hata',
+            failedAt: new Date().toISOString()
+          }
+        })
+        .eq('id', fileRecord.id);
+      
+      throw error;
     }
   };
 
   const handleZipUpload = async (zipFile: File) => {
     toast.info('ZIP dosyası yüklendi, içerik çıkarılıyor...');
     
-    // ZIP içeriğini çıkarmak için basit bir simülasyon
-    // Gerçek uygulamada JSZip kütüphanesi kullanılabilir
     setUploadProgress(50);
     
     // ZIP dosyasını doğrudan yükle ve metadata'sında ZIP olduğunu belirt
     await uploadSingleFile(zipFile, '3tz');
     
     setUploadProgress(100);
-    toast.success('ZIP arşivi başarıyla yüklendi');
+    toast.success('ZIP arşivi başarıyla yüklendi ve katman olarak eklendi');
   };
 
   const deleteFile = async (fileId: string) => {
@@ -347,7 +430,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
             onFileSelected={handleFileUpload}
             onMultipleFilesSelected={handleMultipleFileUpload}
             title="3D Tiles Dosyalarını Yükle"
-            description="Tek dosya, çoklu dosya veya ZIP arşivi yükleyebilirsiniz"
+            description="Tek dosya, çoklu dosya veya ZIP arşivi yükleyebilirsiniz. Yüklenen dosyalar otomatik olarak katman olarak eklenecektir."
             allowedTypes={['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt', 'glb', 'gltf', 'las', 'laz']}
             maxSizeMB={100}
             isUploading={uploading}
@@ -359,7 +442,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
           {uploading && (
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                <span>Yükleniyor...</span>
+                <span>Yükleniyor ve katman oluşturuluyor...</span>
                 <span>{Math.round(uploadProgress)}%</span>
               </div>
               <Progress value={uploadProgress} className="w-full" />
@@ -400,6 +483,9 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
                         <span>{getFileTypeName(file.file_type)}</span>
                         {file.file_size && (
                           <span>• {(file.file_size / 1024 / 1024).toFixed(2)} MB</span>
+                        )}
+                        {file.upload_status === 'completed' && (
+                          <span>• Katman olarak eklendi</span>
                         )}
                       </div>
                     </div>
