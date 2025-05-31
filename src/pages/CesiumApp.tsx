@@ -28,13 +28,16 @@ const CesiumApp: React.FC = () => {
   const handleProjectSelect = useCallback((projectId: string) => {
     setSelectedProjectId(projectId);
     console.log('Seçilen proje:', projectId);
+    toast.info('Proje değiştirildi, katmanlar yükleniyor...');
   }, []);
 
   const handleLayerToggle = useCallback((layerId: string, visible: boolean) => {
+    console.log(`Katman görünürlüğü değiştiriliyor: ${layerId} = ${visible}`);
     toggleLayerVisibility(layerId, visible);
   }, [toggleLayerVisibility]);
 
   const handleOpacityChange = useCallback((layerId: string, opacity: number) => {
+    console.log(`Katman şeffaflığı değiştiriliyor: ${layerId} = ${opacity}`);
     updateLayerOpacity(layerId, opacity);
   }, [updateLayerOpacity]);
 
@@ -47,9 +50,11 @@ const CesiumApp: React.FC = () => {
     const layer = layers.find(l => l.id === layerId);
     if (layer) {
       if (success) {
-        toast.success(`${layer.name} katmanı başarıyla yüklendi`);
+        console.log(`Katman başarıyla yüklendi: ${layer.name}`);
+        // Toast zaten EnhancedCesiumViewer'da gösteriliyor
       } else {
-        toast.error(`${layer.name} katmanı yüklenemedi`);
+        console.error(`Katman yükleme başarısız: ${layer.name}`);
+        // Toast zaten EnhancedCesiumViewer'da gösteriliyor
       }
     }
   }, [layers]);
