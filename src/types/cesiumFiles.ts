@@ -4,7 +4,7 @@ export interface CesiumFile {
   project_id?: string;
   file_name: string;
   file_path: string;
-  file_type: '3tz' | 'json' | 'b3dm' | 'las' | 'laz' | 'tileset';
+  file_type: '3tz' | 'json' | 'b3dm' | 'pnts' | 'i3dm' | 'cmpt' | 'glb' | 'gltf' | 'las' | 'laz' | 'tileset';
   file_size?: number;
   upload_status: 'uploading' | 'completed' | 'failed';
   metadata: Record<string, any>;

@@ -12,9 +12,9 @@ export const uploadFileToStorage = async (file: File, bucket: string): Promise<s
     const fileName = `${uuidv4()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    // Dosya boyutu kontrolü (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error('Dosya boyutu 5MB\'dan küçük olmalıdır');
+    // Dosya boyutu kontrolü (100MB - Cesium dosyaları için artırıldı)
+    if (file.size > 100 * 1024 * 1024) {
+      throw new Error('Dosya boyutu 100MB\'dan küçük olmalıdır');
     }
     
     // Supabase storage'a yükle

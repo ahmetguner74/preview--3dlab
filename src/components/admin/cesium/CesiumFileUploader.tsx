@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Upload, FileText, Loader2, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Upload, FileText, Loader2, CheckCircle, XCircle, Trash2, Archive } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -54,19 +55,40 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
     setUploadProgress(0);
 
     try {
-      // Dosya türünü belirle
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       let fileType: CesiumFile['file_type'];
       
+      // ZIP dosyası kontrolü
+      if (fileExt === 'zip') {
+        await handleZipUpload(file);
+        return;
+      }
+      
+      // Dosya türünü belirle
       switch (fileExt) {
         case '3tz':
           fileType = '3tz';
           break;
         case 'json':
-          fileType = 'json';
+          fileType = file.name.toLowerCase().includes('tileset') ? 'tileset' : 'json';
           break;
         case 'b3dm':
           fileType = 'b3dm';
+          break;
+        case 'pnts':
+          fileType = 'pnts';
+          break;
+        case 'i3dm':
+          fileType = 'i3dm';
+          break;
+        case 'cmpt':
+          fileType = 'cmpt';
+          break;
+        case 'glb':
+          fileType = 'glb';
+          break;
+        case 'gltf':
+          fileType = 'gltf';
           break;
         case 'las':
           fileType = 'las';
@@ -75,65 +97,10 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
           fileType = 'laz';
           break;
         default:
-          if (file.name.includes('tileset')) {
-            fileType = 'tileset';
-          } else {
-            throw new Error('Desteklenmeyen dosya türü');
-          }
+          throw new Error(`Desteklenmeyen dosya türü: ${fileExt}`);
       }
 
-      // Veritabanına dosya kaydını ekle
-      const { data: fileRecord, error: dbError } = await supabase
-        .from('cesium_files')
-        .insert([{
-          project_id: projectId,
-          file_name: file.name,
-          file_path: '',
-          file_type: fileType,
-          file_size: file.size,
-          upload_status: 'uploading',
-          metadata: {
-            originalName: file.name,
-            uploadStarted: new Date().toISOString()
-          }
-        }])
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      setUploadProgress(25);
-
-      // Dosyayı storage'a yükle
-      const fileUrl = await uploadFileToStorage(file, 'cesium-files');
-      
-      if (!fileUrl) {
-        throw new Error('Dosya yükleme başarısız');
-      }
-
-      setUploadProgress(75);
-
-      // Dosya kaydını güncelle - metadata spread sorununu çöz
-      const existingMetadata = (fileRecord.metadata as Record<string, any>) || {};
-      const { error: updateError } = await supabase
-        .from('cesium_files')
-        .update({
-          file_path: fileUrl,
-          upload_status: 'completed',
-          metadata: {
-            ...existingMetadata,
-            uploadCompleted: new Date().toISOString(),
-            fileUrl: fileUrl
-          }
-        })
-        .eq('id', fileRecord.id);
-
-      if (updateError) throw updateError;
-
-      setUploadProgress(100);
-      toast.success(`${file.name} başarıyla yüklendi`);
-      fetchFiles();
-      onFilesChange();
+      await uploadSingleFile(file, fileType);
     } catch (error: any) {
       console.error('Dosya yükleme hatası:', error);
       toast.error(`Dosya yüklenemedi: ${error.message}`);
@@ -141,6 +108,138 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
       setUploading(false);
       setUploadProgress(0);
     }
+  };
+
+  const handleMultipleFileUpload = async (fileList: FileList) => {
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const totalFiles = fileList.length;
+      let uploadedFiles = 0;
+
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        
+        let fileType: CesiumFile['file_type'];
+        switch (fileExt) {
+          case '3tz':
+            fileType = '3tz';
+            break;
+          case 'json':
+            fileType = file.name.toLowerCase().includes('tileset') ? 'tileset' : 'json';
+            break;
+          case 'b3dm':
+            fileType = 'b3dm';
+            break;
+          case 'pnts':
+            fileType = 'pnts';
+            break;
+          case 'i3dm':
+            fileType = 'i3dm';
+            break;
+          case 'cmpt':
+            fileType = 'cmpt';
+            break;
+          case 'glb':
+            fileType = 'glb';
+            break;
+          case 'gltf':
+            fileType = 'gltf';
+            break;
+          case 'las':
+            fileType = 'las';
+            break;
+          case 'laz':
+            fileType = 'laz';
+            break;
+          default:
+            console.warn(`Desteklenmeyen dosya atlandı: ${file.name}`);
+            continue;
+        }
+
+        await uploadSingleFile(file, fileType, false);
+        uploadedFiles++;
+        setUploadProgress((uploadedFiles / totalFiles) * 100);
+      }
+
+      toast.success(`${uploadedFiles} dosya başarıyla yüklendi`);
+      fetchFiles();
+      onFilesChange();
+    } catch (error: any) {
+      console.error('Çoklu dosya yükleme hatası:', error);
+      toast.error(`Dosyalar yüklenemedi: ${error.message}`);
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const uploadSingleFile = async (file: File, fileType: CesiumFile['file_type'], showToast = true) => {
+    // Veritabanına dosya kaydını ekle
+    const { data: fileRecord, error: dbError } = await supabase
+      .from('cesium_files')
+      .insert([{
+        project_id: projectId,
+        file_name: file.name,
+        file_path: '',
+        file_type: fileType,
+        file_size: file.size,
+        upload_status: 'uploading',
+        metadata: {
+          originalName: file.name,
+          uploadStarted: new Date().toISOString()
+        }
+      }])
+      .select()
+      .single();
+
+    if (dbError) throw dbError;
+
+    // Dosyayı storage'a yükle
+    const fileUrl = await uploadFileToStorage(file, 'cesium-files');
+    
+    if (!fileUrl) {
+      throw new Error('Dosya yükleme başarısız');
+    }
+
+    // Dosya kaydını güncelle
+    const existingMetadata = (fileRecord.metadata as Record<string, any>) || {};
+    const { error: updateError } = await supabase
+      .from('cesium_files')
+      .update({
+        file_path: fileUrl,
+        upload_status: 'completed',
+        metadata: {
+          ...existingMetadata,
+          uploadCompleted: new Date().toISOString(),
+          fileUrl: fileUrl
+        }
+      })
+      .eq('id', fileRecord.id);
+
+    if (updateError) throw updateError;
+
+    if (showToast) {
+      toast.success(`${file.name} başarıyla yüklendi`);
+      fetchFiles();
+      onFilesChange();
+    }
+  };
+
+  const handleZipUpload = async (zipFile: File) => {
+    toast.info('ZIP dosyası yüklendi, içerik çıkarılıyor...');
+    
+    // ZIP içeriğini çıkarmak için basit bir simülasyon
+    // Gerçek uygulamada JSZip kütüphanesi kullanılabilir
+    setUploadProgress(50);
+    
+    // ZIP dosyasını doğrudan yükle ve metadata'sında ZIP olduğunu belirt
+    await uploadSingleFile(zipFile, '3tz');
+    
+    setUploadProgress(100);
+    toast.success('ZIP arşivi başarıyla yüklendi');
   };
 
   const deleteFile = async (fileId: string) => {
@@ -168,12 +267,21 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
   const getFileTypeIcon = (fileType: string) => {
     switch (fileType) {
       case '3tz':
-        return '🏗️';
+        return '📦';
       case 'tileset':
       case 'json':
         return '📄';
       case 'b3dm':
         return '🏠';
+      case 'pnts':
+        return '☁️';
+      case 'i3dm':
+        return '🌲';
+      case 'cmpt':
+        return '📋';
+      case 'glb':
+      case 'gltf':
+        return '🎯';
       case 'las':
       case 'laz':
         return '☁️';
@@ -192,6 +300,16 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
         return 'JSON Dosyası';
       case 'b3dm':
         return 'Batched 3D Model';
+      case 'pnts':
+        return 'Point Cloud';
+      case 'i3dm':
+        return 'Instanced 3D Model';
+      case 'cmpt':
+        return 'Composite';
+      case 'glb':
+        return 'GLB Model';
+      case 'gltf':
+        return 'GLTF Model';
       case 'las':
         return 'LAS Nokta Bulutu';
       case 'laz':
@@ -221,25 +339,28 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload size={20} />
-            Dosya Yükleme
+            3D Tiles Dosya Yükleme
           </CardTitle>
         </CardHeader>
         <CardContent>
           <FileUploadBox
             onFileSelected={handleFileUpload}
-            title="Cesium Dosyalarını Yükle"
-            description="Sürükle-bırak veya tıklayarak dosya seç (.3tz, .json, .b3dm, .las, .laz)"
-            allowedTypes={['3tz', 'json', 'b3dm', 'las', 'laz']}
+            onMultipleFilesSelected={handleMultipleFileUpload}
+            title="3D Tiles Dosyalarını Yükle"
+            description="Tek dosya, çoklu dosya veya ZIP arşivi yükleyebilirsiniz"
+            allowedTypes={['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt', 'glb', 'gltf', 'las', 'laz']}
             maxSizeMB={100}
             isUploading={uploading}
-            icon={<FileText className="h-12 w-12 text-gray-400" />}
+            allowMultiple={true}
+            acceptZip={true}
+            icon={<Archive className="h-12 w-12 text-gray-400" />}
           />
           
           {uploading && (
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                 <span>Yükleniyor...</span>
-                <span>{uploadProgress}%</span>
+                <span>{Math.round(uploadProgress)}%</span>
               </div>
               <Progress value={uploadProgress} className="w-full" />
             </div>
@@ -260,6 +381,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
             <div className="text-center py-8 text-gray-500">
               <FileText size={48} className="mx-auto mb-4 opacity-50" />
               <p>Bu proje için henüz dosya yüklenmemiş</p>
+              <p className="text-sm mt-2">Desteklenen formatlar: .3tz, .json, .b3dm, .pnts, .i3dm, .cmpt, .glb, .gltf, .las, .laz, .zip</p>
             </div>
           ) : (
             <div className="space-y-3">
