@@ -37,11 +37,24 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
     }
   }, []);
 
-  // URL düzeltme fonksiyonu
-  const fixTilesetUrl = useCallback((url: string) => {
-    // Eğer URL zaten tam bir URL ise, olduğu gibi döndür
+  // URL doğrulama ve düzeltme fonksiyonu
+  const validateAndFixUrl = useCallback(async (url: string): Promise<string> => {
+    console.log('URL doğrulanıyor:', url);
+    
+    // Eğer URL zaten tam bir URL ise, doğruluğunu kontrol et
     if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        if (response.ok) {
+          console.log('URL geçerli:', url);
+          return url;
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('URL erişim hatası:', error);
+        throw new Error(`URL'ye erişilemedi: ${url}. Dosyanın mevcut olduğunu kontrol edin.`);
+      }
     }
     
     // Supabase storage URL'lerini kontrol et
@@ -51,7 +64,10 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
     
     // Eğer göreli bir path ise, mutlak URL'ye çevir
     const baseUrl = window.location.origin;
-    return url.startsWith('/') ? baseUrl + url : baseUrl + '/' + url;
+    const fullUrl = url.startsWith('/') ? baseUrl + url : baseUrl + '/' + url;
+    
+    console.log('Göreli yol mutlak URL\'ye çevrildi:', fullUrl);
+    return fullUrl;
   }, []);
 
   // Katman yükleme fonksiyonu
@@ -73,28 +89,16 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
         case 'mesh':
         case 'tileset':
           try {
-            // URL'nin geçerli olup olmadığını kontrol et
+            // URL'nin geçerli olup olmadığını kontrol et ve düzelt
             if (!layer.data_url || !layer.data_url.trim()) {
               throw new Error('Katman URL\'si boş veya geçersiz');
             }
 
-            // URL'yi düzelt
-            const fixedUrl = fixTilesetUrl(layer.data_url);
-            console.log(`3D Tileset yükleniyor: ${fixedUrl}`);
-
-            // URL'ye erişilebilir olup olmadığını test et
-            try {
-              const response = await fetch(fixedUrl, { method: 'HEAD' });
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-              }
-            } catch (fetchError) {
-              console.error('URL erişim hatası:', fetchError);
-              throw new Error(`Dosyaya erişilemedi: ${fixedUrl}. Dosyanın mevcut olduğunu ve erişilebilir olduğunu kontrol edin.`);
-            }
+            const validatedUrl = await validateAndFixUrl(layer.data_url);
+            console.log(`3D Tileset yükleniyor: ${validatedUrl}`);
 
             // Geçerli Cesium 3D Tileset seçenekleri
-            loadedResource = await Cesium3DTileset.fromUrl(fixedUrl, {
+            loadedResource = await Cesium3DTileset.fromUrl(validatedUrl, {
               maximumScreenSpaceError: 16,
               cullWithChildrenBounds: false,
               cullRequestsWhileMoving: true,
@@ -124,13 +128,33 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
               }
             }).catch((readyError: any) => {
               console.error('Tileset ready promise hatası:', readyError);
-              toast.warning(`${layer.name} yüklendi ancak bazı detaylar eksik olabilir`);
+              
+              // Daha detaylı hata mesajları
+              let userMessage = 'Model yüklendi ancak bazı detaylar eksik olabilir';
+              if (readyError.message && readyError.message.includes('404')) {
+                userMessage = 'Model yüklendi ancak bazı texture veya detay dosyaları bulunamadı';
+              } else if (readyError.message && readyError.message.includes('tileset.json')) {
+                userMessage = 'tileset.json dosyasında hata var, dosya yolları kontrol edilmeli';
+              }
+              
+              toast.warning(`${layer.name}: ${userMessage}`);
             });
             
             break;
           } catch (tilesetError) {
             console.error('3D Tileset yükleme hatası:', tilesetError);
-            throw new Error(`3D Tileset yüklenemedi: ${tilesetError.message}`);
+            
+            // Daha spesifik hata mesajları
+            let errorMessage = tilesetError.message;
+            if (errorMessage.includes('404')) {
+              errorMessage = `tileset.json veya referans dosyalar bulunamadı. Dosya yollarını kontrol edin.`;
+            } else if (errorMessage.includes('JSON')) {
+              errorMessage = `tileset.json formatı geçersiz veya bozuk.`;
+            } else if (errorMessage.includes('network')) {
+              errorMessage = `Ağ hatası: Model dosyalarına erişilemedi.`;
+            }
+            
+            throw new Error(`3D Tileset yüklenemedi: ${errorMessage}`);
           }
           
         case 'ortho':
@@ -180,20 +204,10 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
       console.error(`${layer.name} katmanı yüklenirken hata:`, error);
       const errorMessage = error.message || 'Bilinmeyen hata oluştu';
       
-      // Daha detaylı hata mesajları
-      let userFriendlyMessage = errorMessage;
-      if (errorMessage.includes('404')) {
-        userFriendlyMessage = `Dosya bulunamadı: ${layer.name}. Dosyanın doğru yüklendiğini kontrol edin.`;
-      } else if (errorMessage.includes('network')) {
-        userFriendlyMessage = `Ağ hatası: ${layer.name} dosyasına erişilemedi.`;
-      } else if (errorMessage.includes('parse') || errorMessage.includes('JSON')) {
-        userFriendlyMessage = `Dosya formatı hatası: ${layer.name} geçersiz veya bozuk.`;
-      }
-      
-      toast.error(`${layer.name} yüklenemedi: ${userFriendlyMessage}`);
+      toast.error(`${layer.name} yüklenemedi: ${errorMessage}`);
       onLayerLoad?.(layer.id, false);
     }
-  }, [onLayerLoad, fixTilesetUrl]);
+  }, [onLayerLoad, validateAndFixUrl]);
 
   // Katman kaldırma fonksiyonu
   const removeLayer = useCallback((layerId: string) => {
