@@ -51,10 +51,10 @@ const CesiumApp: React.FC = () => {
     if (layer) {
       if (success) {
         console.log(`Katman başarıyla yüklendi: ${layer.name}`);
-        // Toast zaten EnhancedCesiumViewer'da gösteriliyor
+        toast.success(`${layer.name} katmanı başarıyla yüklendi ve görüntülendi`);
       } else {
         console.error(`Katman yükleme başarısız: ${layer.name}`);
-        // Toast zaten EnhancedCesiumViewer'da gösteriliyor
+        toast.error(`${layer.name} katmanı yüklenemedi. Dosya yollarını kontrol edin.`);
       }
     }
   }, [layers]);
@@ -70,11 +70,13 @@ const CesiumApp: React.FC = () => {
   return (
     <Layout>
       <div className="relative h-screen w-full bg-black overflow-hidden">
-        <EnhancedCesiumViewer 
-          className="absolute inset-0" 
-          layers={layers}
-          onLayerLoad={handleLayerLoad}
-        />
+        <div className="absolute inset-0" style={{ width: '100%', height: '100%' }}>
+          <EnhancedCesiumViewer 
+            className="w-full h-full" 
+            layers={layers}
+            onLayerLoad={handleLayerLoad}
+          />
+        </div>
         
         <CesiumProjectSelector
           projects={projects}

@@ -62,7 +62,6 @@ export const processZipFile = async (
   for (const { path, file } of fileList) {
     try {
       const blob = await file.async('blob');
-      const fileName = path.split('/').pop() || path;
       const filePath = `${folderName}/${path}`;
       
       console.log(`Dosya yükleniyor: ${path} -> ${filePath}`);
@@ -129,6 +128,7 @@ export const processZipFile = async (
 
 // tileset.json içindeki dosya yollarını güncelle
 const updateTilesetPaths = (tilesetContent: any, folderName: string): any => {
+  // Supabase public URL'ini doğru formatta oluştur
   const baseUrl = `https://lcxyrthrzviksmksfvmz.supabase.co/storage/v1/object/public/cesium-files/${folderName}`;
   
   const updatePaths = (obj: any): any => {
@@ -146,7 +146,9 @@ const updateTilesetPaths = (tilesetContent: any, folderName: string): any => {
     if (updated.content && updated.content.uri) {
       const originalUri = updated.content.uri;
       if (!originalUri.startsWith('http')) {
-        updated.content.uri = `${baseUrl}/${originalUri}`;
+        // Slash'ı normalize et
+        const cleanUri = originalUri.startsWith('./') ? originalUri.substring(2) : originalUri;
+        updated.content.uri = `${baseUrl}/${cleanUri}`;
         console.log(`URI güncellendi: ${originalUri} -> ${updated.content.uri}`);
       }
     }
@@ -155,7 +157,8 @@ const updateTilesetPaths = (tilesetContent: any, folderName: string): any => {
     if (updated.texture) {
       const originalTexture = updated.texture;
       if (typeof originalTexture === 'string' && !originalTexture.startsWith('http')) {
-        updated.texture = `${baseUrl}/${originalTexture}`;
+        const cleanTexture = originalTexture.startsWith('./') ? originalTexture.substring(2) : originalTexture;
+        updated.texture = `${baseUrl}/${cleanTexture}`;
         console.log(`Texture güncellendi: ${originalTexture} -> ${updated.texture}`);
       }
     }
@@ -165,15 +168,24 @@ const updateTilesetPaths = (tilesetContent: any, folderName: string): any => {
       Object.keys(updated.images).forEach(key => {
         const imagePath = updated.images[key];
         if (typeof imagePath === 'string' && !imagePath.startsWith('http')) {
-          updated.images[key] = `${baseUrl}/${imagePath}`;
+          const cleanImagePath = imagePath.startsWith('./') ? imagePath.substring(2) : imagePath;
+          updated.images[key] = `${baseUrl}/${cleanImagePath}`;
           console.log(`Image güncellendi: ${imagePath} -> ${updated.images[key]}`);
         }
       });
     }
     
+    // uri alanlarını güncelle (doğrudan uri property'si olan objeler için)
+    if (updated.uri && typeof updated.uri === 'string' && !updated.uri.startsWith('http')) {
+      const originalUri = updated.uri;
+      const cleanUri = originalUri.startsWith('./') ? originalUri.substring(2) : originalUri;
+      updated.uri = `${baseUrl}/${cleanUri}`;
+      console.log(`Direct URI güncellendi: ${originalUri} -> ${updated.uri}`);
+    }
+    
     // Diğer alanları recursively işle
     Object.keys(updated).forEach(key => {
-      if (key !== 'content' && key !== 'texture' && key !== 'images') {
+      if (key !== 'content' && key !== 'texture' && key !== 'images' && key !== 'uri') {
         updated[key] = updatePaths(updated[key]);
       }
     });
@@ -190,7 +202,6 @@ export const processSingleFile = async (
   projectId: string
 ): Promise<string> => {
   const timestamp = Date.now();
-  const fileExt = file.name.split('.').pop()?.toLowerCase();
   const fileName = `project-${projectId}-${timestamp}-${file.name}`;
   
   console.log(`Tek dosya yükleniyor: ${file.name} -> ${fileName}`);

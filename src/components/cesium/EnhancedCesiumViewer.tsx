@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Viewer as CesiumViewer, createWorldTerrainAsync, Ion, Cartesian3, Cesium3DTileset, ImageryLayer, WebMapServiceImageryProvider } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
@@ -33,8 +34,11 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
       if (rect.width === 0 || rect.height === 0) {
         console.warn('Cesium container boyutları sıfır! CSS kontrol edilmeli.');
         toast.error('Cesium container boyut sorunu tespit edildi');
+        return false;
       }
+      return true;
     }
+    return false;
   }, []);
 
   // URL doğrulama ve düzeltme fonksiyonu
@@ -44,16 +48,13 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
     // Eğer URL zaten tam bir URL ise, doğruluğunu kontrol et
     if (url.startsWith('http://') || url.startsWith('https://')) {
       try {
-        const response = await fetch(url, { method: 'HEAD' });
-        if (response.ok) {
-          console.log('URL geçerli:', url);
-          return url;
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        // HEAD request yerine basit URL formatı kontrolü yap
+        new URL(url); // URL formatını kontrol et
+        console.log('URL geçerli:', url);
+        return url;
       } catch (error) {
-        console.error('URL erişim hatası:', error);
-        throw new Error(`URL'ye erişilemedi: ${url}. Dosyanın mevcut olduğunu kontrol edin.`);
+        console.error('URL format hatası:', error);
+        throw new Error(`Geçersiz URL formatı: ${url}`);
       }
     }
     
@@ -97,17 +98,9 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
             const validatedUrl = await validateAndFixUrl(layer.data_url);
             console.log(`3D Tileset yükleniyor: ${validatedUrl}`);
 
-            // Geçerli Cesium 3D Tileset seçenekleri
+            // Basit 3D Tileset seçenekleri
             loadedResource = await Cesium3DTileset.fromUrl(validatedUrl, {
-              maximumScreenSpaceError: 16,
-              cullWithChildrenBounds: false,
-              cullRequestsWhileMoving: true,
-              cullRequestsWhileMovingMultiplier: 60.0,
-              skipLevelOfDetail: true,
-              skipScreenSpaceErrorFactor: 16,
-              skipLevels: 1,
-              immediatelyLoadDesiredLevelOfDetail: false,
-              loadSiblings: false
+              maximumScreenSpaceError: 16
             });
             
             if (!loadedResource) {
@@ -233,9 +226,14 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
   useEffect(() => {
     if (!cesiumContainer.current) return;
 
-    checkContainerSize();
+    // Container boyutunu kontrol et
+    const containerValid = checkContainerSize();
+    if (!containerValid) {
+      console.error('Container boyutları geçersiz, Cesium viewer oluşturulamıyor');
+      return;
+    }
 
-    // Geçerli Cesium Ion token
+    // Güncellenen Cesium Ion token (daha güncel)
     Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWNmNzI1NS0wNDRjLTRjN2QtYjMyMi0zMGIxMGU3MDBmYzkiLCJpZCI6NDE3MTMsImlhdCI6MTc0ODcyNjI5Mn0.ARU7thee8WkbfLvADG4jsebahgLZNWEoFoT2Ya42DiE';
 
     const initViewer = async () => {
@@ -337,7 +335,13 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
     <div 
       ref={cesiumContainer} 
       className={className}
-      style={{ minHeight: '400px' }}
+      style={{ 
+        minHeight: '400px',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        display: 'block'
+      }}
     />
   );
 };
