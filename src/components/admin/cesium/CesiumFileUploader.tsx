@@ -27,6 +27,15 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
     fetchFiles();
   }, [projectId]);
 
+  // Helper function to safely convert Json to Record<string, any>
+  const safeMetadataConvert = (metadata: any): Record<string, any> => {
+    if (!metadata) return {};
+    if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+      return metadata as Record<string, any>;
+    }
+    return {};
+  };
+
   const fetchFiles = async () => {
     try {
       const { data, error } = await supabase
@@ -41,7 +50,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
         ...file,
         file_type: file.file_type as CesiumFile['file_type'],
         upload_status: file.upload_status as CesiumFile['upload_status'],
-        metadata: (file.metadata as Record<string, any>) || {}
+        metadata: safeMetadataConvert(file.metadata)
       })) || []);
     } catch (error) {
       console.error('Dosyalar yüklenirken hata:', error);
@@ -159,7 +168,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
           ...fileRecord,
           file_type: 'tileset',
           upload_status: 'completed',
-          metadata: fileRecord.metadata || {}
+          metadata: safeMetadataConvert(fileRecord.metadata)
         });
         
         setUploadProgress(100);
@@ -236,7 +245,7 @@ const CesiumFileUploader: React.FC<CesiumFileUploaderProps> = ({
           ...fileRecord,
           file_type: fileType,
           upload_status: 'completed',
-          metadata: fileRecord.metadata || {}
+          metadata: safeMetadataConvert(fileRecord.metadata)
         });
         
         setUploadProgress(100);
