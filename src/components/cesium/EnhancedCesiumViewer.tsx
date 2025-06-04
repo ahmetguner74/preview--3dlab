@@ -233,7 +233,7 @@ const EnhancedCesiumViewer: React.FC<EnhancedCesiumViewerProps> = ({
       return;
     }
 
-    // Güncellenen Cesium Ion token (daha güncel)
+    // Yeni Cesium Ion token
     Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWNmNzI1NS0wNDRjLTRjN2QtYjMyMi0zMGIxMGU3MDBmYzkiLCJpZCI6NDE3MTMsImlhdCI6MTc0ODcyNjI5Mn0.ARU7thee8WkbfLvADG4jsebahgLZNWEoFoT2Ya42DiE';
 
     const initViewer = async () => {

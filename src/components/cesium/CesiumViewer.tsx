@@ -21,8 +21,8 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
   useEffect(() => {
     if (!cesiumContainer.current) return;
 
-    // Cesium Ion token
-    Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyNzg0NTE4Mn0.XcKpgANiY19MC4bdFUPB2qVhFUdcCRAKyzvs6IjQLJY';
+    // Yeni Cesium Ion token
+    Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWNmNzI1NS0wNDRjLTRjN2QtYjMyMi0zMGIxMGU3MDBmYzkiLCJpZCI6NDE3MTMsImlhdCI6MTc0ODcyNjI5Mn0.ARU7thee8WkbfLvADG4jsebahgLZNWEoFoT2Ya42DiE';
 
     const initViewer = async () => {
       try {
