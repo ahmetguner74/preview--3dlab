@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Viewer as CesiumViewer, createWorldTerrainAsync, Ion, Cartesian3, Cesium3DTileset } from 'cesium';
 import { Button } from '@/components/ui/button';
-import { Upload, FileCheck, AlertCircle } from 'lucide-react';
+import { Upload, FileCheck, AlertCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
@@ -10,12 +10,18 @@ interface CesiumViewerProps {
   className?: string;
 }
 
+interface LoadedModel {
+  id: string;
+  name: string;
+  tileset: Cesium3DTileset;
+}
+
 const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-screen w-full" }) => {
   const cesiumContainer = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<CesiumViewer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [hasModel, setHasModel] = useState(false);
+  const [loadedModels, setLoadedModels] = useState<LoadedModel[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -26,7 +32,13 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
 
     const initViewer = async () => {
       try {
-        const terrainProvider = await createWorldTerrainAsync();
+        let terrainProvider;
+        try {
+          terrainProvider = await createWorldTerrainAsync();
+        } catch (terrainError) {
+          console.warn('World Terrain yüklenemedi, varsayılan terrain kullanılıyor');
+          terrainProvider = undefined;
+        }
         
         const viewer = new CesiumViewer(cesiumContainer.current!, {
           terrainProvider,
@@ -50,6 +62,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
 
         viewerRef.current = viewer;
         setIsLoaded(true);
+        toast.success('Cesium haritası başarıyla yüklendi');
       } catch (error) {
         console.error('Cesium viewer oluşturulamadı:', error);
         toast.error('Cesium viewer yüklenirken hata oluştu');
@@ -67,36 +80,54 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
   }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !viewerRef.current) return;
-
-    // Dosya türü kontrolü
-    if (!file.name.endsWith('.json') && !file.name.endsWith('.3tz')) {
-      toast.error('Lütfen geçerli bir tileset.json veya .3tz dosyası seçin');
-      return;
-    }
+    const files = event.target.files;
+    if (!files || files.length === 0 || !viewerRef.current) return;
 
     setLoading(true);
 
     try {
-      // Dosyayı okuma
-      const fileUrl = URL.createObjectURL(file);
-      
-      // 3D Tileset oluşturma
-      const tileset = await Cesium3DTileset.fromUrl(fileUrl);
-      
-      // Sahneye ekleme
-      viewerRef.current.scene.primitives.add(tileset);
-      
-      // Kamerayı modele yönlendirme
-      viewerRef.current.zoomTo(tileset);
-      
-      setHasModel(true);
-      toast.success(`${file.name} başarıyla yüklendi`);
-      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Dosya türü kontrolü
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        const supportedFormats = ['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt', 'glb', 'gltf', 'las', 'laz', 'zip'];
+        
+        if (!fileExt || !supportedFormats.includes(fileExt)) {
+          toast.error(`Desteklenmeyen dosya türü: ${file.name}`);
+          continue;
+        }
+
+        // Dosyayı okuma
+        const fileUrl = URL.createObjectURL(file);
+        
+        // 3D Tileset oluşturma
+        try {
+          const tileset = await Cesium3DTileset.fromUrl(fileUrl);
+          
+          // Sahneye ekleme
+          viewerRef.current.scene.primitives.add(tileset);
+          
+          // Model listesine ekleme
+          const modelId = `model_${Date.now()}_${i}`;
+          setLoadedModels(prev => [...prev, {
+            id: modelId,
+            name: file.name,
+            tileset: tileset
+          }]);
+          
+          // Kamerayı modele yönlendirme
+          viewerRef.current.zoomTo(tileset);
+          
+          toast.success(`${file.name} başarıyla yüklendi ve görüntülendi`);
+        } catch (modelError) {
+          console.error(`Model yükleme hatası (${file.name}):`, modelError);
+          toast.error(`${file.name} yüklenemedi. Dosya formatını kontrol edin.`);
+        }
+      }
     } catch (error) {
-      console.error('Model yükleme hatası:', error);
-      toast.error('Model yüklenirken hata oluştu. Dosya formatını kontrol edin.');
+      console.error('Dosya yükleme hatası:', error);
+      toast.error('Dosyalar yüklenirken hata oluştu');
     } finally {
       setLoading(false);
       // Input değerini temizle
@@ -106,8 +137,33 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
     }
   };
 
+  const removeModel = (modelId: string) => {
+    if (!viewerRef.current) return;
+    
+    const model = loadedModels.find(m => m.id === modelId);
+    if (model) {
+      viewerRef.current.scene.primitives.remove(model.tileset);
+      setLoadedModels(prev => prev.filter(m => m.id !== modelId));
+      toast.success(`${model.name} kaldırıldı`);
+    }
+  };
+
+  const focusOnModel = (modelId: string) => {
+    if (!viewerRef.current) return;
+    
+    const model = loadedModels.find(m => m.id === modelId);
+    if (model) {
+      viewerRef.current.zoomTo(model.tileset);
+      toast.info(`${model.name} modeline odaklanıldı`);
+    }
+  };
+
   const triggerFileUpload = () => {
     fileInputRef.current?.click();
+  };
+
+  const getSupportedFormatsText = () => {
+    return "3D Tiles (.3tz, tileset.json, .b3dm, .pnts, .i3dm, .cmpt), 3D Modeller (.glb, .gltf), Nokta Bulutu (.las, .laz), ZIP Arşivleri";
   };
 
   return (
@@ -115,24 +171,12 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       {/* Cesium Container */}
       <div ref={cesiumContainer} className="absolute inset-0" />
       
-      {/* Overlay UI */}
+      {/* Dosya Yükleme UI */}
       {isLoaded && (
         <div className="absolute top-4 left-4 z-10">
-          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="text-sm">
-                {hasModel ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <FileCheck size={16} />
-                    <span>Model yüklendi</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <AlertCircle size={16} />
-                    <span>3D Tiles dosyası yükleyin</span>
-                  </div>
-                )}
-              </div>
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg max-w-80">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium text-lg">3D Model Yükleme</h3>
               <Button
                 onClick={triggerFileUpload}
                 disabled={loading}
@@ -143,20 +187,55 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
                 {loading ? 'Yükleniyor...' : 'Dosya Seç'}
               </Button>
             </div>
+            
+            <div className="text-xs text-gray-600 mb-3">
+              <strong>Desteklenen formatlar:</strong><br />
+              {getSupportedFormatsText()}
+            </div>
+
+            {loadedModels.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-700">
+                  Yüklenen Modeller ({loadedModels.length}):
+                </div>
+                {loadedModels.map((model) => (
+                  <div key={model.id} className="flex items-center justify-between bg-gray-50 p-2 rounded text-sm">
+                    <span 
+                      className="truncate cursor-pointer hover:text-blue-600 flex-1 mr-2"
+                      onClick={() => focusOnModel(model.id)}
+                      title={`${model.name} - Odaklanmak için tıklayın`}
+                    >
+                      {model.name}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeModel(model.id)}
+                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={12} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Welcome Message */}
-      {isLoaded && !hasModel && (
+      {isLoaded && loadedModels.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-5 pointer-events-none">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 text-center shadow-xl">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 text-center shadow-xl max-w-md">
             <Upload size={48} className="mx-auto mb-4 text-gray-400" />
-            <h2 className="text-xl font-medium text-gray-800 mb-2">
-              Lütfen bir 3D Tiles dosyası yükleyin
+            <h2 className="text-xl font-medium text-gray-800 mb-3">
+              3D Modellerinizi Yükleyin
             </h2>
-            <p className="text-sm text-gray-600">
-              Desteklenen formatlar: tileset.json, .3tz
+            <p className="text-sm text-gray-600 mb-2">
+              <strong>Desteklenen formatlar:</strong>
+            </p>
+            <p className="text-xs text-gray-500">
+              {getSupportedFormatsText()}
             </p>
           </div>
         </div>
@@ -176,9 +255,10 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       <input
         ref={fileInputRef}
         type="file"
-        accept=".json,.3tz"
+        accept=".3tz,.json,.b3dm,.pnts,.i3dm,.cmpt,.glb,.gltf,.las,.laz,.zip"
         onChange={handleFileUpload}
         className="hidden"
+        multiple
       />
     </div>
   );

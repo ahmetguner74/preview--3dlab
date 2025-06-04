@@ -1,104 +1,13 @@
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
-import EnhancedCesiumViewer from '@/components/cesium/EnhancedCesiumViewer';
-import EnhancedLayerManager from '@/components/cesium/EnhancedLayerManager';
-import CesiumProjectSelector from '@/components/cesium/CesiumProjectSelector';
-import MeasurementTools from '@/components/cesium/MeasurementTools';
-import { useCesiumProjects, useCesiumLayers } from '@/hooks/useCesiumData';
-import { toast } from 'sonner';
-
-interface MeasurementResult {
-  id: string;
-  type: 'coordinate' | 'distance' | 'area';
-  value: string;
-  coordinates?: string;
-}
-
-type MeasurementMode = 'none' | 'coordinate' | 'distance' | 'area';
+import CesiumViewer from '@/components/cesium/CesiumViewer';
 
 const CesiumApp: React.FC = () => {
-  const [selectedProjectId, setSelectedProjectId] = useState<string>();
-  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>('none');
-  const [measurementResults, setMeasurementResults] = useState<MeasurementResult[]>([]);
-
-  const { projects, loading: projectsLoading } = useCesiumProjects();
-  const { layers, loading: layersLoading, toggleLayerVisibility, updateLayerOpacity } = useCesiumLayers(selectedProjectId);
-
-  const handleProjectSelect = useCallback((projectId: string) => {
-    setSelectedProjectId(projectId);
-    console.log('Seçilen proje:', projectId);
-    toast.info('Proje değiştirildi, katmanlar yükleniyor...');
-  }, []);
-
-  const handleLayerToggle = useCallback((layerId: string, visible: boolean) => {
-    console.log(`Katman görünürlüğü değiştiriliyor: ${layerId} = ${visible}`);
-    toggleLayerVisibility(layerId, visible);
-  }, [toggleLayerVisibility]);
-
-  const handleOpacityChange = useCallback((layerId: string, opacity: number) => {
-    console.log(`Katman şeffaflığı değiştiriliyor: ${layerId} = ${opacity}`);
-    updateLayerOpacity(layerId, opacity);
-  }, [updateLayerOpacity]);
-
-  const handleLayerSettings = useCallback((layerId: string) => {
-    console.log('Katman ayarları:', layerId);
-    toast.info(`${layerId} katmanı için ayarlar yakında gelecek`);
-  }, []);
-
-  const handleLayerLoad = useCallback((layerId: string, success: boolean) => {
-    const layer = layers.find(l => l.id === layerId);
-    if (layer) {
-      if (success) {
-        console.log(`Katman başarıyla yüklendi: ${layer.name}`);
-        toast.success(`${layer.name} katmanı başarıyla yüklendi ve görüntülendi`);
-      } else {
-        console.error(`Katman yükleme başarısız: ${layer.name}`);
-        toast.error(`${layer.name} katmanı yüklenemedi. Dosya yollarını kontrol edin.`);
-      }
-    }
-  }, [layers]);
-
-  const handleMeasurementModeChange = useCallback((mode: MeasurementMode) => {
-    setMeasurementMode(mode);
-  }, []);
-
-  const handleClearMeasurements = useCallback(() => {
-    setMeasurementResults([]);
-  }, []);
-
   return (
     <Layout>
       <div className="relative h-screen w-full bg-black overflow-hidden">
-        <div className="absolute inset-0" style={{ width: '100%', height: '100%' }}>
-          <EnhancedCesiumViewer 
-            className="w-full h-full" 
-            layers={layers}
-            onLayerLoad={handleLayerLoad}
-          />
-        </div>
-        
-        <CesiumProjectSelector
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          onProjectSelect={handleProjectSelect}
-          loading={projectsLoading}
-        />
-        
-        <EnhancedLayerManager
-          layers={layers}
-          onLayerToggle={handleLayerToggle}
-          onOpacityChange={handleOpacityChange}
-          onLayerSettings={handleLayerSettings}
-          loading={layersLoading}
-        />
-        
-        <MeasurementTools
-          currentMode={measurementMode}
-          onModeChange={handleMeasurementModeChange}
-          results={measurementResults}
-          onClearResults={handleClearMeasurements}
-        />
+        <CesiumViewer className="w-full h-full" />
       </div>
     </Layout>
   );
