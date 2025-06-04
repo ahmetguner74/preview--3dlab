@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Viewer as CesiumViewer, createWorldTerrainAsync, Ion, Cartesian3, Cesium3DTileset } from 'cesium';
 import { Button } from '@/components/ui/button';
-import { Upload, FileCheck, AlertCircle, Trash2 } from 'lucide-react';
+import { Upload, FileCheck, AlertCircle, Trash2, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
@@ -27,7 +27,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
   useEffect(() => {
     if (!cesiumContainer.current) return;
 
-    // Yeni Cesium Ion token
+    // Cesium Ion token
     Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWNmNzI1NS0wNDRjLTRjN2QtYjMyMi0zMGIxMGU3MDBmYzkiLCJpZCI6NDE3MTMsImlhdCI6MTc0ODcyNjI5Mn0.ARU7thee8WkbfLvADG4jsebahgLZNWEoFoT2Ya42DiE';
 
     const initViewer = async () => {
@@ -91,10 +91,14 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         
         // Dosya türü kontrolü
         const fileExt = file.name.split('.').pop()?.toLowerCase();
-        const supportedFormats = ['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt', 'glb', 'gltf', 'las', 'laz', 'zip'];
+        const supportedFormats = ['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt', 'glb', 'gltf'];
         
         if (!fileExt || !supportedFormats.includes(fileExt)) {
-          toast.error(`Desteklenmeyen dosya türü: ${file.name}`);
+          if (fileExt === 'las' || fileExt === 'laz') {
+            toast.error(`${file.name}: LAS/LAZ dosyaları desteklenmiyor. Önce 3D Tiles formatına dönüştürülmesi gerekiyor.`);
+          } else {
+            toast.error(`Desteklenmeyen dosya türü: ${file.name}. Sadece 3D Tiles ve GLTF dosyaları desteklenir.`);
+          }
           continue;
         }
 
@@ -103,7 +107,20 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         
         // 3D Tileset oluşturma
         try {
-          const tileset = await Cesium3DTileset.fromUrl(fileUrl);
+          let tileset;
+          
+          if (fileExt === 'glb' || fileExt === 'gltf') {
+            // GLB/GLTF dosyaları için farklı yaklaşım gerekebilir
+            toast.info(`${file.name}: GLB/GLTF dosyaları için henüz tam destek yok`);
+            continue;
+          } else {
+            // 3D Tiles dosyaları
+            tileset = await Cesium3DTileset.fromUrl(fileUrl, {
+              maximumScreenSpaceError: 16,
+              debugShowBoundingVolume: false,
+              debugShowContentBoundingVolume: false
+            });
+          }
           
           // Sahneye ekleme
           viewerRef.current.scene.primitives.add(tileset);
@@ -122,7 +139,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           toast.success(`${file.name} başarıyla yüklendi ve görüntülendi`);
         } catch (modelError) {
           console.error(`Model yükleme hatası (${file.name}):`, modelError);
-          toast.error(`${file.name} yüklenemedi. Dosya formatını kontrol edin.`);
+          toast.error(`${file.name} yüklenemedi. Geçerli bir 3D Tiles dosyası olduğundan emin olun.`);
         }
       }
     } catch (error) {
@@ -162,10 +179,6 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
     fileInputRef.current?.click();
   };
 
-  const getSupportedFormatsText = () => {
-    return "3D Tiles (.3tz, tileset.json, .b3dm, .pnts, .i3dm, .cmpt), 3D Modeller (.glb, .gltf), Nokta Bulutu (.las, .laz), ZIP Arşivleri";
-  };
-
   return (
     <div className={`relative ${className} bg-black overflow-hidden`}>
       {/* Cesium Container */}
@@ -188,9 +201,23 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
               </Button>
             </div>
             
-            <div className="text-xs text-gray-600 mb-3">
-              <strong>Desteklenen formatlar:</strong><br />
-              {getSupportedFormatsText()}
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
+              <div className="flex items-start gap-2">
+                <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-blue-800">
+                  <div className="font-medium mb-1">Desteklenen formatlar:</div>
+                  <div className="space-y-1">
+                    <div>• <strong>3D Tiles:</strong> .3tz, tileset.json, .b3dm, .pnts, .i3dm, .cmpt</div>
+                    <div>• <strong>3D Modeller:</strong> .glb, .gltf (sınırlı destek)</div>
+                  </div>
+                  <div className="mt-2 text-red-700 font-medium">
+                    ⚠️ LAS/LAZ dosyaları desteklenmiyor
+                  </div>
+                  <div className="text-xs text-red-600">
+                    Nokta bulutu verilerini önce 3D Tiles formatına dönüştürün
+                  </div>
+                </div>
+              </div>
             </div>
 
             {loadedModels.length > 0 && (
@@ -226,17 +253,17 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       {/* Welcome Message */}
       {isLoaded && loadedModels.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-5 pointer-events-none">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 text-center shadow-xl max-w-md">
+          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 text-center shadow-xl max-w-md">
             <Upload size={48} className="mx-auto mb-4 text-gray-400" />
             <h2 className="text-xl font-medium text-gray-800 mb-3">
               3D Modellerinizi Yükleyin
             </h2>
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Desteklenen formatlar:</strong>
-            </p>
-            <p className="text-xs text-gray-500">
-              {getSupportedFormatsText()}
-            </p>
+            <div className="text-sm text-gray-600 space-y-2">
+              <div><strong>Desteklenen formatlar:</strong></div>
+              <div className="text-green-700">✅ 3D Tiles (.3tz, tileset.json, .b3dm, .pnts, .i3dm, .cmpt)</div>
+              <div className="text-yellow-700">⚠️ 3D Modeller (.glb, .gltf) - sınırlı destek</div>
+              <div className="text-red-700">❌ Nokta Bulutu (.las, .laz) - desteklenmiyor</div>
+            </div>
           </div>
         </div>
       )}
@@ -255,7 +282,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       <input
         ref={fileInputRef}
         type="file"
-        accept=".3tz,.json,.b3dm,.pnts,.i3dm,.cmpt,.glb,.gltf,.las,.laz,.zip"
+        accept=".3tz,.json,.b3dm,.pnts,.i3dm,.cmpt,.glb,.gltf"
         onChange={handleFileUpload}
         className="hidden"
         multiple
