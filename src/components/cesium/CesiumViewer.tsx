@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Viewer as CesiumViewer, createWorldTerrainAsync, Ion, Cartesian3, Cesium3DTileset } from 'cesium';
+import { Viewer as CesiumViewer, Cartesian3, Cesium3DTileset } from 'cesium';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
@@ -20,32 +20,35 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
   useEffect(() => {
     if (!cesiumContainer.current) return;
 
-    // Cesium Ion token
-    Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWNmNzI1NS0wNDRjLTRjN2QtYjMyMi0zMGIxMGU3MDBmYzkiLCJpZCI6NDE3MTMsImlhdCI6MTc0ODcyNjI5Mn0.ARU7thee8WkbfLvADG4jsebahgLZNWEoFoT2Ya42DiE';
-
     const initViewer = async () => {
       try {
-        let terrainProvider;
-        try {
-          terrainProvider = await createWorldTerrainAsync();
-        } catch (terrainError) {
-          console.warn('World Terrain yüklenemedi, varsayılan terrain kullanılıyor');
-          terrainProvider = undefined;
-        }
+        console.log('Cesium viewer başlatılıyor...');
         
+        // Token kullanmadan basit bir viewer oluştur
         const viewer = new CesiumViewer(cesiumContainer.current!, {
-          terrainProvider,
-          homeButton: false,
+          // Terrain sağlayıcısını devre dışı bırak
+          terrainProvider: undefined,
+          // UI kontrollerini minimal tutma
+          homeButton: true,
           sceneModePicker: false,
           baseLayerPicker: false,
           navigationHelpButton: false,
           animation: false,
           timeline: false,
-          fullscreenButton: false,
+          fullscreenButton: true,
           vrButton: false,
           geocoder: false,
           infoBox: false,
-          selectionIndicator: false
+          selectionIndicator: true,
+          // Hata yönetimi
+          requestRenderMode: false,
+          maximumRenderTimeChange: undefined
+        });
+
+        // Hata durumlarını yakalama
+        viewer.scene.renderError.addEventListener((error) => {
+          console.warn('Cesium render uyarısı:', error);
+          // Hata durumunda viewer'ı yeniden başlatma
         });
 
         // Başlangıç konumu (Türkiye)
@@ -53,12 +56,27 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           destination: Cartesian3.fromDegrees(35.2433, 38.9637, 1000000)
         });
 
+        // Temel ayarlar
+        viewer.scene.globe.enableLighting = false;
+        viewer.scene.skyBox.show = true;
+        viewer.scene.sun.show = true;
+        viewer.scene.moon.show = false;
+
         viewerRef.current = viewer;
         setIsLoaded(true);
-        toast.success('3D Dünya Haritası Yüklendi');
+        console.log('Cesium viewer başarıyla yüklendi');
+        toast.success('3D Harita Yüklendi');
       } catch (error) {
         console.error('Cesium viewer oluşturulamadı:', error);
         toast.error('3D Harita yüklenirken hata oluştu');
+        
+        // Hata durumunda tekrar deneme
+        setTimeout(() => {
+          console.log('Cesium viewer tekrar deneniliyor...');
+          if (!viewerRef.current) {
+            initViewer();
+          }
+        }, 2000);
       }
     };
 
@@ -66,8 +84,12 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
 
     return () => {
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {
-        viewerRef.current.destroy();
-        viewerRef.current = null;
+        try {
+          viewerRef.current.destroy();
+          viewerRef.current = null;
+        } catch (error) {
+          console.warn('Viewer destroy hatası:', error);
+        }
       }
     };
   }, []);
@@ -84,7 +106,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         
         // Dosya türü kontrolü
         const fileExt = file.name.split('.').pop()?.toLowerCase();
-        const supportedFormats = ['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt', 'glb', 'gltf'];
+        const supportedFormats = ['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt'];
         
         if (!fileExt || !supportedFormats.includes(fileExt)) {
           toast.error(`Desteklenmeyen dosya türü: ${file.name}`);
@@ -95,26 +117,36 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         const fileUrl = URL.createObjectURL(file);
         
         try {
-          if (fileExt === 'glb' || fileExt === 'gltf') {
-            toast.info(`${file.name}: GLB/GLTF desteği sınırlı`);
-            continue;
-          } else {
-            // 3D Tiles dosyaları
-            const tileset = await Cesium3DTileset.fromUrl(fileUrl, {
-              maximumScreenSpaceError: 16
-            });
+          console.log(`3D Tileset yükleniyor: ${file.name}`);
+          
+          // 3D Tiles dosyası yükleme
+          const tileset = await Cesium3DTileset.fromUrl(fileUrl, {
+            maximumScreenSpaceError: 16,
+            skipLevelOfDetail: true,
+            baseScreenSpaceError: 1024,
+            skipScreenSpaceErrorFactor: 16,
+            skipLevels: 1,
+            immediatelyLoadDesiredLevelOfDetail: false,
+            loadSiblings: false,
+            cullWithChildrenBounds: true
+          });
+          
+          // Sahneye ekleme
+          viewerRef.current.scene.primitives.add(tileset);
+          
+          // Model yüklendiğinde kamerayı odakla
+          tileset.readyPromise.then(() => {
+            console.log(`${file.name} tileset hazır, kamera odaklanıyor...`);
+            viewerRef.current?.zoomTo(tileset);
+            toast.success(`${file.name} başarıyla yüklendi`);
+          }).catch((readyError: any) => {
+            console.warn('Tileset ready promise uyarısı:', readyError);
+            toast.success(`${file.name} yüklendi (bazı detaylar eksik olabilir)`);
+          });
             
-            // Sahneye ekleme
-            viewerRef.current.scene.primitives.add(tileset);
-            
-            // Kamerayı modele yönlendirme
-            viewerRef.current.zoomTo(tileset);
-            
-            toast.success(`${file.name} yüklendi`);
-          }
         } catch (modelError) {
           console.error(`Model yükleme hatası (${file.name}):`, modelError);
-          toast.error(`${file.name} yüklenemedi`);
+          toast.error(`${file.name} yüklenemedi: Format hatası`);
         }
       }
     } catch (error) {
@@ -137,7 +169,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       {/* Cesium Container */}
       <div ref={cesiumContainer} className="absolute inset-0" />
       
-      {/* Minimalist Upload Button */}
+      {/* Upload Button */}
       {isLoaded && (
         <div className="absolute top-4 left-4 z-10">
           <Button
@@ -156,7 +188,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-            <p>3D Dünya Haritası Yükleniyor...</p>
+            <p>3D Harita Yükleniyor...</p>
           </div>
         </div>
       )}
@@ -165,7 +197,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       <input
         ref={fileInputRef}
         type="file"
-        accept=".3tz,.json,.b3dm,.pnts,.i3dm,.cmpt,.glb,.gltf"
+        accept=".3tz,.json,.b3dm,.pnts,.i3dm,.cmpt"
         onChange={handleFileUpload}
         className="hidden"
         multiple
