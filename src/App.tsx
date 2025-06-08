@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,7 +19,6 @@ import SettingsPage from "./pages/admin/Settings";
 import AboutContent from "./pages/admin/AboutContent";
 import YoloProcessing from "./pages/YoloProcessing";
 import NotFound from "./pages/NotFound";
-import WhatsappButton from "./components/ui/WhatsappButton";
 import Maps from "./pages/Maps";
 import MapServices from "./pages/admin/MapServices";
 import CesiumApp from "./pages/CesiumApp";
@@ -63,7 +63,6 @@ const App = () => (
           <Route path="/admin/yolo" element={<YoloProcessing />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <WhatsappButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
