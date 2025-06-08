@@ -24,11 +24,8 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       try {
         console.log('Cesium viewer başlatılıyor...');
         
-        // Token kullanmadan basit bir viewer oluştur
         const viewer = new CesiumViewer(cesiumContainer.current!, {
-          // Terrain sağlayıcısını devre dışı bırak
           terrainProvider: undefined,
-          // UI kontrollerini minimal tutma
           homeButton: true,
           sceneModePicker: false,
           baseLayerPicker: false,
@@ -40,15 +37,12 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           geocoder: false,
           infoBox: false,
           selectionIndicator: true,
-          // Hata yönetimi
           requestRenderMode: false,
           maximumRenderTimeChange: undefined
         });
 
-        // Hata durumlarını yakalama
         viewer.scene.renderError.addEventListener((error) => {
           console.warn('Cesium render uyarısı:', error);
-          // Hata durumunda viewer'ı yeniden başlatma
         });
 
         // Başlangıç konumu (Türkiye)
@@ -56,7 +50,6 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           destination: Cartesian3.fromDegrees(35.2433, 38.9637, 1000000)
         });
 
-        // Temel ayarlar
         viewer.scene.globe.enableLighting = false;
         viewer.scene.skyBox.show = true;
         viewer.scene.sun.show = true;
@@ -70,7 +63,6 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         console.error('Cesium viewer oluşturulamadı:', error);
         toast.error('3D Harita yüklenirken hata oluştu');
         
-        // Hata durumunda tekrar deneme
         setTimeout(() => {
           console.log('Cesium viewer tekrar deneniliyor...');
           if (!viewerRef.current) {
@@ -104,7 +96,6 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         
-        // Dosya türü kontrolü
         const fileExt = file.name.split('.').pop()?.toLowerCase();
         const supportedFormats = ['3tz', 'json', 'b3dm', 'pnts', 'i3dm', 'cmpt'];
         
@@ -113,13 +104,11 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           continue;
         }
 
-        // Dosyayı okuma
         const fileUrl = URL.createObjectURL(file);
         
         try {
           console.log(`3D Tileset yükleniyor: ${file.name}`);
           
-          // 3D Tiles dosyası yükleme
           const tileset = await Cesium3DTileset.fromUrl(fileUrl, {
             maximumScreenSpaceError: 16,
             skipLevelOfDetail: true,
@@ -131,18 +120,17 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
             cullWithChildrenBounds: true
           });
           
-          // Sahneye ekleme
           viewerRef.current.scene.primitives.add(tileset);
           
-          // Model yüklendiğinde kamerayı odakla
-          tileset.readyPromise.then(() => {
-            console.log(`${file.name} tileset hazır, kamera odaklanıyor...`);
+          // Tileset yüklendikten sonra direkt zoom yap
+          try {
+            console.log(`${file.name} tileset yüklendi, kamera odaklanıyor...`);
             viewerRef.current?.zoomTo(tileset);
             toast.success(`${file.name} başarıyla yüklendi`);
-          }).catch((readyError: any) => {
-            console.warn('Tileset ready promise uyarısı:', readyError);
-            toast.success(`${file.name} yüklendi (bazı detaylar eksik olabilir)`);
-          });
+          } catch (zoomError) {
+            console.warn('Kamera odaklama hatası:', zoomError);
+            toast.success(`${file.name} yüklendi (kamera odaklama uyarısı ile)`);
+          }
             
         } catch (modelError) {
           console.error(`Model yükleme hatası (${file.name}):`, modelError);
@@ -166,10 +154,8 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
 
   return (
     <div className={`relative ${className} bg-black overflow-hidden`}>
-      {/* Cesium Container */}
       <div ref={cesiumContainer} className="absolute inset-0" />
       
-      {/* Upload Button */}
       {isLoaded && (
         <div className="absolute top-4 left-4 z-10">
           <Button
@@ -183,7 +169,6 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         </div>
       )}
 
-      {/* Loading Overlay */}
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
           <div className="text-white text-center">
@@ -193,7 +178,6 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         </div>
       )}
 
-      {/* Hidden File Input */}
       <input
         ref={fileInputRef}
         type="file"
