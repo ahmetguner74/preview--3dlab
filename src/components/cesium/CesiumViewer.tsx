@@ -38,10 +38,7 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           infoBox: false,
           selectionIndicator: true,
           requestRenderMode: false,
-          maximumRenderTimeChange: undefined,
-          imageryProvider: false, // Varsayılan imagery'yi devre dışı bırak
-          skyBox: false, // Sky box'ı devre dışı bırak
-          skyAtmosphere: false // Atmosfer görselini devre dışı bırak
+          maximumRenderTimeChange: undefined
         });
 
         // Tüm varsayılan imagery katmanlarını kaldır
