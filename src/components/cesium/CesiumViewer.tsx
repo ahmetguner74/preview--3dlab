@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Viewer as CesiumViewer, Cartesian3, Cesium3DTileset, ImageryLayer, SingleTileImageryProvider } from 'cesium';
+import { Viewer as CesiumViewer, Cartesian3, Cesium3DTileset } from 'cesium';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,32 +41,44 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           maximumRenderTimeChange: undefined
         });
 
-        // Tüm varsayılan imagery katmanlarını kaldır
-        viewer.scene.imageryLayers.removeAll();
+        // Tüm varsayılan imagery katmanlarını güvenli şekilde kaldır
+        try {
+          viewer.scene.imageryLayers.removeAll();
+          console.log('Varsayılan imagery katmanları kaldırıldı');
+        } catch (imageryError) {
+          console.warn('Imagery katmanları kaldırılırken uyarı:', imageryError);
+        }
+
+        // Globe ayarlarını güvenli hale getir
+        if (viewer.scene.globe) {
+          viewer.scene.globe.enableLighting = false;
+          viewer.scene.globe.showWaterEffect = false;
+          viewer.scene.globe.showGroundAtmosphere = false;
+          viewer.scene.globe.show = true; // Globe'u göster ama efektleri kapat
+        }
         
-        // Basit bir tek renkli arka plan ekle
-        const imageryProvider = new SingleTileImageryProvider({
-          url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-          rectangle: undefined
-        });
-        
-        viewer.scene.imageryLayers.addImageryProvider(imageryProvider);
+        // Sky ve atmosphere ayarları
+        if (viewer.scene.skyBox) {
+          viewer.scene.skyBox.show = false;
+        }
+        if (viewer.scene.sun) {
+          viewer.scene.sun.show = false;
+        }
+        if (viewer.scene.moon) {
+          viewer.scene.moon.show = false;
+        }
+        if (viewer.scene.skyAtmosphere) {
+          viewer.scene.skyAtmosphere.show = false;
+        }
+
+        // Arka plan rengini ayarla
+        viewer.scene.backgroundColor = new (window as any).Cesium.Color(0.0, 0.0, 0.0, 1.0);
 
         // Error handling'i iyileştir
         viewer.scene.renderError.addEventListener((error) => {
           console.warn('Cesium render uyarısı:', error);
+          // Render hatalarını sessizce logla, UI'ı bozma
         });
-
-        // Globe ayarları
-        viewer.scene.globe.enableLighting = false;
-        viewer.scene.globe.showWaterEffect = false;
-        viewer.scene.globe.showGroundAtmosphere = false;
-        
-        // Sky ve sun ayarları
-        viewer.scene.skyBox.show = false;
-        viewer.scene.sun.show = false;
-        viewer.scene.moon.show = false;
-        viewer.scene.skyAtmosphere.show = false;
 
         // Başlangıç konumu (Türkiye)
         viewer.camera.setView({
@@ -81,12 +93,55 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
         console.error('Cesium viewer oluşturulamadı:', error);
         toast.error('3D Harita yüklenirken hata oluştu');
         
+        // Tekrar denemeyi sınırla
         setTimeout(() => {
-          console.log('Cesium viewer tekrar deneniliyor...');
           if (!viewerRef.current) {
-            initViewer();
+            console.log('Cesium viewer basit modda tekrar deneniyor...');
+            initSimpleViewer();
           }
-        }, 2000);
+        }, 3000);
+      }
+    };
+
+    // Basit viewer alternatifi
+    const initSimpleViewer = () => {
+      try {
+        const viewer = new CesiumViewer(cesiumContainer.current!, {
+          terrainProvider: undefined,
+          homeButton: false,
+          sceneModePicker: false,
+          baseLayerPicker: false,
+          navigationHelpButton: false,
+          animation: false,
+          timeline: false,
+          fullscreenButton: false,
+          vrButton: false,
+          geocoder: false,
+          infoBox: false,
+          selectionIndicator: false,
+          requestRenderMode: true,
+          maximumRenderTimeChange: 0.5
+        });
+
+        // Minimal ayarlar
+        viewer.scene.imageryLayers.removeAll();
+        viewer.scene.globe.show = false;
+        viewer.scene.skyBox.show = false;
+        viewer.scene.sun.show = false;
+        viewer.scene.moon.show = false;
+        viewer.scene.skyAtmosphere.show = false;
+
+        viewer.camera.setView({
+          destination: Cartesian3.fromDegrees(35.2433, 38.9637, 1000000)
+        });
+
+        viewerRef.current = viewer;
+        setIsLoaded(true);
+        console.log('Cesium viewer basit modda yüklendi');
+        toast.success('3D Harita Basit Modda Yüklendi');
+      } catch (simpleError) {
+        console.error('Basit viewer da oluşturulamadı:', simpleError);
+        toast.error('3D Harita yüklenemedi');
       }
     };
 
