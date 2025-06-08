@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Viewer as CesiumViewer, Cartesian3, Cesium3DTileset } from 'cesium';
+import { Viewer as CesiumViewer, Cartesian3, Cesium3DTileset, ImageryLayer, SingleTileImageryProvider } from 'cesium';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
@@ -38,22 +38,43 @@ const CesiumViewerComponent: React.FC<CesiumViewerProps> = ({ className = "h-scr
           infoBox: false,
           selectionIndicator: true,
           requestRenderMode: false,
-          maximumRenderTimeChange: undefined
+          maximumRenderTimeChange: undefined,
+          imageryProvider: false, // Varsayılan imagery'yi devre dışı bırak
+          skyBox: false, // Sky box'ı devre dışı bırak
+          skyAtmosphere: false // Atmosfer görselini devre dışı bırak
         });
 
+        // Tüm varsayılan imagery katmanlarını kaldır
+        viewer.scene.imageryLayers.removeAll();
+        
+        // Basit bir tek renkli arka plan ekle
+        const imageryProvider = new SingleTileImageryProvider({
+          url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+          rectangle: undefined
+        });
+        
+        viewer.scene.imageryLayers.addImageryProvider(imageryProvider);
+
+        // Error handling'i iyileştir
         viewer.scene.renderError.addEventListener((error) => {
           console.warn('Cesium render uyarısı:', error);
         });
+
+        // Globe ayarları
+        viewer.scene.globe.enableLighting = false;
+        viewer.scene.globe.showWaterEffect = false;
+        viewer.scene.globe.showGroundAtmosphere = false;
+        
+        // Sky ve sun ayarları
+        viewer.scene.skyBox.show = false;
+        viewer.scene.sun.show = false;
+        viewer.scene.moon.show = false;
+        viewer.scene.skyAtmosphere.show = false;
 
         // Başlangıç konumu (Türkiye)
         viewer.camera.setView({
           destination: Cartesian3.fromDegrees(35.2433, 38.9637, 1000000)
         });
-
-        viewer.scene.globe.enableLighting = false;
-        viewer.scene.skyBox.show = true;
-        viewer.scene.sun.show = true;
-        viewer.scene.moon.show = false;
 
         viewerRef.current = viewer;
         setIsLoaded(true);
