@@ -8,31 +8,42 @@ interface ProjectDescriptionProps {
 
 const ProjectDescription: React.FC<ProjectDescriptionProps> = ({ project }) => {
   return (
-    <div className="grid md:grid-cols-3 gap-12 mb-16">
-      <div className="md:col-span-2">
-        <h2 className="text-xl md:text-2xl font-display mb-6">Proje Hakkında</h2>
-        <p className="text-arch-gray">
-          {project.description || 'Bu proje için henüz bir açıklama girilmemiş.'}
-        </p>
-      </div>
+    <div className="mb-12">
+      {project.description && (
+        <div className="mb-8">
+          <h2 className="text-xl md:text-2xl font-display mb-4">Proje Hakkında</h2>
+          <p className="text-arch-gray leading-relaxed">
+            {project.description}
+          </p>
+        </div>
+      )}
       
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-sm uppercase text-arch-gray">Müşteri</h3>
-          <p>{project.client || '-'}</p>
-        </div>
-        <div>
-          <h3 className="text-sm uppercase text-arch-gray">Alan</h3>
-          <p>{project.area || '-'}</p>
-        </div>
-        <div>
-          <h3 className="text-sm uppercase text-arch-gray">Yıl</h3>
-          <p>{project.year || '-'}</p>
-        </div>
-        <div>
-          <h3 className="text-sm uppercase text-arch-gray">Mimar</h3>
-          <p>{project.architect || '-'}</p>
-        </div>
+      {/* Sadece dolu olan alanları göster - daha kompakt grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {project.client && (
+          <div>
+            <h3 className="text-xs uppercase text-arch-gray mb-1">Müşteri</h3>
+            <p className="text-sm font-medium">{project.client}</p>
+          </div>
+        )}
+        {project.area && (
+          <div>
+            <h3 className="text-xs uppercase text-arch-gray mb-1">Alan</h3>
+            <p className="text-sm font-medium">{project.area}</p>
+          </div>
+        )}
+        {project.year && (
+          <div>
+            <h3 className="text-xs uppercase text-arch-gray mb-1">Yıl</h3>
+            <p className="text-sm font-medium">{project.year}</p>
+          </div>
+        )}
+        {project.architect && (
+          <div>
+            <h3 className="text-xs uppercase text-arch-gray mb-1">Mimar</h3>
+            <p className="text-sm font-medium">{project.architect}</p>
+          </div>
+        )}
       </div>
     </div>
   );

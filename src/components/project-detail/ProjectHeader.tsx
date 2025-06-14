@@ -8,16 +8,24 @@ interface ProjectHeaderProps {
 
 const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
   return (
-    <>
-      <h1 className="text-3xl md:text-5xl font-display font-light mb-6">{project.title}</h1>
-      <div className="flex flex-wrap gap-x-6 gap-y-2 mb-16">
-        <p className="text-arch-gray">{project.category || 'Kategori Belirtilmemiş'}</p>
-        <p className="text-arch-gray">•</p>
-        <p className="text-arch-gray">{project.location || 'Konum Belirtilmemiş'}</p>
-        <p className="text-arch-gray">•</p>
-        <p className="text-arch-gray">{project.year || 'Yıl Belirtilmemiş'}</p>
+    <div className="mb-8">
+      <h1 className="text-2xl md:text-4xl font-display font-light mb-3">{project.title}</h1>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-arch-gray">
+        {project.category && <span>{project.category}</span>}
+        {project.location && (
+          <>
+            <span>•</span>
+            <span>{project.location}</span>
+          </>
+        )}
+        {project.year && (
+          <>
+            <span>•</span>
+            <span>{project.year}</span>
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

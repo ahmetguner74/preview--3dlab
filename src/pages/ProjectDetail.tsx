@@ -68,7 +68,7 @@ const ProjectDetail = () => {
     <Layout>
       <section>
         <div className="arch-container max-w-5xl px-2 sm:px-4 mx-auto"> 
-          <div className="relative h-[300px] md:h-[400px] mb-12 rounded-lg overflow-hidden">
+          <div className="relative h-[300px] md:h-[400px] mb-8 rounded-lg overflow-hidden">
             <img
               src={project.thumbnail || mainImage}
               alt={project.title}
@@ -87,28 +87,9 @@ const ProjectDetail = () => {
             </div>
           </div>
 
-          <ProjectHeader project={project} />
-          <ProjectDescription project={project} />
-
-          {/* Nokta Bulutu bölümü */}
-          {pointCloudModels.length > 0 && activePointCloud && (
-            <div className="mb-16">
-              <h2 className="text-2xl font-display mb-6">{t("Point Cloud")}</h2>
-              <ProjectPointCloud
-                models={pointCloudModels}
-                activePointCloudUrl={activePointCloud}
-                onPointCloudSelect={(modelUrl) => handlePointCloudSelect(models, modelUrl)}
-              />
-            </div>
-          )}
-
-          <div className="mb-16">
-            <h2 className="text-2xl font-display mb-6">{t("Gallery")}</h2>
-            <ProjectGallery images={images} title={project.title} />
-          </div>
-
+          {/* Öncesi/Sonrası bölümü - EN ÜST SIRAYA */}
           {beforeImage && afterImage && (
-            <div className="mb-16">
+            <div className="mb-12">
               <h2 className="text-2xl font-display mb-6">{t("Before / After")}</h2>
               <ProjectBeforeAfter
                 beforeImageUrl={beforeImageUrl}
@@ -118,8 +99,28 @@ const ProjectDetail = () => {
             </div>
           )}
 
+          {/* Minimalist proje açıklaması */}
+          <ProjectDescription project={project} />
+
+          {/* Nokta Bulutu bölümü */}
+          {pointCloudModels.length > 0 && activePointCloud && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-display mb-6">{t("Point Cloud")}</h2>
+              <ProjectPointCloud
+                models={pointCloudModels}
+                activePointCloudUrl={activePointCloud}
+                onPointCloudSelect={(modelUrl) => handlePointCloudSelect(models, modelUrl)}
+              />
+            </div>
+          )}
+
+          <div className="mb-12">
+            <h2 className="text-2xl font-display mb-6">{t("Gallery")}</h2>
+            <ProjectGallery images={images} title={project.title} />
+          </div>
+
           {hasVideos && (
-            <div className="mb-16">
+            <div className="mb-12">
               <h2 className="text-2xl font-display mb-6">{t("Video")}</h2>
               <ProjectVideo videoUrl={videoUrl} />
             </div>
