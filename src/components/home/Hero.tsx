@@ -35,7 +35,7 @@ const Hero = () => {
         .from('site_images')
         .select('image_url')
         .eq('image_key', 'hero_youtube_video')
-        .single();
+        .maybeSingle();
 
       if (!videoError && videoData?.image_url) {
         setVideoUrl(videoData.image_url);
@@ -100,10 +100,10 @@ const Hero = () => {
       <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-display font-light text-white mb-6 leading-tight">
-            {t("3D Digital Architecture")}
+            3D Digital Architecture
           </h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-            {t("Innovative solutions for modern architecture with cutting-edge technology")}
+            Innovative solutions for modern architecture with cutting-edge technology
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -111,7 +111,7 @@ const Hero = () => {
               to="/projects" 
               className="bg-white text-arch-black px-8 py-3 rounded-md hover:bg-gray-100 transition-colors font-medium"
             >
-              {t("View Projects")}
+              View Projects
             </Link>
             
             <Link 
@@ -119,7 +119,7 @@ const Hero = () => {
               className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
             >
               <Globe size={20} />
-              {t("3D Harita")}
+              3D Harita
             </Link>
             
             {videoUrl && (
@@ -128,7 +128,7 @@ const Hero = () => {
                 className="border border-white text-white px-8 py-3 rounded-md hover:bg-white/10 transition-colors font-medium flex items-center gap-2"
               >
                 <Play size={20} fill="currentColor" />
-                {t("Watch Video")}
+                Watch Video
               </button>
             )}
           </div>
