@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface SiteImage {
+  image_url: string;
+}
+
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [heroImages, setHeroImages] = useState<string[]>([]);
@@ -14,16 +18,17 @@ const Hero = () => {
     fetchHeroContent();
   }, []);
 
-  const fetchHeroContent = async () => {
+  const fetchHeroContent = async (): Promise<void> => {
     try {
       const { data: heroData, error: heroError } = await supabase
         .from('site_images')
         .select('image_url')
         .eq('image_type', 'hero')
-        .order('sort_order');
+        .order('sort_order')
+        .returns<SiteImage[]>();
 
       if (!heroError && heroData) {
-        const images: string[] = heroData.map(item => item.image_url);
+        const images: string[] = heroData.map((item: SiteImage) => item.image_url);
         if (images.length > 0) {
           setHeroImages(images);
         }
@@ -33,7 +38,8 @@ const Hero = () => {
         .from('site_images')
         .select('image_url')
         .eq('image_key', 'hero_youtube_video')
-        .single();
+        .single()
+        .returns<SiteImage>();
 
       if (!videoError && videoData?.image_url) {
         setVideoUrl(videoData.image_url);
@@ -43,11 +49,11 @@ const Hero = () => {
     }
   };
 
-  const nextSlide = () => {
+  const nextSlide = (): void => {
     setCurrentSlide((prev: number) => (prev + 1) % Math.max(heroImages.length, 1));
   };
 
-  const prevSlide = () => {
+  const prevSlide = (): void => {
     setCurrentSlide((prev: number) => (prev - 1 + Math.max(heroImages.length, 1)) % Math.max(heroImages.length, 1));
   };
 
