@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play, Globe } from 'lucide-react';
@@ -33,12 +32,12 @@ const Hero = () => {
 
       const { data: videoData, error: videoError } = await supabase
         .from('site_images')
-        .select('image_url')
-        .eq('image_key', 'hero_youtube_video')
+        .select('youtube_url')
+        .eq('image_type', 'hero_video')
         .single();
 
-      if (!videoError && videoData?.image_url) {
-        setVideoUrl(videoData.image_url);
+      if (!videoError && videoData?.youtube_url) {
+        setVideoUrl(videoData.youtube_url);
       }
     } catch (error) {
       console.error('Hero içerik yüklenirken hata:', error);
