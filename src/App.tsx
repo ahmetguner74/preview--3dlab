@@ -1,67 +1,34 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./lib/i18n";
 import Index from "./pages/Index";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Admin from "./pages/Admin";
-import ProjectList from "./pages/admin/ProjectList";
-import ProjectForm from "./pages/admin/ProjectForm";
-import SiteSettings from "./pages/admin/SiteSettings";
-import CoverImages from "./pages/admin/CoverImages";
-import Messages from "./pages/admin/Messages";
-import SettingsPage from "./pages/admin/Settings";
-import AboutContent from "./pages/admin/AboutContent";
-import YoloProcessing from "./pages/YoloProcessing";
-import NotFound from "./pages/NotFound";
-import Maps from "./pages/Maps";
-import MapServices from "./pages/admin/MapServices";
-import CesiumApp from "./pages/CesiumApp";
-import CesiumManagement from "./pages/admin/CesiumManagement";
-import "./i18n";
+import AdminLogin from "./pages/AdminLogin";
+import Contact from "./pages/Contact";
+import TourDetail from "./pages/TourDetail";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/projects" element={<Projects />} />
-          <Route path="/project/:slug" element={<ProjectDetail />} />
-          <Route path="/maps" element={<Maps />} />
-          <Route path="/cesium" element={<CesiumApp />} />
-          <Route path="/yolo" element={<YoloProcessing />} />
+          <Route path="/projects/:slug" element={<ProjectDetail />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/projects" element={<ProjectList />} />
-          <Route path="/admin/projects/new" element={<ProjectForm />} />
-          <Route path="/admin/projects/:id/edit" element={<ProjectForm />} />
-          <Route path="/admin/cesium" element={<CesiumManagement />} />
-          <Route path="/admin/map-services" element={<MapServices />} />
-          <Route path="/admin/site-settings" element={<SiteSettings />} />
-          <Route path="/admin/cover-images" element={<CoverImages />} />
-          <Route path="/admin/messages" element={<Messages />} />
-          <Route path="/admin/settings" element={<SettingsPage />} />
-          <Route path="/admin/about-content" element={<AboutContent />} />
-          <Route path="/admin/yolo" element={<YoloProcessing />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/tour/:slug" element={<TourDetail />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
