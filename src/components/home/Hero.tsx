@@ -4,10 +4,6 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface SiteImage {
-  image_url: string;
-}
-
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [heroImages, setHeroImages] = useState<string[]>([]);
@@ -20,27 +16,31 @@ const Hero = () => {
 
   const fetchHeroContent = async (): Promise<void> => {
     try {
-      const { data: heroData, error: heroError } = await supabase
+      const heroResponse = await supabase
         .from('site_images')
         .select('image_url')
         .eq('image_type', 'hero')
         .order('sort_order');
 
-      if (!heroError && heroData) {
-        const images: string[] = heroData.map((item: any) => item.image_url);
+      if (heroResponse.error) {
+        console.error('Error fetching hero images:', heroResponse.error.message);
+      } else if (heroResponse.data) {
+        const images: string[] = heroResponse.data.map((item) => item.image_url);
         if (images.length > 0) {
           setHeroImages(images);
         }
       }
 
-      const { data: videoData, error: videoError } = await supabase
+      const videoResponse = await supabase
         .from('site_images')
         .select('image_url')
         .eq('image_key', 'hero_youtube_video')
         .maybeSingle();
 
-      if (!videoError && videoData?.image_url) {
-        setVideoUrl(videoData.image_url);
+      if (videoResponse.error) {
+        console.error('Error fetching hero video:', videoResponse.error.message);
+      } else if (videoResponse.data?.image_url) {
+        setVideoUrl(videoResponse.data.image_url);
       }
     } catch (error) {
       console.error('Hero içerik yüklenirken hata:', error);
