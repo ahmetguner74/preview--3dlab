@@ -1,181 +1,136 @@
 
-import React, { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Phone, Settings } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, User, MessageCircle, Globe } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
-import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
   const { t } = useTranslation();
 
-  // Scroll efekti
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const isActive = (path: string) => location.pathname === path;
 
-  const phone = "+905313553274";
-  
+  const navigation = [
+    { name: t('Home'), href: '/' },
+    { name: t('Projects'), href: '/projects' },
+    { name: t('Maps'), href: '/maps' },
+    { name: '3D Harita', href: '/cesium' },
+    { name: t('About'), href: '/about' },
+    { name: t('Contact'), href: '/contact' }
+  ];
+
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-        ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
+    <nav className="bg-white/95 backdrop-blur-sm shadow-sm fixed w-full z-50">
       <div className="arch-container">
-        <div className="flex items-center justify-between">
-          {/* Logo - Ana sayfaya yönlendirme */}
-          <Link to="/" className="flex items-center font-display">
-            <div className="text-xl font-bold text-yellow-400 mr-1">3D</div>
-            <div className="text-lg font-bold">DİJİTAL</div>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/" className="text-2xl font-display font-light text-arch-black hover:text-gray-600 transition-colors">
+            3D Digital
           </Link>
 
-          {/* Masaüstü menü */}
-          <nav className="hidden md:flex space-x-6">
-            <NavLink to="/projects" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
-              {t('projects')}
-            </NavLink>
-            <NavLink to="/maps" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
-              Haritalar
-            </NavLink>
-            <NavLink to="/cesium" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
-              3D Viewer
-            </NavLink>
-            <NavLink to="/about" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
-              {t('about')}
-            </NavLink>
-            <NavLink to="/contact" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
-              {t('contact')}
-            </NavLink>
-            <NavLink to="/yolo" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600 hover:text-black transition-colors'}>
-              YOLOv8
-            </NavLink>
-          </nav>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`text-sm font-medium transition-colors ${
+                  isActive(item.href)
+                    ? 'text-arch-black border-b-2 border-arch-black'
+                    : 'text-gray-600 hover:text-arch-black'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
 
-          <div className="flex items-center space-x-3">
-            {/* WhatsApp Butonu */}
-            <a
-              href={`https://wa.me/${phone.replace(/^\+/, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 transition-colors rounded-full px-3 py-2 text-white text-sm"
-              title="WhatsApp ile iletişim"
+          {/* Desktop Controls */}
+          <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
+            
+            {/* Admin Button */}
+            <Link
+              to="/admin"
+              className="text-gray-600 hover:text-arch-black transition-colors p-2 rounded-md hover:bg-gray-100"
+              title="Admin Panel"
             >
-              <Phone size={16} />
-              <span>WhatsApp</span>
-            </a>
-
-            {/* Admin Panel Butonu */}
-            <Link to="/admin" className="hidden md:block">
-              <Button variant="outline" size="sm" className="bg-black text-white border-black hover:bg-gray-800">
-                <Settings size={16} className="mr-1" />
-                Admin
-              </Button>
+              <User size={20} />
             </Link>
 
-            {/* Dil değiştirici */}
-            <div className="hidden md:block">
-              <LanguageSwitcher />
-            </div>
-
-            {/* Mobil menü butonu */}
-            <button className="md:hidden ml-4" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* WhatsApp Button */}
+            <a
+              href="https://wa.me/905555555555"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition-colors"
+              title="WhatsApp"
+            >
+              <MessageCircle size={20} />
+            </a>
           </div>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-gray-600 hover:text-arch-black transition-colors"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-        
-        {/* Mobil menü */}
-        {isMenuOpen && (
-          <div className="md:hidden pt-4 pb-6 bg-white shadow-lg rounded-b-lg mt-2">
-            <nav className="flex flex-col space-y-6">
-              {/* Ana Menü Linkleri */}
-              <div className="flex flex-col space-y-4 px-4">
-                <NavLink to="/projects" className={({
-                isActive
-              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
-                  {t('projects')}
-                </NavLink>
-                <NavLink to="/maps" className={({
-                isActive
-              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
-                  Haritalar
-                </NavLink>
-                <NavLink to="/cesium" className={({
-                isActive
-              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
-                  3D Viewer
-                </NavLink>
-                <NavLink to="/about" className={({
-                isActive
-              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
-                  {t('about')}
-                </NavLink>
-                <NavLink to="/contact" className={({
-                isActive
-              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
-                  {t('contact')}
-                </NavLink>
-                <NavLink to="/yolo" className={({
-                isActive
-              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
-                  YOLOv8
-                </NavLink>
-              </div>
 
-              {/* Ayırıcı çizgi */}
-              <div className="border-t border-gray-200 mx-4"></div>
-
-              {/* Aksiyon Butonları */}
-              <div className="flex flex-col space-y-4 px-4">
-                {/* Mobil WhatsApp */}
-                <a
-                  href={`https://wa.me/${phone.replace(/^\+/, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 transition-colors rounded-lg px-4 py-3 text-white font-medium"
-                  onClick={() => setIsMenuOpen(false)}
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`block px-3 py-3 text-base font-medium transition-colors ${
+                    isActive(item.href)
+                      ? 'text-arch-black bg-gray-50'
+                      : 'text-gray-600 hover:text-arch-black hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsOpen(false)}
                 >
-                  <Phone size={20} />
-                  <span>WhatsApp ile İletişim</span>
-                </a>
-
-                {/* Mobil Admin Panel */}
-                <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" size="lg" className="w-full bg-black text-white border-black hover:bg-gray-800 justify-center gap-3 py-3">
-                    <Settings size={20} />
-                    <span>Admin Panel</span>
-                  </Button>
+                  {item.name}
                 </Link>
-              </div>
-
-              {/* Dil Seçici */}
-              <div className="px-4">
-                <div className="flex justify-center">
-                  <LanguageSwitcher />
+              ))}
+              
+              {/* Mobile Controls */}
+              <div className="px-3 py-3 space-y-3 border-t border-gray-200">
+                <LanguageSwitcher />
+                
+                <div className="flex items-center space-x-3">
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-3 text-gray-600 hover:text-arch-black transition-colors bg-gray-100 px-4 py-3 rounded-md hover:bg-gray-200 w-full"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User size={20} />
+                    <span className="text-base font-medium">Admin Panel</span>
+                  </Link>
+                  
+                  <a
+                    href="https://wa.me/905555555555"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-green-500 text-white px-4 py-3 rounded-md hover:bg-green-600 transition-colors w-full"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <MessageCircle size={20} />
+                    <span className="text-base font-medium">WhatsApp</span>
+                  </a>
                 </div>
               </div>
-            </nav>
+            </div>
           </div>
         )}
       </div>
-    </header>
+    </nav>
   );
 };
 

@@ -1,149 +1,173 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDownCircle } from 'lucide-react';
-import { getSiteImage } from '@/utils/siteHelpers';
-import { useTranslation } from 'react-i18next';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Play, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
-// Panelden yönetim için bu yapı Supabase entegrasyonu ile tekrar düzenlenecek!
-const DEFAULT_HERO = {
-  title: {
-    tr: "3D DİJİTALLEŞTİRME ATÖLYESİ",
-    en: "3D DIGITIZATION WORKSHOP"
-  },
-  subtitle: {
-    tr: "Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.",
-    en: "We digitize your data with a professional approach."
-  },
-  youtubeChannel: "https://www.youtube.com/channel/UCrSguWcA9nJyuqCdENnXeZA"
-};
 const Hero = () => {
-  const {
-    t,
-    i18n
-  } = useTranslation();
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [heroImages, setHeroImages] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState({
-    opacity: '0.75',
-    position: 'center',
-    height: '100vh',
-    overlay_color: 'rgba(0, 0, 0, 0.5)',
-    blend_mode: 'normal'
-  });
-  const isMobile = useIsMobile();
-  const heroData = DEFAULT_HERO;
-  const lang = i18n.language === "en" ? "en" : "tr";
+  const [showVideo, setShowVideo] = useState(false);
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Görsel, video ve ayarları paralel olarak çekelim
-        const [imageData, videoLink] = await Promise.all([supabase.from('site_images').select('*').eq('image_key', 'hero_background').maybeSingle(), getSiteImage('hero_youtube_video')]);
-
-        // Görsel ve ayarları işleyelim
-        if (imageData?.data) {
-          setBackgroundImage(imageData.data.image_url);
-
-          // Ayarları kontrol edelim ve varsayılanlarla birleştirelim
-          if (imageData.data.settings && typeof imageData.data.settings === 'object') {
-            setSettings(prev => ({
-              ...prev,
-              ...(imageData.data.settings as any)
-            }));
-          }
-        } else {
-          // Görsel yoksa sadece varsayılan ayarları kullan
-          const fallbackImage = await getSiteImage('hero_background');
-          setBackgroundImage(fallbackImage);
-        }
-
-        // Video URL'sini ayarlayalım
-        if (videoLink) setVideoUrl(videoLink);
-      } catch (error) {
-        console.error('Hero verisi yüklenirken hata:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchHeroContent();
   }, []);
-  const scrollToProjects = () => {
-    document.getElementById('projects')?.scrollIntoView({
-      behavior: 'smooth'
-    });
+
+  const fetchHeroContent = async () => {
+    try {
+      const { data: heroData, error: heroError } = await supabase
+        .from('site_images')
+        .select('image_url')
+        .eq('image_type', 'hero')
+        .order('sort_order');
+
+      if (!heroError && heroData) {
+        const images = heroData.map(item => item.image_url);
+        if (images.length > 0) {
+          setHeroImages(images);
+        }
+      }
+
+      const { data: videoData, error: videoError } = await supabase
+        .from('site_images')
+        .select('youtube_url')
+        .eq('image_type', 'hero_video')
+        .single();
+
+      if (!videoError && videoData?.youtube_url) {
+        setVideoUrl(videoData.youtube_url);
+      }
+    } catch (error) {
+      console.error('Hero içerik yüklenirken hata:', error);
+    }
   };
-  const finalVideoUrl = React.useMemo(() => {
-    if (!videoUrl) return null;
-    let processedUrl = videoUrl;
-    if (processedUrl.includes('youtube.com/watch?v=')) {
-      const videoId = processedUrl.split('v=')[1]?.split('&')[0];
-      if (videoId) {
-        processedUrl = `https://www.youtube.com/embed/${videoId}`;
-      }
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % Math.max(heroImages.length, 1));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + Math.max(heroImages.length, 1)) % Math.max(heroImages.length, 1));
+  };
+
+  useEffect(() => {
+    if (heroImages.length > 1) {
+      const timer = setInterval(nextSlide, 5000);
+      return () => clearInterval(timer);
     }
-    if (processedUrl.includes('youtu.be/')) {
-      const videoId = processedUrl.split('youtu.be/')[1]?.split('?')[0];
-      if (videoId) {
-        processedUrl = `https://www.youtube.com/embed/${videoId}`;
-      }
-    }
-    if (!processedUrl.includes('youtube.com/embed/')) {
-      console.error('Geçersiz YouTube embed URL\'si:', videoUrl);
-      return null;
-    }
-    const videoId = processedUrl.split('/embed/')[1]?.split('?')[0];
-    if (!videoId) {
-      console.error('Video ID çıkarılamadı:', processedUrl);
-      return null;
-    }
-    const baseUrl = `https://www.youtube.com/embed/${videoId}`;
-    return `${baseUrl}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
-  }, [videoUrl]);
-  return <section className="relative min-h-[85vh] flex items-center justify-center bg-black md:bg-transparent py-10 md:py-0 mt-16" style={{
-    minHeight: settings.height || '85vh'
-  }}>
-      {backgroundImage && <>
-          <div className="absolute inset-0 bg-arch-black z-5" style={{
-        opacity: settings.overlay_color ? 1 : Number(settings.opacity || 0.75),
-        backgroundColor: settings.overlay_color || 'rgba(0, 0, 0, 0.5)'
-      }} />
-          <div className="absolute inset-0 bg-cover bg-no-repeat" style={{
-        backgroundImage: `url('${backgroundImage}')`,
-        backgroundPosition: settings.position || 'center',
-        mixBlendMode: settings.blend_mode as any || 'normal'
-      }} />
-        </>}
-      
-      <div className="arch-container relative z-20 w-full">
-        <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 md:gap-16 min-h-[60vh] justify-between px-2 md:px-0">
-          <div className="flex flex-col justify-center flex-1 max-w-xl text-left text-white drop-shadow-2xl bg-black/40 md:bg-transparent rounded-3xl md:rounded-none p-6 md:p-0 min-w-[320px]">
-            <h1 className="text-4xl font-display mb-6 font-extrabold text-yellow-400 md:text-5xl text-left">
-              {heroData.title[lang]}
-            </h1>
-            <p className="text-lg mb-8 font-medium text-yellow-200 md:text-xl">
-              {heroData.subtitle[lang]}
-            </p>
-            <div className="flex gap-4 mb-6 flex-wrap">
-              <button onClick={scrollToProjects} className="flex items-center gap-2 border border-white px-6 py-3 uppercase tracking-wider hover:text-arch-black transition-all duration-300 bg-yellow-400 hover:bg-yellow-300 font-bold text-base text-black rounded shadow-sm animate-fade-in">
-                {t("viewProjects")} <ArrowDownCircle size={18} />
-              </button>
-            </div>
-            <div className="mt-10">
-              <span className="text-xs text-white/90">{t("youtubeInfo")}</span>
-            </div>
-          </div>
+  }, [heroImages.length]);
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1` : '';
+  };
+
+  const currentImage = heroImages.length > 0 
+    ? heroImages[currentSlide] 
+    : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
+
+  return (
+    <section className="relative h-screen overflow-hidden">
+      {showVideo && videoUrl ? (
+        <div className="absolute inset-0 z-10">
+          <iframe
+            src={getYouTubeEmbedUrl(videoUrl)}
+            className="w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+          <button
+            onClick={() => setShowVideo(false)}
+            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-20"
+          >
+            ×
+          </button>
+        </div>
+      ) : (
+        <>
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+            style={{ backgroundImage: `url(${currentImage})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+        </>
+      )}
+
+      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-7xl font-display font-light text-white mb-6 leading-tight">
+            {t("3D Digital Architecture")}
+          </h1>
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
+            {t("Innovative solutions for modern architecture with cutting-edge technology")}
+          </p>
           
-          <div className="flex-1 flex items-center justify-center min-w-[340px] md:max-w-2xl">
-            <div className={`w-full aspect-video rounded-3xl overflow-hidden shadow-lg bg-black bg-opacity-80 backdrop-blur-sm ring-2 ring-white ring-opacity-20 animate-fade-in ${isMobile ? 'h-64' : 'min-h-[450px]'}`}>
-              {finalVideoUrl ? <iframe src={finalVideoUrl} title="Hero Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" frameBorder="0" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  Video yüklenemedi
-                </div>}
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link 
+              to="/projects" 
+              className="bg-white text-arch-black px-8 py-3 rounded-md hover:bg-gray-100 transition-colors font-medium"
+            >
+              {t("View Projects")}
+            </Link>
+            
+            <Link 
+              to="/cesium" 
+              className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+            >
+              <Globe size={20} />
+              {t("3D Harita")}
+            </Link>
+            
+            {videoUrl && (
+              <button
+                onClick={() => setShowVideo(true)}
+                className="border border-white text-white px-8 py-3 rounded-md hover:bg-white/10 transition-colors font-medium flex items-center gap-2"
+              >
+                <Play size={20} fill="currentColor" />
+                {t("Watch Video")}
+              </button>
+            )}
           </div>
         </div>
       </div>
-    </section>;
+
+      {/* Navigation Arrows */}
+      {heroImages.length > 1 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"
+          >
+            <ChevronRight size={24} />
+          </button>
+        </>
+      )}
+
+      {/* Slide Indicators */}
+      {heroImages.length > 1 && (
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                index === currentSlide ? 'bg-white' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
 };
+
 export default Hero;
