@@ -18,7 +18,7 @@ const Hero = () => {
     try {
       const { data: heroData, error: heroError } = await supabase
         .from('site_images')
-        .select('*') // Changed to '*' to resolve TypeScript type inference issue
+        .select('image_url') // Tür çıkarımını basitleştirmek ve hatayı düzeltmek için yalnızca 'image_url' seçildi.
         .eq('image_type', 'hero')
         .order('sort_order');
 
