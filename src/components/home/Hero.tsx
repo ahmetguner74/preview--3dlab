@@ -33,7 +33,7 @@ const Hero = () => {
         .from('site_images')
         .select('image_url')
         .eq('image_key', 'hero_youtube_video')
-        .maybeSingle();
+        .single();
 
       if (!videoError && videoData?.image_url) {
         setVideoUrl(videoData.image_url);

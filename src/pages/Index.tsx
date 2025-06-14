@@ -4,7 +4,7 @@ import Layout from '../components/layout/Layout';
 import Hero from '../components/home/Hero';
 import ProjectGrid from '../components/home/ProjectGrid';
 import AboutPreview from '../components/home/AboutPreview';
-import '../i18n';
+import '../lib/i18n';
 
 const Index = () => {
   return (
