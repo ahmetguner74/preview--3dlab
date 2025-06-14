@@ -103,61 +103,73 @@ const Navbar = () => {
         
         {/* Mobil menü */}
         {isMenuOpen && (
-          <div className="md:hidden pt-4 pb-2">
-            <nav className="flex flex-col space-y-4">
-              <NavLink to="/projects" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                {t('projects')}
-              </NavLink>
-              <NavLink to="/maps" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                Haritalar
-              </NavLink>
-              <NavLink to="/cesium" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                3D Viewer
-              </NavLink>
-              <NavLink to="/about" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                {t('about')}
-              </NavLink>
-              <NavLink to="/contact" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                {t('contact')}
-              </NavLink>
-              <NavLink to="/yolo" className={({
-            isActive
-          }) => isActive ? 'text-black font-medium' : 'text-gray-600'} onClick={() => setIsMenuOpen(false)}>
-                YOLOv8
-              </NavLink>
-              
-              {/* Mobil WhatsApp */}
-              <a
-                href={`https://wa.me/${phone.replace(/^\+/, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 transition-colors rounded px-3 py-2 text-white text-sm w-fit"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Phone size={16} />
-                <span>WhatsApp</span>
-              </a>
+          <div className="md:hidden pt-4 pb-6 bg-white shadow-lg rounded-b-lg mt-2">
+            <nav className="flex flex-col space-y-6">
+              {/* Ana Menü Linkleri */}
+              <div className="flex flex-col space-y-4 px-4">
+                <NavLink to="/projects" className={({
+                isActive
+              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
+                  {t('projects')}
+                </NavLink>
+                <NavLink to="/maps" className={({
+                isActive
+              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
+                  Haritalar
+                </NavLink>
+                <NavLink to="/cesium" className={({
+                isActive
+              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
+                  3D Viewer
+                </NavLink>
+                <NavLink to="/about" className={({
+                isActive
+              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
+                  {t('about')}
+                </NavLink>
+                <NavLink to="/contact" className={({
+                isActive
+              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
+                  {t('contact')}
+                </NavLink>
+                <NavLink to="/yolo" className={({
+                isActive
+              }) => isActive ? 'text-black font-medium text-lg' : 'text-gray-600 text-lg'} onClick={() => setIsMenuOpen(false)}>
+                  YOLOv8
+                </NavLink>
+              </div>
 
-              {/* Mobil Admin Panel */}
-              <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="outline" size="sm" className="bg-black text-white border-black hover:bg-gray-800 w-fit">
-                  <Settings size={16} className="mr-1" />
-                  Admin Panel
-                </Button>
-              </Link>
+              {/* Ayırıcı çizgi */}
+              <div className="border-t border-gray-200 mx-4"></div>
 
-              <div className="pt-2">
-                <LanguageSwitcher />
+              {/* Aksiyon Butonları */}
+              <div className="flex flex-col space-y-4 px-4">
+                {/* Mobil WhatsApp */}
+                <a
+                  href={`https://wa.me/${phone.replace(/^\+/, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 transition-colors rounded-lg px-4 py-3 text-white font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Phone size={20} />
+                  <span>WhatsApp ile İletişim</span>
+                </a>
+
+                {/* Mobil Admin Panel */}
+                <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" size="lg" className="w-full bg-black text-white border-black hover:bg-gray-800 justify-center gap-3 py-3">
+                    <Settings size={20} />
+                    <span>Admin Panel</span>
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Dil Seçici */}
+              <div className="px-4">
+                <div className="flex justify-center">
+                  <LanguageSwitcher />
+                </div>
               </div>
             </nav>
           </div>
