@@ -16,31 +16,31 @@ const Hero = () => {
 
   const fetchHeroContent = async (): Promise<void> => {
     try {
-      const heroResponse = await supabase
+      const { data: heroData, error: heroError } = await supabase
         .from('site_images')
-        .select('image_url')
+        .select('*') // Changed to '*' to resolve TypeScript type inference issue
         .eq('image_type', 'hero')
         .order('sort_order');
 
-      if (heroResponse.error) {
-        console.error('Error fetching hero images:', heroResponse.error.message);
-      } else if (heroResponse.data) {
-        const images: string[] = heroResponse.data.map((item) => item.image_url);
+      if (heroError) {
+        console.error('Error fetching hero images:', heroError.message);
+      } else if (heroData) {
+        const images: string[] = heroData.map((item) => item.image_url);
         if (images.length > 0) {
           setHeroImages(images);
         }
       }
 
-      const videoResponse = await supabase
+      const { data: videoData, error: videoError } = await supabase
         .from('site_images')
         .select('image_url')
         .eq('image_key', 'hero_youtube_video')
         .maybeSingle();
 
-      if (videoResponse.error) {
-        console.error('Error fetching hero video:', videoResponse.error.message);
-      } else if (videoResponse.data?.image_url) {
-        setVideoUrl(videoResponse.data.image_url);
+      if (videoError) {
+        console.error('Error fetching hero video:', videoError.message);
+      } else if (videoData?.image_url) {
+        setVideoUrl(videoData.image_url);
       }
     } catch (error) {
       console.error('Hero içerik yüklenirken hata:', error);
