@@ -24,11 +24,10 @@ const Hero = () => {
         .from('site_images')
         .select('image_url')
         .eq('image_type', 'hero')
-        .order('sort_order')
-        .returns<SiteImage[]>();
+        .order('sort_order');
 
       if (!heroError && heroData) {
-        const images: string[] = heroData.map((item: SiteImage) => item.image_url);
+        const images: string[] = heroData.map((item: any) => item.image_url);
         if (images.length > 0) {
           setHeroImages(images);
         }
@@ -38,8 +37,7 @@ const Hero = () => {
         .from('site_images')
         .select('image_url')
         .eq('image_key', 'hero_youtube_video')
-        .single()
-        .returns<SiteImage>();
+        .maybeSingle();
 
       if (!videoError && videoData?.image_url) {
         setVideoUrl(videoData.image_url);
