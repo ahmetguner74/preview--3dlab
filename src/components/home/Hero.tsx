@@ -5,10 +5,10 @@ import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Hero = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [heroImages, setHeroImages] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState(false);
+  const [showVideo, setShowVideo] = useState<boolean>(false);
 
   useEffect(() => {
     fetchHeroContent();
@@ -23,7 +23,7 @@ const Hero = () => {
         .order('sort_order');
 
       if (!heroError && heroData) {
-        const images = heroData.map(item => item.image_url);
+        const images: string[] = heroData.map(item => item.image_url);
         if (images.length > 0) {
           setHeroImages(images);
         }
@@ -44,11 +44,11 @@ const Hero = () => {
   };
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % Math.max(heroImages.length, 1));
+    setCurrentSlide((prev: number) => (prev + 1) % Math.max(heroImages.length, 1));
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + Math.max(heroImages.length, 1)) % Math.max(heroImages.length, 1));
+    setCurrentSlide((prev: number) => (prev - 1 + Math.max(heroImages.length, 1)) % Math.max(heroImages.length, 1));
   };
 
   useEffect(() => {
@@ -58,12 +58,12 @@ const Hero = () => {
     }
   }, [heroImages.length]);
 
-  const getYouTubeEmbedUrl = (url: string) => {
+  const getYouTubeEmbedUrl = (url: string): string => {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
     return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1` : '';
   };
 
-  const currentImage = heroImages.length > 0 
+  const currentImage: string = heroImages.length > 0 
     ? heroImages[currentSlide] 
     : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
 
@@ -146,7 +146,7 @@ const Hero = () => {
       {/* Slide Indicators */}
       {heroImages.length > 1 && (
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-          {heroImages.map((_, index) => (
+          {heroImages.map((_, index: number) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
