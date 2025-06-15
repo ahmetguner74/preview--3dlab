@@ -22,7 +22,7 @@ const Hero = () => {
       const { data: heroData, error: heroError } = await supabase
         .from('site_images')
         .select('image_url')
-        .eq('image_type', 'hero')
+        .like('image_key', 'hero_%') // Hata: 'image_type' kolonu yok. 'image_key' kullanılarak düzeltildi.
         .order('sort_order')
         .returns<HeroImageData[]>(); // Explicitly set return type
 
