@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Project } from '@/types/project';
 import { getSiteImage } from '@/utils/siteHelpers';
 
 const ProjectGrid = () => {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [coverImage, setCoverImage] = useState<string | null>(null);
@@ -54,8 +56,12 @@ const ProjectGrid = () => {
       <div className="arch-container">
         <div className="flex justify-between items-end mb-16">
           <div>
-            <h2 className={`text-sm uppercase tracking-wider mb-2 ${coverImage ? 'text-gray-300' : 'text-arch-gray'}`}>Çalışmalarımız</h2>
-            <h3 className="text-2xl md:text-4xl font-display text-white">Öne Çıkan Projeler</h3>
+            <h2 className={`text-sm uppercase tracking-wider mb-2 ${coverImage ? 'text-gray-300' : 'text-arch-gray'}`}>
+              {t('projects')}
+            </h2>
+            <h3 className="text-2xl md:text-4xl font-display text-white">
+              Öne Çıkan Projeler
+            </h3>
           </div>
           <div className="hidden md:block">
             <Link to="/projects" className={`flex items-center gap-1 text-sm ${coverImage ? 'text-white hover:text-gray-300' : 'hover:text-arch-gray'} transition-colors`}>

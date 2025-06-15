@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 
 interface HeroImageData {
@@ -9,14 +10,28 @@ interface HeroImageData {
 }
 
 const Hero = () => {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [heroImages, setHeroImages] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState<boolean>(false);
+  const [autoplayVideo, setAutoplayVideo] = useState<boolean>(false);
 
   useEffect(() => {
     fetchHeroContent();
   }, []);
+
+  useEffect(() => {
+    // Video otomatik oynatma için timer
+    if (videoUrl && !showVideo) {
+      const timer = setTimeout(() => {
+        setAutoplayVideo(true);
+        setShowVideo(true);
+      }, 3000); // 3 saniye sonra videoyu başlat
+
+      return () => clearTimeout(timer);
+    }
+  }, [videoUrl, showVideo]);
 
   const fetchHeroContent = async (): Promise<void> => {
     try {
@@ -68,7 +83,7 @@ const Hero = () => {
 
   const getYouTubeEmbedUrl = (url: string): string => {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1` : '';
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=${autoplayVideo ? 1 : 0}&mute=1` : '';
   };
 
   const currentImage: string = heroImages.length > 0 
@@ -106,10 +121,10 @@ const Hero = () => {
       <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-display font-light text-white mb-6 leading-tight">
-            3D Digital Architecture
+            {t('heroTitle')}
           </h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Innovative solutions for modern architecture with cutting-edge technology
+            {t('heroSubtitle')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -117,16 +132,19 @@ const Hero = () => {
               to="/projects" 
               className="bg-white text-arch-black px-8 py-3 rounded-md hover:bg-gray-100 transition-colors font-medium"
             >
-              View Projects
+              {t('viewProjects')}
             </Link>
             
             {videoUrl && (
               <button
-                onClick={() => setShowVideo(true)}
+                onClick={() => {
+                  setAutoplayVideo(false);
+                  setShowVideo(true);
+                }}
                 className="border border-white text-white px-8 py-3 rounded-md hover:bg-white/10 transition-colors font-medium flex items-center gap-2"
               >
                 <Play size={20} fill="currentColor" />
-                Watch Video
+                {t('youtubeWatch')}
               </button>
             )}
           </div>
