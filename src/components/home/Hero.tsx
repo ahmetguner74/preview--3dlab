@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
@@ -22,12 +23,11 @@ const Hero = () => {
       const { data: heroData, error: heroError } = await supabase
         .from('site_images')
         .select('image_url')
-        .like('image_key', 'hero_%') // Hata: 'image_type' kolonu yok. 'image_key' kullanılarak düzeltildi.
-        .order('sort_order')
-        .returns<HeroImageData[]>(); // Explicitly set return type
+        .like('image_key', 'hero_%')
+        .order('created_at');
 
       if (heroError) {
-        console.error('Error fetching hero images:', heroError.message);
+        console.error('Hero görsellerini getirme hatası:', heroError.message);
       } else if (heroData) {
         const images: string[] = heroData.map((item) => item.image_url);
         if (images.length > 0) {
@@ -42,7 +42,7 @@ const Hero = () => {
         .maybeSingle();
 
       if (videoError) {
-        console.error('Error fetching hero video:', videoError.message);
+        console.error('Hero video getirme hatası:', videoError.message);
       } else if (videoData?.image_url) {
         setVideoUrl(videoData.image_url);
       }
