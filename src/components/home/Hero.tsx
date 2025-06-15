@@ -1,8 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+
+interface HeroImageData {
+  image_url: string;
+}
 
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
@@ -18,9 +21,10 @@ const Hero = () => {
     try {
       const { data: heroData, error: heroError } = await supabase
         .from('site_images')
-        .select('image_url') // Tür çıkarımını basitleştirmek ve hatayı düzeltmek için yalnızca 'image_url' seçildi.
+        .select('image_url')
         .eq('image_type', 'hero')
-        .order('sort_order');
+        .order('sort_order')
+        .returns<HeroImageData[]>(); // Explicitly set return type
 
       if (heroError) {
         console.error('Error fetching hero images:', heroError.message);
