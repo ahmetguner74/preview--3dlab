@@ -1,32 +1,45 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, MessageCircle, Globe } from 'lucide-react';
-import LanguageSwitcher from './LanguageSwitcher';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { t } = useTranslation();
-
-  const isActive = (path: string) => location.pathname === path;
+  const { user, signOut } = useAuth();
 
   const navigation = [
     { name: t('Home'), href: '/' },
     { name: t('Projects'), href: '/projects' },
     { name: t('Maps'), href: '/maps' },
-    { name: '3D Harita', href: '/cesium' },
+    { name: 'Cesium 3D', href: '/cesium' },
     { name: t('About'), href: '/about' },
-    { name: t('Contact'), href: '/contact' }
+    { name: t('Contact'), href: '/contact' },
   ];
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
-    <nav className="bg-white/95 backdrop-blur-sm shadow-sm fixed w-full z-50">
+    <nav className="bg-white shadow-sm border-b border-gray-100 fixed w-full top-0 z-50">
       <div className="arch-container">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-display font-light text-arch-black hover:text-gray-600 transition-colors">
+          <Link to="/" className="text-xl font-display font-medium">
             3D Digital
           </Link>
 
@@ -36,10 +49,10 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`text-sm font-medium transition-colors ${
+                className={`text-sm transition-colors ${
                   isActive(item.href)
-                    ? 'text-arch-black border-b-2 border-arch-black'
-                    : 'text-gray-600 hover:text-arch-black'
+                    ? 'text-arch-black font-medium'
+                    : 'text-arch-gray hover:text-arch-black'
                 }`}
               >
                 {item.name}
@@ -47,52 +60,57 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Desktop Controls */}
+          {/* Right Side - Language Switcher and Auth */}
           <div className="hidden md:flex items-center space-x-4">
             <LanguageSwitcher />
             
-            {/* Admin Button */}
-            <Link
-              to="/admin"
-              className="text-gray-600 hover:text-arch-black transition-colors p-2 rounded-md hover:bg-gray-100"
-              title="Admin Panel"
-            >
-              <User size={20} />
-            </Link>
-
-            {/* WhatsApp Button */}
-            <a
-              href="https://wa.me/905555555555"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition-colors"
-              title="WhatsApp"
-            >
-              <MessageCircle size={20} />
-            </a>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <User size={16} />
+                    <span className="text-sm">{user.email}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut size={16} className="mr-2" />
+                    Çıkış Yap
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm" variant="outline">
+                  Giriş Yap
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-gray-600 hover:text-arch-black transition-colors"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-arch-gray hover:text-arch-black"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+            <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-100">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-3 text-base font-medium transition-colors ${
+                  className={`block px-3 py-2 text-sm transition-colors ${
                     isActive(item.href)
-                      ? 'text-arch-black bg-gray-50'
-                      : 'text-gray-600 hover:text-arch-black hover:bg-gray-50'
+                      ? 'text-arch-black font-medium bg-gray-50'
+                      : 'text-arch-gray hover:text-arch-black hover:bg-gray-50'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
@@ -100,31 +118,29 @@ const Navbar = () => {
                 </Link>
               ))}
               
-              {/* Mobile Controls */}
-              <div className="px-3 py-3 space-y-3 border-t border-gray-200">
+              <div className="px-3 py-2 border-t border-gray-100 mt-4">
                 <LanguageSwitcher />
                 
-                <div className="flex items-center space-x-3">
-                  <Link
-                    to="/admin"
-                    className="flex items-center gap-3 text-gray-600 hover:text-arch-black transition-colors bg-gray-100 px-4 py-3 rounded-md hover:bg-gray-200 w-full"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <User size={20} />
-                    <span className="text-base font-medium">Admin Panel</span>
+                {user ? (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-sm text-gray-600">{user.email}</p>
+                    <Button 
+                      onClick={handleSignOut} 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full justify-start"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Çıkış Yap
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to="/auth" className="block mt-3">
+                    <Button size="sm" variant="outline" className="w-full">
+                      Giriş Yap
+                    </Button>
                   </Link>
-                  
-                  <a
-                    href="https://wa.me/905555555555"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 bg-green-500 text-white px-4 py-3 rounded-md hover:bg-green-600 transition-colors w-full"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <MessageCircle size={20} />
-                    <span className="text-base font-medium">WhatsApp</span>
-                  </a>
-                </div>
+                )}
               </div>
             </div>
           </div>

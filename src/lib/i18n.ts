@@ -35,6 +35,7 @@ const resources = {
       'Katmanlar': 'Layers',
       'Nokta bulutu yükleniyor...': 'Loading point cloud...',
       'Yükleme başarılı': 'Upload successful',
+      'uploadSuccessful': 'Upload successful',
       'Nokta bulutu başarıyla yüklendi.': 'Point cloud uploaded successfully.',
       'Yükle ve Görüntüle': 'Upload and View',
       'Yükleniyor...': 'Loading...',
@@ -81,6 +82,33 @@ const resources = {
       "youtubeWatch": "YouTube'da İzle",
       "youtubeInfo": "Bu bölümde, projelerimizin veya teknolojimizin tanıtım videosu otomatik olarak oynatılır.",
       
+      // Point Cloud Viewer
+      'Global Point Cloud Viewer': 'Küresel Nokta Bulutu Görüntüleyici',
+      'Upload and visualize LAS, LAZ or EPT format point cloud data on a 3D globe. Supports WGS84 and UTM coordinate systems.': 'LAS, LAZ veya EPT formatındaki nokta bulutu verilerini 3D küre üzerinde yükleyin ve görselleştirin. WGS84 ve UTM koordinat sistemlerini destekler.',
+      'Upload': 'Yükle',
+      'View': 'Görünüm',
+      'Settings': 'Ayarlar',
+      'Coordinate System': 'Koordinat Sistemi',
+      'Global coordinate system used for GPS': 'GPS için kullanılan küresel koordinat sistemi',
+      'Universal Transverse Mercator projection': 'Evrensel Transvers Merkator projeksiyonu',
+      'Current Point Cloud': 'Mevcut Nokta Bulutu',
+      'Globe Point Cloud': 'Küre Nokta Bulutu',
+      'Dosya seçin veya sürükleyin': 'Dosya seçin veya sürükleyin',
+      'Desteklenen formatlar': 'Desteklenen formatlar',
+      'veya URL belirtin': 'veya URL belirtin',
+      'Publicly accessible URL to a point cloud file': 'Nokta bulutu dosyasına herkese açık URL',
+      'Yakınlaştır': 'Yakınlaştır',
+      'Uzaklaştır': 'Uzaklaştır',
+      'Döndür': 'Döndür',
+      'Arazi': 'Arazi',
+      'Katmanlar': 'Katmanlar',
+      'Nokta bulutu yükleniyor...': 'Nokta bulutu yükleniyor...',
+      'Yükleme başarılı': 'Yükleme başarılı',
+      'uploadSuccessful': 'Yükleme başarılı',
+      'Nokta bulutu başarıyla yüklendi.': 'Nokta bulutu başarıyla yüklendi.',
+      'Yükle ve Görüntüle': 'Yükle ve Görüntüle',
+      'Yükleniyor...': 'Yükleniyor...',
+      
       // Hero Section
       "heroTitle": "3D DİJİTALLEŞTİRME ATÖLYESİ",
       "heroSubtitle": "Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.",
@@ -122,9 +150,12 @@ const resources = {
   },
 };
 
+// localStorage'dan dil tercihini al
+const savedLanguage = localStorage.getItem('language') || 'tr';
+
 i18n.use(initReactI18next).init({
   resources,
-  lng: "tr",
+  lng: savedLanguage,
   fallbackLng: "tr",
   interpolation: { escapeValue: false },
 });
