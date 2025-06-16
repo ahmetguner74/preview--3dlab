@@ -15,23 +15,10 @@ const Hero = () => {
   const [heroImages, setHeroImages] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState<boolean>(false);
-  const [autoplayVideo, setAutoplayVideo] = useState<boolean>(false);
 
   useEffect(() => {
     fetchHeroContent();
   }, []);
-
-  useEffect(() => {
-    // Video otomatik oynatma için timer
-    if (videoUrl && !showVideo) {
-      const timer = setTimeout(() => {
-        setAutoplayVideo(true);
-        setShowVideo(true);
-      }, 3000); // 3 saniye sonra videoyu başlat
-
-      return () => clearTimeout(timer);
-    }
-  }, [videoUrl, showVideo]);
 
   const fetchHeroContent = async (): Promise<void> => {
     try {
@@ -83,7 +70,7 @@ const Hero = () => {
 
   const getYouTubeEmbedUrl = (url: string): string => {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=${autoplayVideo ? 1 : 0}&mute=1` : '';
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1` : '';
   };
 
   const currentImage: string = heroImages.length > 0 
@@ -137,10 +124,7 @@ const Hero = () => {
             
             {videoUrl && (
               <button
-                onClick={() => {
-                  setAutoplayVideo(false);
-                  setShowVideo(true);
-                }}
+                onClick={() => setShowVideo(true)}
                 className="border border-white text-white px-8 py-3 rounded-md hover:bg-white/10 transition-colors font-medium flex items-center gap-2"
               >
                 <Play size={20} fill="currentColor" />

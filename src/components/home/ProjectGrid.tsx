@@ -57,7 +57,7 @@ const ProjectGrid = () => {
         <div className="flex justify-between items-end mb-16">
           <div>
             <h2 className={`text-sm uppercase tracking-wider mb-2 ${coverImage ? 'text-gray-300' : 'text-arch-gray'}`}>
-              {t('projects')}
+              Çalışmalarımız
             </h2>
             <h3 className="text-2xl md:text-4xl font-display text-white">
               Öne Çıkan Projeler
