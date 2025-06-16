@@ -6,9 +6,14 @@ import { initReactI18next } from "react-i18next";
 const resources = {
   en: {
     translation: {
-      'projects': 'Projects',
-      'about': 'About',
-      'contact': 'Contact',
+      // Navigation
+      'Home': 'Home',
+      'Projects': 'Projects',
+      'Maps': 'Maps',
+      'About': 'About',
+      'Contact': 'Contact',
+      
+      // Project Cloud Viewer
       'Global Point Cloud Viewer': 'Global Point Cloud Viewer',
       'Upload and visualize LAS, LAZ or EPT format point cloud data on a 3D globe. Supports WGS84 and UTM coordinate systems.': 'Upload and visualize LAS, LAZ or EPT format point cloud data on a 3D globe. Supports WGS84 and UTM coordinate systems.',
       'Upload': 'Upload',
@@ -33,15 +38,38 @@ const resources = {
       'Nokta bulutu başarıyla yüklendi.': 'Point cloud uploaded successfully.',
       'Yükle ve Görüntüle': 'Upload and View',
       'Yükleniyor...': 'Loading...',
-      'Point Cloud': 'Point Cloud'
+      'Point Cloud': 'Point Cloud',
+      
+      // Hero Section
+      "heroTitle": "3D DIGITALIZATION STUDIO",
+      "heroSubtitle": "We digitize your data with a professional approach.",
+      "viewProjects": "View Projects",
+      "youtubeWatch": "Watch on YouTube",
+      
+      // About Section
+      "aboutDescription": "We work with objects of different complexity from historical buildings to modern complexes.",
+      "aboutResult": "As a result of the work, laser scanning point cloud, photogrammetric model, orthophoto plans and measured restoration drawings are delivered to you.",
+      "learnMore": "Learn more about our studio",
+      
+      // Footer
+      "footerDescription": "We create modern, sustainable architectural solutions.",
+      "footerAddress": "123 Architecture Street",
+      "footerCity": "Istanbul, Turkey", 
+      "footerPrivacy": "Privacy Policy",
+      "footerTerms": "Terms of Service",
+      "footerRights": "All rights reserved.",
     }
   },
   tr: {
     translation: {
-      // --- NAV, HERO, BUTONS ---
-      "projects": "Projeler",
-      "about": "Hakkımızda",
-      "contact": "İletişim",
+      // Navigation
+      'Home': 'Ana Sayfa',
+      'Projects': 'Projeler',
+      'Maps': 'Haritalar',
+      'About': 'Hakkımızda',
+      'Contact': 'İletişim',
+      
+      // Admin Panel
       "admin": "Yönetim",
       "video": "Video",
       "3D Model": "3D Model",
@@ -52,21 +80,17 @@ const resources = {
       "viewProjects": "Projeleri Gör",
       "youtubeWatch": "YouTube'da İzle",
       "youtubeInfo": "Bu bölümde, projelerimizin veya teknolojimizin tanıtım videosu otomatik olarak oynatılır.",
-      // HERO
+      
+      // Hero Section
       "heroTitle": "3D DİJİTALLEŞTİRME ATÖLYESİ",
       "heroSubtitle": "Profesyonel yaklaşımla verilerinizi dijitalleştiriyoruz.",
-      // ABOUT
+      
+      // About Section
       "aboutDescription": "Tarihi yapılardan modern komplekslere kadar farklı karmaşıklıktaki nesnelerle çalışıyoruz.",
       "aboutResult": "Çalışma sonucunda lazer tarama noktaları bulutu, fotogrametrik model, ortofoto planlar ve ölçülü restorasyon çizimleri tarafınıza teslim edilir.",
       "learnMore": "Stüdyomuz hakkında daha fazla bilgi edinin",
-      // Chat / Widget
-      "chatTitle": "Bize Mesaj Bırakın",
-      "chatInputName": "Adınız",
-      "chatInputMessage": "Mesajınız...",
-      "chatSend": "Gönder",
-      "chatDisclaimer": "Bıraktığınız mesaj yönetici panelinde görülebilir.",
-      "chatButtonOpen": "Mesaj bırakın",
-      // Admin / Messages / Settings
+      
+      // Messages & Settings
       "Messages": "Mesajlar",
       "messages": "Mesajlar",
       "Settings": "Ayarlar",
@@ -79,12 +103,14 @@ const resources = {
       "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
         "Bu sayfa çok yakında iletişim formundan gelen mesajları gösterecek. Buradan tüm site mesajlarını görüntüleyebilir, yanıtlayabilir ve yönetebilirsiniz.",
       "adminMessageInfo": "Ziyaretçilerden gelen son mesajlar aşağıda listelenir. Cevaplamak için e-posta ile iletişime geçebilirsiniz.",
-      // Ayarlar
+      
+      // Settings
       "generalSettings": "Genel Ayarlar",
       "siteLanguage": "Site Dili",
       "languageChangeInfo": "Dil değişimi şimdilik demo amaçlı devredışı bırakıldı.",
       "adminDemoSettings": "Demo Yönetici Ayarı",
       "adminSettingsInfo": "Daha fazla detay ve özelleştirme çok yakında burada olacak.",
+      
       // Footer
       "footerDescription": "Modern, sürdürülebilir mimari çözümler oluşturuyoruz.",
       "footerAddress": "123 Mimarlık Caddesi",
