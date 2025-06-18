@@ -1,18 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 
-interface HeroImageData {
-  image_url: string;
-}
-
 const Hero = () => {
   const { t } = useTranslation();
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
-  const [heroImages, setHeroImages] = useState<string[]>([]);
+  const [heroImage, setHeroImage] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState<boolean>(false);
 
@@ -26,15 +21,17 @@ const Hero = () => {
         .from('site_images')
         .select('image_url')
         .like('image_key', 'hero_%')
-        .order('created_at');
+        .order('created_at')
+        .limit(1)
+        .single();
 
       if (heroError) {
-        console.error('Hero görsellerini getirme hatası:', heroError.message);
+        console.error('Hero görselini getirme hatası:', heroError.message);
+        setHeroImage('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070');
       } else if (heroData) {
-        const images: string[] = heroData.map((item) => item.image_url);
-        if (images.length > 0) {
-          setHeroImages(images);
-        }
+        setHeroImage(heroData.image_url);
+      } else {
+        setHeroImage('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070');
       }
 
       const { data: videoData, error: videoError } = await supabase
@@ -50,32 +47,14 @@ const Hero = () => {
       }
     } catch (error) {
       console.error('Hero içerik yüklenirken hata:', error);
+      setHeroImage('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070');
     }
   };
-
-  const nextSlide = (): void => {
-    setCurrentSlide((prev: number) => (prev + 1) % Math.max(heroImages.length, 1));
-  };
-
-  const prevSlide = (): void => {
-    setCurrentSlide((prev: number) => (prev - 1 + Math.max(heroImages.length, 1)) % Math.max(heroImages.length, 1));
-  };
-
-  useEffect(() => {
-    if (heroImages.length > 1) {
-      const timer = setInterval(nextSlide, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [heroImages.length]);
 
   const getYouTubeEmbedUrl = (url: string): string => {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1` : '';
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1` : '';
   };
-
-  const currentImage: string = heroImages.length > 0 
-    ? heroImages[currentSlide] 
-    : 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070';
 
   return (
     <section className="relative h-screen overflow-hidden">
@@ -98,8 +77,8 @@ const Hero = () => {
       ) : (
         <>
           <div 
-            className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
-            style={{ backgroundImage: `url(${currentImage})` }}
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroImage})` }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
         </>
@@ -134,39 +113,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-
-      {/* Navigation Arrows */}
-      {heroImages.length > 1 && (
-        <>
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </>
-      )}
-
-      {/* Slide Indicators */}
-      {heroImages.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-          {heroImages.map((_, index: number) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 };
