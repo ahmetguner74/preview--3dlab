@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Upload, Globe, Settings, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
@@ -23,10 +22,10 @@ const CesiumMap = () => {
       if (viewerRef.current && !viewer) {
         try {
           // Cesium'u dinamik olarak yükle
-          const { Viewer, Terrain } = await import('@cesium/engine');
+          const CesiumEngine = await import('@cesium/engine');
           
-          const newViewer = new Viewer(viewerRef.current, {
-            terrain: Terrain.fromWorldTerrain(),
+          const newViewer = new CesiumEngine.Viewer(viewerRef.current, {
+            terrain: CesiumEngine.Terrain.fromWorldTerrain(),
             homeButton: false,
             sceneModePicker: false,
             baseLayerPicker: false,
@@ -99,9 +98,9 @@ const CesiumMap = () => {
     setLoading(true);
     try {
       // URL'den nokta bulutu yükle
-      const { Cesium3DTileset } = await import('@cesium/engine');
+      const CesiumEngine = await import('@cesium/engine');
       
-      const tileset = await Cesium3DTileset.fromUrl(fileUrl);
+      const tileset = await CesiumEngine.Cesium3DTileset.fromUrl(fileUrl);
       viewer.scene.primitives.add(tileset);
       viewer.zoomTo(tileset);
 
