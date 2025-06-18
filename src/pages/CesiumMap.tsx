@@ -22,10 +22,10 @@ const CesiumMap = () => {
       if (viewerRef.current && !viewer) {
         try {
           // Cesium'u dinamik olarak yükle
-          const CesiumEngine = await import('@cesium/engine');
+          const cesium = await import('cesium');
           
-          const newViewer = new CesiumEngine.Viewer(viewerRef.current, {
-            terrain: CesiumEngine.Terrain.fromWorldTerrain(),
+          const newViewer = new cesium.Viewer(viewerRef.current, {
+            terrain: cesium.Terrain.fromWorldTerrain(),
             homeButton: false,
             sceneModePicker: false,
             baseLayerPicker: false,
@@ -98,9 +98,9 @@ const CesiumMap = () => {
     setLoading(true);
     try {
       // URL'den nokta bulutu yükle
-      const CesiumEngine = await import('@cesium/engine');
+      const cesium = await import('cesium');
       
-      const tileset = await CesiumEngine.Cesium3DTileset.fromUrl(fileUrl);
+      const tileset = await cesium.Cesium3DTileset.fromUrl(fileUrl);
       viewer.scene.primitives.add(tileset);
       viewer.zoomTo(tileset);
 
