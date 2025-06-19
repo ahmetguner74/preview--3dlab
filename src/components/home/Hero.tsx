@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Play } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -9,7 +8,6 @@ const Hero = () => {
   const { t } = useTranslation();
   const [heroImage, setHeroImage] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState<boolean>(false);
 
   useEffect(() => {
     fetchHeroContent();
@@ -53,65 +51,51 @@ const Hero = () => {
 
   const getYouTubeEmbedUrl = (url: string): string => {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1` : '';
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}` : '';
   };
 
   return (
     <section className="relative h-screen overflow-hidden">
-      {showVideo && videoUrl ? (
-        <div className="absolute inset-0 z-10">
-          <iframe
-            src={getYouTubeEmbedUrl(videoUrl)}
-            className="w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-          <button
-            onClick={() => setShowVideo(false)}
-            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-20"
-          >
-            ×
-          </button>
-        </div>
-      ) : (
-        <>
+      <div className="flex h-full">
+        {/* Sol taraf - İçerik */}
+        <div className="flex-1 relative">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-        </>
-      )}
-
-      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-display font-light text-white mb-6 leading-tight">
-            {t('heroTitle')}
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-            {t('heroSubtitle')}
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30" />
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link 
-              to="/projects" 
-              className="bg-white text-arch-black px-8 py-3 rounded-md hover:bg-gray-100 transition-colors font-medium"
-            >
-              {t('viewProjects')}
-            </Link>
-            
-            {videoUrl && (
-              <button
-                onClick={() => setShowVideo(true)}
-                className="border border-white text-white px-8 py-3 rounded-md hover:bg-white/10 transition-colors font-medium flex items-center gap-2"
+          <div className="relative z-10 h-full flex flex-col justify-center items-start text-left px-8 lg:px-16">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-light text-white mb-6 leading-tight">
+                {t('heroTitle')}
+              </h1>
+              <p className="text-lg md:text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
+                {t('heroSubtitle')}
+              </p>
+              
+              <Link 
+                to="/projects" 
+                className="bg-white text-arch-black px-8 py-3 rounded-md hover:bg-gray-100 transition-colors font-medium inline-block"
               >
-                <Play size={20} fill="currentColor" />
-                {t('youtubeWatch')}
-              </button>
-            )}
+                {t('viewProjects')}
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* Sağ taraf - Video */}
+        {videoUrl && (
+          <div className="flex-1 relative">
+            <iframe
+              src={getYouTubeEmbedUrl(videoUrl)}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        )}
       </div>
     </section>
   );
