@@ -118,11 +118,22 @@ const resources = {
       "aboutResult": "Çalışma sonucunda lazer tarama noktaları bulutu, fotogrametrik model, ortofoto planlar ve ölçülü restorasyon çizimleri tarafınıza teslim edilir.",
       "learnMore": "Stüdyomuz hakkında daha fazla bilgi edinin",
       
-      // Messages & Settings
+      // Chat / Widget
+      "chatTitle": "Bize Mesaj Bırakın",
+      "chatInputName": "Adınız",
+      "chatInputMessage": "Mesajınız...",
+      "chatSend": "Gönder",
+      "chatDisclaimer": "Bıraktığınız mesaj yönetici panelinde görülebilir.",
+      "chatButtonOpen": "Mesaj bırakın",
+      
+      // Admin / Messages / Settings
       "Messages": "Mesajlar",
       "messages": "Mesajlar",
-      "Settings": "Ayarlar",
-      "settings": "Ayarlar",
+      "generalSettings": "Genel Ayarlar",
+      "siteLanguage": "Site Dili",
+      "languageChangeInfo": "Dil değişimi şimdilik demo amaçlı devredışı bırakıldı.",
+      "adminDemoSettings": "Demo Yönetici Ayarı",
+      "adminSettingsInfo": "Daha fazla detay ve özelleştirme çok yakında burada olacak.",
       "Coming Soon!": "Çok Yakında!",
       "Return to Dashboard": "Gösterge Paneline Dön",
       "returnDashboard": "Gösterge Paneline Dön",
@@ -131,13 +142,6 @@ const resources = {
       "This page will soon display messages received from contact forms. Here you can view, reply, and manage all site messages.":
         "Bu sayfa çok yakında iletişim formundan gelen mesajları gösterecek. Buradan tüm site mesajlarını görüntüleyebilir, yanıtlayabilir ve yönetebilirsiniz.",
       "adminMessageInfo": "Ziyaretçilerden gelen son mesajlar aşağıda listelenir. Cevaplamak için e-posta ile iletişime geçebilirsiniz.",
-      
-      // Settings
-      "generalSettings": "Genel Ayarlar",
-      "siteLanguage": "Site Dili",
-      "languageChangeInfo": "Dil değişimi şimdilik demo amaçlı devredışı bırakıldı.",
-      "adminDemoSettings": "Demo Yönetici Ayarı",
-      "adminSettingsInfo": "Daha fazla detay ve özelleştirme çok yakında burada olacak.",
       
       // Footer
       "footerDescription": "Modern, sürdürülebilir mimari çözümler oluşturuyoruz.",

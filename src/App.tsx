@@ -17,6 +17,14 @@ import Maps from "./pages/Maps";
 import Auth from "./pages/Auth";
 import CesiumMap from "./pages/CesiumMap";
 import NotFound from "./pages/NotFound";
+import SiteSettings from "./pages/admin/SiteSettings";
+import ProjectList from "./pages/admin/ProjectList";
+import ProjectForm from "./pages/admin/ProjectForm";
+import CoverImages from "./pages/admin/CoverImages";
+import AboutContent from "./pages/admin/AboutContent";
+import Messages from "./pages/admin/Messages";
+import Settings from "./pages/admin/Settings";
+import MapServices from "./pages/admin/MapServices";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +45,16 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/projects" element={<ProjectList />} />
+            <Route path="/admin/projects/new" element={<ProjectForm />} />
+            <Route path="/admin/projects/:id" element={<ProjectForm />} />
+            <Route path="/admin/site-settings" element={<SiteSettings />} />
+            <Route path="/admin/cover-images" element={<CoverImages />} />
+            <Route path="/admin/about-content" element={<AboutContent />} />
+            <Route path="/admin/messages" element={<Messages />} />
+            <Route path="/admin/settings" element={<Settings />} />
+            <Route path="/admin/map-services" element={<MapServices />} />
+            <Route path="/admin/cesium" element={<CesiumMap />} />
             <Route path="/tour/:slug" element={<TourDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
