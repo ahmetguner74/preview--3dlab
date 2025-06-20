@@ -51,51 +51,51 @@ const Hero = () => {
 
   const getYouTubeEmbedUrl = (url: string): string => {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}` : '';
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1` : '';
   };
 
   return (
     <section className="relative h-screen overflow-hidden">
-      <div className="flex h-full">
-        {/* Sol taraf - İçerik */}
-        <div className="flex-1 relative">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage})` }}
+      {/* Arka plan görseli */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      />
+      
+      {/* Video arka planda */}
+      {videoUrl && (
+        <div className="absolute inset-0 opacity-30">
+          <iframe
+            src={getYouTubeEmbedUrl(videoUrl)}
+            className="w-full h-full object-cover"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ pointerEvents: 'none' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30" />
-          
-          <div className="relative z-10 h-full flex flex-col justify-center items-start text-left px-8 lg:px-16">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-light text-white mb-6 leading-tight">
-                {t('heroTitle')}
-              </h1>
-              <p className="text-lg md:text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-                {t('heroSubtitle')}
-              </p>
-              
-              <Link 
-                to="/projects" 
-                className="bg-white text-arch-black px-8 py-3 rounded-md hover:bg-gray-100 transition-colors font-medium inline-block"
-              >
-                {t('viewProjects')}
-              </Link>
-            </div>
-          </div>
         </div>
-
-        {/* Sağ taraf - Video */}
-        {videoUrl && (
-          <div className="flex-1 relative">
-            <iframe
-              src={getYouTubeEmbedUrl(videoUrl)}
-              className="w-full h-full"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        )}
+      )}
+      
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/60" />
+      
+      {/* İçerik */}
+      <div className="relative z-10 h-full flex flex-col justify-center items-start px-8 lg:px-16 max-w-7xl mx-auto">
+        <div className="max-w-3xl">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-light text-white mb-6 leading-tight">
+            {t('heroTitle')}
+          </h1>
+          <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 leading-relaxed max-w-2xl">
+            {t('heroSubtitle')}
+          </p>
+          
+          <Link 
+            to="/projects" 
+            className="bg-white text-black px-10 py-4 rounded-md hover:bg-gray-100 transition-all duration-300 font-medium text-lg inline-block hover:scale-105 transform"
+          >
+            {t('viewProjects')}
+          </Link>
+        </div>
       </div>
     </section>
   );
