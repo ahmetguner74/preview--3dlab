@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -73,6 +74,13 @@ const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="flex items-center">
+                      <Settings size={16} className="mr-2" />
+                      Admin Panel
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut size={16} className="mr-2" />
                     Çıkış Yap
@@ -124,6 +132,16 @@ const Navbar = () => {
                 {user ? (
                   <div className="mt-3 space-y-2">
                     <p className="text-sm text-gray-600">{user.email}</p>
+                    <Link to="/admin" className="block">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full justify-start mb-2"
+                      >
+                        <Settings size={16} className="mr-2" />
+                        Admin Panel
+                      </Button>
+                    </Link>
                     <Button 
                       onClick={handleSignOut} 
                       variant="outline" 

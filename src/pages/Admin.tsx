@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeftCircle, LogOut } from 'lucide-react';
+import { Home, Globe, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
@@ -67,11 +67,16 @@ const Admin = () => {
         {/* Üst Menü */}
         <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
-              <ArrowLeftCircle size={20} className="mr-2" />
-              <span className="text-sm">Siteye Dön</span>
+            <Link to="/admin" className="text-gray-600 flex items-center hover:text-arch-black">
+              <Home size={20} className="mr-2" />
+              <span className="text-sm">Dashboard</span>
             </Link>
-            <h1 className="text-xl font-medium">Dashboard</h1>
+            <span className="text-gray-300">|</span>
+            <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
+              <Globe size={20} className="mr-2" />
+              <span className="text-sm">Canlı Site</span>
+            </Link>
+            <h1 className="text-xl font-medium ml-4">Dashboard</h1>
           </div>
           
           <div>

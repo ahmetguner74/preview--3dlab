@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeftCircle, LogOut, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeftCircle, LogOut, Loader2, RefreshCw, Home, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AdminHeaderProps {
@@ -14,21 +14,25 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ title, onRefresh, refreshing 
   return (
     <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4">
       <div className="flex items-center space-x-4">
-        <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
-          <ArrowLeftCircle size={20} className="mr-2" />
-          <span className="text-sm">Siteye Dön</span>
+        <Link to="/admin" className="text-gray-600 flex items-center hover:text-arch-black">
+          <Home size={20} className="mr-2" />
+          <span className="text-sm">Dashboard</span>
         </Link>
-        <h1 className="text-xl font-medium">{title}</h1>
+        <span className="text-gray-300">|</span>
+        <Link to="/" className="text-gray-600 flex items-center hover:text-arch-black">
+          <Globe size={20} className="mr-2" />
+          <span className="text-sm">Canlı Site</span>
+        </Link>
+        <h1 className="text-xl font-medium ml-4">{title}</h1>
       </div>
       
-      <div>
+      <div className="flex items-center space-x-3">
         {onRefresh && (
           <Button 
             variant="outline" 
             size="sm" 
             onClick={onRefresh} 
             disabled={refreshing}
-            className="mr-4"
           >
             {refreshing ? (
               <Loader2 size={16} className="animate-spin mr-2" />
