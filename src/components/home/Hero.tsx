@@ -72,7 +72,7 @@ const Hero = () => {
             </h1>
           </div>
           
-          <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 leading-relaxed max-w-2xl">
+          <p className="text-xl md:text-2xl mb-12 leading-relaxed max-w-2xl text-amber-300 lg:text-3xl">
             {t('heroSubtitle')}
           </p>
           
