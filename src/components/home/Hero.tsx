@@ -82,9 +82,16 @@ const Hero = () => {
       {/* İçerik */}
       <div className="relative z-10 h-full flex flex-col justify-center items-start px-8 lg:px-16 max-w-7xl mx-auto">
         <div className="max-w-3xl">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-light text-white mb-6 leading-tight">
-            {t('heroTitle')}
-          </h1>
+          <div className="relative inline-block mb-6">
+            {/* Arkaplan efekti */}
+            <div className="absolute inset-0 bg-gradient-to-r from-arch-black/80 via-arch-black/60 to-transparent blur-sm rounded-lg transform -skew-y-1"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-lg"></div>
+            
+            <h1 className="relative text-5xl md:text-7xl lg:text-8xl font-display font-light text-white leading-tight px-6 py-4">
+              {t('heroTitle')}
+            </h1>
+          </div>
+          
           <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 leading-relaxed max-w-2xl">
             {t('heroSubtitle')}
           </p>
