@@ -17,6 +17,7 @@ import Maps from "./pages/Maps";
 import Auth from "./pages/Auth";
 import CesiumMap from "./pages/CesiumMap";
 import Cesium3d from "./pages/Cesium3d";
+import Cesium4D from "./pages/Cesium4D";
 import NotFound from "./pages/NotFound";
 import SiteSettings from "./pages/admin/SiteSettings";
 import ProjectList from "./pages/admin/ProjectList";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/maps" element={<Maps />} />
             <Route path="/cesium" element={<CesiumMap />} />
             <Route path="/cesium3d" element={<Cesium3d />} />
+            <Route path="/cesium4d" element={<Cesium4D />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
