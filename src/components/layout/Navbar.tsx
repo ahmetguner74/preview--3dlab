@@ -24,8 +24,6 @@ const Navbar = () => {
     { name: t('Home'), href: '/' },
     { name: t('Projects'), href: '/projects' },
     { name: t('Maps'), href: '/maps' },
-    { name: 'Cesium 3D', href: '/cesium3d' },
-    { name: 'Cesium 4D', href: '/cesium4d' },
     { name: t('About'), href: '/about' },
     { name: t('Contact'), href: '/contact' },
   ];
